@@ -1,0 +1,154 @@
+What's new in version
+
+1.2.2
+Fixed bug that prevented project files from being loaded when the referenced image files of the old or new map had been moved to another folder.
+
+Added File - Export Points - Linked Points of Old and New Map and Vectors in New Map. This generates a file with 7 columns: 
+1. The name of the linked pair of points;
+2 & 3. The coordinates of the point in the old map; 
+4 & 5. The coordinates of the point in the new map;
+6. The length of the vector connecting the two points in the coordinate system of the new map.
+7. The orientation (azimuth) of the vector connecting the two points in the coordinate system of the new map.
+
+Fixed bug in computation of outliers of displacement vectors.
+
+1.2.3
+Added export of linked points where points in old map are in pixel coordinates relative to the top-left corner of the old map image.
+
+Improved import of unlinked points for old map and new refrence map: Linking the points is now more reliable. Improved documentation on import of points.
+
+1.2.4
+Made changes so that MapAnalyst can be used online.
+
+Fixed a bug that prevented MapAnalyst to start on certain configurations of Mac OS X.
+
+1.3
+Added OpenStreetMap: OpenStreetMap is now the default reference map. There is no need anymore to scan a modern reference map for many areas. OpenStreetMap provides good enough reference information for many types of analyses. However, if OpenStreetMap is not of sufficient quality in the area of interest, a scanned map can still be used instead. 
+
+Ondulations of distortion grids can be enlarged for visualizing distortion in relatively accurate modern maps.
+
+An undistorted, but rotated grid can now be shown together with the distorted grid.
+
+Many minor improvements to the user interface.
+
+Vector data can no longer be transformed from or to an old map. If you require this feature, please contact the authors.
+
+1.3.1
+Added more meaningful error message when opening a project file and an image file cannot be found.
+
+1.3.2 
+3 November 2009
+Improved report window: scale factors are inverted if smaller than 1; standard deviations indicated are labelled as such, improved layout.
+
+Linked points are now displayed in a table instead of a simple text window. Points selected in the list are also selected in the maps and vice versa.
+
+Fixed a font issue that resulted in the "Old Map Information" not being completely displayed on Windows operating systems.
+
+Fixed wrong computation of standard derivation of translation parameters in Helmert transformation (values shown in the report window). This bug did not affect the graphical results or the computation of the scale and rotation of  maps.
+
+1.3.3
+13 November 2009
+Fixed another error in the computation of the standard derivation of translation parameters in Helmert transformation (values shown in the report window). This bug did not affect the graphical results or the computation of the scale and rotation of maps.
+Many thanks to Prof. Merminod of EPFL Lausanne for helping with this problem!
+
+1.3.4
+17 November 2009
+Added export button to report and comparison window.
+Points now can be exported to a xls file format that is directly readable with Excel.
+
+1.3.5
+18 November 2009
+Export of report and comparison window resulted in a text file with a single line on Windows. Fixed.
+Fixed text alignment issue in comparison window.
+On Windows MapAnalyst is now appended to the document title.
+When quitting MapAnalyst on Windows, the Java environment was not properly shot down. Fixed.
+On Mac OS X, the main menu disappeared under certain conditions when a dialog was displayed. Fixed.
+
+1.3.6
+20. November 2009
+Fixed a bug in the "Export Points -> Linked Points of Old and New Map and Vectors in New Map" command: exported azimuth were wrong. Fixed. Many thanks to Prof. Peter Mesenburg for reporting this bug.
+
+1.3.7
+11. January 2010
+Linked points could not be moved. Fixed. Thanks to David Bower.
+
+1.3.8
+25. January 2010
+Fixed bug in error message reporting wrong size of distortion grid.
+Added Import and Export for geographic longitude / latitude coordinates.
+Distortion grids along longitude / latitude lines can now be generated.
+
+1.3.9
+9. February 2010
+Fixed a bug introduced with the last update that prevented project files from being saved and read.
+
+1.3.10 & 11
+10. February 2010
+Fixed another bug related to saving project files.
+Save As is now always activated.
+Colors have not been rendered correctly on monitors with 16 bit colors. Fixed.
+Display parameters (colors, stroke widths, etc.) have not been stored correctly in project files. Fixed.
+Many thanks to Martin Rickenbacher for his help.
+
+1.3.12
+Added export to ESRI Shape file format for points and line art.
+Settings in main window were not read. Fixed.
+Fixed bug in Ungenerate exporter.
+
+1.3.13
+Added option to offset distortion grid, accessible via the More button. The maximum offset is equal to the mesh size.
+
+1.3.14
+1 March 2010
+When using an affine-6 transformation, the "Report for Last Computation"  showed wrong standard deviation for translation parameters and gave wrong direction for the second rotation angle.
+
+1.3.15
+23 March 2010
+Wrong rotation value was displayed for affine-5 transformation in Report window. Fixed.
+Compare Transformations windows showed wrong values when OpenStreetMap was used. Fixed.
+Added import and export of points in pixel units.
+Residuals for each point are not shown in the report window. Outliers longer than three times sigma 0 are marked with an asterisk.
+For affine-6 transformation, the root mean square of all residuals is now displayed: sqrt(((u*u)+(v*v)) / n) with u and v residuals in horizontal and vertical direction and n the number of points. This is the same value as displayed by ArcGIS in the Georeferencing dialog. 
+
+1.3.16
+29 March 2010
+Fixed bug related to export of raster images. Thanks to Georg Leupolt.
+
+1.3.17
+12 May 2010
+Fixed bug a display bug that appeared in the Show Report of Last Computation window when the old map is georeferenced and the resulting scale is close to 1:1.
+
+1.3.18
+6 July 2010
+Added a Maps menu with commands to remove map images, as well as add and remove the OpenStreetMap.
+
+1.3.19
+7 July 2010
+Removed an accidentally included item in the Analysis menu for a feature that is still under development.
+
+1.3.20
+17 August 2010
+Fixed a bug introduced with the last version that prevented MapAnalyst from starting.
+
+1.3.21
+25 October 2010
+Fixed a bug introduced with the last version that prevented MapAnalyst from using project files.
+
+1.3.22
+8 January 2012
+Fixed a bug related to the import of images.
+
+1.3.23
+19 January 2016
+Fixed a bug that prevented MapAnalyst to run with Java 1.7 or newer.
+Updated the Window executable file to use launch4j 3.8.
+Updated Macintosh bundle to use appbundler.
+With this update file association on OS X is broken. This is because appbundler does not include the option to set CFBundleDocumentTypes.
+
+1.3.24
+8 February 2017
+Fixed bug in coordinate reference system for OpenStreetMap. The Earth sphere was using a wrong size. This resulted in wrong coordinates when exporting points from the OpenStreetMap. 
+
+When OpenStreetMap points from previous versions are imported into MapAnalyst version 1.3.24, they will be offset by a few kilometers. There is a new function available at Maps > Correct OpenStreetMap Misalignment to move offset points to their correct location. 
+
+Dashed lines are no longer available to draw distortion visualisations, as they tend to crash the Java Virtual Machine.

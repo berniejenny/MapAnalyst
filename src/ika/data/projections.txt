@@ -1,0 +1,25 @@
+// list projections by proj4 code in order of appearance in menu
+// only the proj4 code is used, the rest of the line is ignored
+// lines starting with two dashes are ignored
+apian1 Apian Globular I
+apian2 Apian Globular II
+bacon Bacon Globular
+bonne
+cass Cassini
+cea Cylindrical Equal-Area
+eqdc Equidistant Conic
+eqc Equidistant Cylindrical (Plate Carrée)
+euler
+four2 Fournier II
+// gnom Gnomonic Azimuthal buggy
+// lagrng Lagrange buggy
+lcc Lambert Conformal Conic
+laea Lambert Azimuthal Equal Area
+leac Lambert Equal Area Conic
+merc Mercator
+nicol Nicolosi Globular
+ortel Ortelius Oval
+sinu Sinusoidal
+stere Stereographic Azimuthal
+tcea Transverse Cylindrical Equal Area
+utm Transverse Mercator
