@@ -15,10 +15,8 @@ import com.jhlabs.map.proj.EquidistantCylindricalProjection;
 import com.jhlabs.map.proj.LambertConformalConicProjection;
 import com.jhlabs.map.proj.MercatorProjection;
 import com.jhlabs.map.proj.Projection;
-import com.jhlabs.map.proj.ProjectionFactory;
 import ika.geo.*;
 import ika.geo.osm.OpenStreetMap;
-import ika.geo.osm.Projector;
 import ika.utils.*;
 import ika.map.tools.*;
 import ika.transformation.*;
@@ -131,8 +129,11 @@ public class MainWindow extends javax.swing.JFrame
             this.resetManager(new Manager());
             this.writeGUI();
 
-            this.oldMapComponent.setCoordinateFormatter(new CoordinateFormatter("###,##0.0 cm", "###,##0.0", 100));
-            this.newMapComponent.setCoordinateFormatter(new CoordinateFormatter("###,##0.00 m", "###,##0.###", 1));
+            CoordinateFormatter oldFormat, newFormat;
+            oldFormat = new CoordinateFormatter("###,##0.0 cm", "###,##0.0", 100);
+            newFormat = new CoordinateFormatter("###,##0.00 m", "###,##0.###", 1);
+            this.oldMapComponent.setCoordinateFormatter(oldFormat);
+            this.newMapComponent.setCoordinateFormatter(newFormat);
 
             // register the info panels with the two maps
             this.coordinateInfoPanel.registerWithMapComponent(this.oldMapComponent);
@@ -283,8 +284,9 @@ public class MainWindow extends javax.swing.JFrame
         this.oldMapComponent.addGeoObject(manager.getOldGeoSet());
         this.newMapComponent.addGeoObject(manager.getNewGeoSet());
 
-        this.localScaleRotationInfoPanel.setManager(this.manager);
-
+        localScaleRotationInfoPanel.setManager(manager);
+        coordinateInfoPanel.setManager(manager);
+        
         // create a new MapTool to make sure the tool knows about the new Manager.
         // only for MapTools that have reference to some data of the Manager.
         // not really elegant!
@@ -715,9 +717,10 @@ public class MainWindow extends javax.swing.JFrame
         mapsMenu = new javax.swing.JMenu();
         removeOldRasterImageMenuItem = new javax.swing.JMenuItem();
         removeNewRasterImageMenuItem = new javax.swing.JMenuItem();
-        jSeparator17 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator17 = new javax.swing.JPopupMenu.Separator();
         addOSMMenuItem = new javax.swing.JMenuItem();
         removeOSMMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator22 = new javax.swing.JPopupMenu.Separator();
         correctOSMMisalignmentBugMenuItem = new javax.swing.JMenuItem();
         analysisMenu = new javax.swing.JMenu();
         computeMenuItem = new javax.swing.JMenuItem();
@@ -2946,6 +2949,7 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     });
     mapsMenu.add(removeOSMMenuItem);
+    mapsMenu.add(jSeparator22);
 
     correctOSMMisalignmentBugMenuItem.setText("Correct OpenStreetMap Misalignment…");
     correctOSMMisalignmentBugMenuItem.setEnabled(false);
@@ -6107,8 +6111,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void writePointCoords(GeoPoint oldPt, GeoPoint newPt) {
         if (newPt != null) {
             CoordinateFormatter newFormatter = this.newMapComponent.getCoordinateFormatter();
-            this.pointNewXLabel.setText(newFormatter.format(newPt.getX()));
-            this.pointNewYLabel.setText(newFormatter.format(newPt.getY()));
+            pointNewXLabel.setText(newFormatter.format(newPt.getX()));
+            pointNewYLabel.setText(newFormatter.format(newPt.getY()));
         }
         if (oldPt != null) {
             CoordinateFormatter oldFormatter = this.oldMapComponent.getCoordinateFormatter();
@@ -6425,7 +6429,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator14;
     private javax.swing.JSeparator jSeparator15;
     private javax.swing.JSeparator jSeparator16;
-    private javax.swing.JPopupMenu.Separator jSeparator17;
     private javax.swing.JSeparator jSeparator18;
     private javax.swing.JToolBar.Separator jSeparator19;
     private javax.swing.JSeparator jSeparator2;

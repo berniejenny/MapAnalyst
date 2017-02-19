@@ -7,9 +7,6 @@
 package ika.gui;
 
 import ika.map.tools.*;
-import ika.map.*;
-import ika.utils.CoordinateFormatter;
-import java.text.*;
 import ika.geo.*;
 
 /**
@@ -40,7 +37,7 @@ public class GeoObjectInfoPanel extends javax.swing.JPanel
 
         setLayout(new java.awt.GridBagLayout());
 
-        nameTextLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        nameTextLabel.setFont(nameTextLabel.getFont().deriveFont(nameTextLabel.getFont().getSize()-2f));
         nameTextLabel.setText("Point:");
         nameTextLabel.setToolTipText("Name of the point under the mouse pointer.");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -48,7 +45,7 @@ public class GeoObjectInfoPanel extends javax.swing.JPanel
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 0);
         add(nameTextLabel, gridBagConstraints);
 
-        nameLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        nameLabel.setFont(nameLabel.getFont().deriveFont(nameLabel.getFont().getSize()-2f));
         nameLabel.setText("-");
         nameLabel.setToolTipText("Name of the point under the mouse pointer.");
         nameLabel.setPreferredSize(new java.awt.Dimension(120, 13));

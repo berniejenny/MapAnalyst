@@ -49,7 +49,7 @@ public class LocalScaleRotationInfoPanel
 
         setLayout(new java.awt.GridBagLayout());
 
-        scaleLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        scaleLabel.setFont(scaleLabel.getFont().deriveFont(scaleLabel.getFont().getSize()-2f));
         scaleLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         scaleLabel.setToolTipText("Scale at the mouse pointer. Only available for the old map.");
         scaleLabel.setPreferredSize(new java.awt.Dimension(110, 13));
@@ -58,7 +58,7 @@ public class LocalScaleRotationInfoPanel
         gridBagConstraints.gridy = 0;
         add(scaleLabel, gridBagConstraints);
 
-        rotationLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        rotationLabel.setFont(rotationLabel.getFont().deriveFont(rotationLabel.getFont().getSize()-2f));
         rotationLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         rotationLabel.setToolTipText("Rotation at the mouse pointer. Only available for the old map.");
         rotationLabel.setPreferredSize(new java.awt.Dimension(110, 13));
@@ -67,7 +67,7 @@ public class LocalScaleRotationInfoPanel
         gridBagConstraints.gridy = 1;
         add(rotationLabel, gridBagConstraints);
 
-        scaleTextLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        scaleTextLabel.setFont(scaleTextLabel.getFont().deriveFont(scaleTextLabel.getFont().getSize()-2f));
         scaleTextLabel.setText("Local Scale : ");
         scaleTextLabel.setToolTipText("Scale at the mouse pointer. Only available for the old map.");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -77,7 +77,7 @@ public class LocalScaleRotationInfoPanel
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         add(scaleTextLabel, gridBagConstraints);
 
-        rotationTextLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        rotationTextLabel.setFont(rotationTextLabel.getFont().deriveFont(rotationTextLabel.getFont().getSize()-2f));
         rotationTextLabel.setText("Local Rotation : ");
         rotationTextLabel.setToolTipText("Rotation at the mouse pointer. Only available for the old map.");
         gridBagConstraints = new java.awt.GridBagConstraints();
