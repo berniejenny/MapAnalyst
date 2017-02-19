@@ -195,7 +195,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         if (map == null) {
             return;
         }
-
+        
         // compute OSM zoom level
         double boundsWidthPx = bounds.getWidth() * scale;
         int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
@@ -317,8 +317,10 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                 dDeg = bases[baseID] * Math.pow(10, ndigits) * s;
         }
 
-        g2d.setStroke(new BasicStroke(0));
+        g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
         g2d.setColor(Color.GRAY);
+        // without the KEY_STROKE_CONTROL rendering hint the meridian at 0 deg longitude is sometimes not drawn on OS X
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_OFF);
 
@@ -370,10 +372,12 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                 RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
+    @Override
     public boolean isPointOnSymbol(Point2D point, double tolDist, double scale) {
         return false;
     }
 
+    @Override
     public boolean isIntersectedByRectangle(Rectangle2D rect, double scale) {
         return false;
     }
