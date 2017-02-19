@@ -6,13 +6,11 @@
 package ika.gui;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.awt.image.*;
 import ika.geo.*;
 import ika.map.tools.*;
 import ika.utils.*;
-import java.awt.event.MouseMotionListener;
 
 
 /**
@@ -395,7 +393,7 @@ public class MapComponent extends javax.swing.JComponent
      * @param pt The point to convert. Will not be changed.
      * @return The convert point in world coordinates.
      */
-    protected final Point2D.Double userToWorldSpace(Point pt) {
+    public final Point2D.Double userToWorldSpace(Point pt) {
         final double x =  pt.getX() / scale + topLeft.getX();
         final double y = -pt.getY() / scale + topLeft.getY();
         return new Point2D.Double(x, y);
@@ -507,6 +505,7 @@ public class MapComponent extends javax.swing.JComponent
      * Overwrite paintComponent of JComponent to do our custom drawing.
      * @param g The destination to draw to.
      */
+    @Override
     protected void paintComponent(Graphics g) {
         /* From a sun java tutorial:
          *Make sure that when the paintComponent method exits, the Graphics

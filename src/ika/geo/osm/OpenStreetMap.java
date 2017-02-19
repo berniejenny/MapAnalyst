@@ -1,9 +1,15 @@
 package ika.geo.osm;
 
+import com.jhlabs.map.proj.MercatorProjection;
 import ika.geo.GeoObject;
 import ika.gui.MapComponent;
+import ika.proj.ProjectionsManager;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -166,6 +172,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         return tile;
     }
 
+    @Override
     public Rectangle2D getBounds2D() {
         return bounds;
     }
@@ -182,14 +189,15 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     }
 
+    @Override
     public void draw(Graphics2D g2d, double scale, boolean drawSelectionState) {
 
-        if (this.map == null) {
+        if (map == null) {
             return;
         }
 
         // compute OSM zoom level
-        double boundsWidthPx = this.bounds.getWidth() * scale;
+        double boundsWidthPx = bounds.getWidth() * scale;
         int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
         if (zoom > OSM_MAX_ZOOM) {
             zoom = OSM_MAX_ZOOM;
@@ -236,7 +244,130 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                  */
             }
         }
+        
+        drawGraticule(g2d, scale);
+    }
+    
+    private void drawGraticule(Graphics2D g2d, double scale) {
+        // compute OSM zoom level
+        double boundsWidthPx = bounds.getWidth() * scale;
+        int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
+        
+        Rectangle2D.Double visRect = map.getVisibleArea();
+        
+        MercatorProjection mercator = ProjectionsManager.createWebMercatorProjection();
+        double r = mercator.getEquatorRadius();
 
+        double dDeg;
+        switch (zoom) {
+            case 0:
+                dDeg = 90;
+                break;
+            case 1:
+                dDeg = 45;
+                break;
+            case 2:
+                dDeg = 30;
+                break;
+            case 3:
+                dDeg = 15;
+                break;
+            case 4:
+                dDeg = 10;
+                break;
+            case 5:
+                dDeg = 5;
+                break;
+            case 6:
+                dDeg = 2;
+                break;
+            case 7:
+                dDeg = 2;
+                break;
+            case 8:
+                dDeg = 1;
+                break;
+            default:
+                // find a spacing between meridians that results in one meridian per approximately 150 pixels
+                Point2D.Double xy1 = map.userToWorldSpace(new java.awt.Point(0, 0));
+                Point2D.Double xy2 = map.userToWorldSpace(new java.awt.Point(150, 0));
+                // inverse projection of horizontal distance to longitude
+                double dLonDeg = Math.toDegrees((xy2.x - xy1.x) / r);
+
+                final double[] bases = new double[]{5, 2, 1};
+                // scale the cell size such that it is > 1
+                double s = 1; // scale factor
+                double dLonDeg_s = dLonDeg;
+                while (dLonDeg_s < 1d) {
+                    dLonDeg_s *= 10d;
+                    s /= 10d;
+                }
+
+                // compute the number of digits of the integral part of the scaled value
+                double ndigits = (int) Math.floor(Math.log10(dLonDeg_s));
+
+                // find the index into bases for the first limit after dLongDeg
+                int baseID = 0;
+                for (int i = 0; i < bases.length; ++i) {
+                    if (dLonDeg_s >= bases[i]) {
+                        baseID = i;
+                        break;
+                    }
+                }
+                dDeg = bases[baseID] * Math.pow(10, ndigits) * s;
+        }
+
+        g2d.setStroke(new BasicStroke(0));
+        g2d.setColor(Color.GRAY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_OFF);
+
+        // find map extension in degrees
+        double latMaxRad = Math.toRadians(mercator.getMinLatitude());
+        double maxX = Math.PI * r;
+        double maxY = Math.log(Math.tan(Math.PI / 4d + 0.5 * latMaxRad)) * r;
+        Point2D.Double lonLatBottomLeftDeg = new Point2D.Double();
+        mercator.inverseTransform(new Point2D.Double(visRect.getMinX(), visRect.getMinY()), lonLatBottomLeftDeg);
+        Point2D.Double lonLatTopRightDeg = new Point2D.Double();
+        mercator.inverseTransform(new Point2D.Double(visRect.getMaxX(), visRect.getMaxY()), lonLatTopRightDeg);
+
+        // meridians
+        double firstLon = lonLatBottomLeftDeg.x;
+        if (firstLon < 0) {
+            firstLon -= firstLon % dDeg;
+        } else {
+            firstLon += dDeg - firstLon % dDeg;
+        }
+        double lastLon = lonLatTopRightDeg.x - (lonLatTopRightDeg.x % dDeg);
+        int nbrMeridians = (int) Math.round((lastLon - firstLon) / dDeg) + 1;
+        for (int i = 0; i < nbrMeridians; i++) {
+            double lonDeg = firstLon + i * dDeg;
+            double meridianX = r * Math.toRadians(lonDeg);
+            Line2D meridian = new Line2D.Double(meridianX, -maxY, meridianX, maxY);
+            g2d.draw(meridian);
+        }
+
+        // parallels
+        double minLat = Math.max(lonLatBottomLeftDeg.y, mercator.getMinLatitude());
+        double maxLat = Math.min(lonLatTopRightDeg.y, mercator.getMaxLatitude());
+        double firstLat = minLat;
+        if (firstLat < 0d) {
+            firstLat -= firstLat % dDeg;
+        } else {
+            firstLat += dDeg - firstLat % dDeg;
+        }
+        double lastLat = maxLat - (maxLat % dDeg);
+        int nbrParallels = (int) Math.round((lastLat - firstLat) / dDeg) + 1;
+        for (int i = 0; i < nbrParallels; i++) {
+            double latDeg = firstLat + i * dDeg;
+            double latRad = Math.toRadians(latDeg);
+            double parallelY = r * Math.log(Math.tan(Math.PI / 4 + 0.5 * latRad));
+            Line2D parallel = new Line2D.Double(maxX, parallelY, -maxX, parallelY);
+            g2d.draw(parallel);
+        }
+
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
     public boolean isPointOnSymbol(Point2D point, double tolDist, double scale) {
