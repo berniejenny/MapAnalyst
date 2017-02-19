@@ -1311,9 +1311,10 @@ public class MainWindow extends javax.swing.JFrame
         projectionDescriptionTextArea.setEditable(false);
         projectionDescriptionTextArea.setFont(projectionDescriptionTextArea.getFont().deriveFont(projectionDescriptionTextArea.getFont().getSize()-2f));
         projectionDescriptionTextArea.setLineWrap(true);
-        projectionDescriptionTextArea.setRows(3);
+        projectionDescriptionTextArea.setRows(10);
         projectionDescriptionTextArea.setText("Ð");
         projectionDescriptionTextArea.setWrapStyleWord(true);
+        projectionDescriptionTextArea.setMinimumSize(new java.awt.Dimension(200, 200));
         projectionDescriptionTextArea.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -5711,7 +5712,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void updateProjectionInfo() {
         Projection p = manager.getProjection();
         String desc = p.getDescription();
-        String history = p.getHistory();
+        String history = p.getHistoryDescription();
         if (history != null && history.isEmpty() == false) {
             desc = desc + "\n" + history;
         }
@@ -6050,13 +6051,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             buggyMercator.initialize();
 
             // OSM coordinate system
-            MercatorProjection osmMercator = new MercatorProjection();
-            osmMercator.setMaxLatitude(OpenStreetMap.MAX_LAT);
-            osmMercator.setMinLatitude(OpenStreetMap.MIN_LAT);
-            Ellipsoid osmSphere = new Ellipsoid("osm", 6378137.0, 6378137.0, 0.0, "OSM Sphere");
-            osmMercator.setEllipsoid(osmSphere);
-            osmMercator.initialize();
-
+            MercatorProjection osmMercator = ProjectionsManager.createWebMercatorProjection();
+            
             // convert from buggy OSM to spherical coordinates, then to OSM coordinates
             for (int i = 0; i < nbrPoints; i++) {
                 GeoPoint pt = (GeoPoint) (ptsGeoSet.getGeoObject(i));

@@ -4,6 +4,7 @@ import com.jhlabs.map.Ellipsoid;
 import com.jhlabs.map.proj.MercatorProjection;
 import com.jhlabs.map.proj.Projection;
 import com.jhlabs.map.proj.TCEAProjection;
+import ika.proj.ProjectionsManager;
 import java.awt.geom.Point2D;
 
 /**
@@ -17,12 +18,7 @@ public class Projector {
     private static final MercatorProjection mercator;
 
     static {
-        mercator = new MercatorProjection();
-        mercator.setMaxLatitude(OpenStreetMap.MAX_LAT);
-        mercator.setMinLatitude(OpenStreetMap.MIN_LAT);
-        Ellipsoid osmSphere = new Ellipsoid("osm", 6378137.0, 6378137.0, 0.0, "OSM Sphere");
-        mercator.setEllipsoid(osmSphere);
-        mercator.initialize();
+        mercator = ProjectionsManager.createWebMercatorProjection();
     }
 
     /**

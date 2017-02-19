@@ -1,7 +1,10 @@
 package ika.proj;
 
+import com.jhlabs.map.Ellipsoid;
+import com.jhlabs.map.proj.MercatorProjection;
 import com.jhlabs.map.proj.Projection;
 import com.jhlabs.map.proj.ProjectionFactory;
+import ika.geo.osm.OpenStreetMap;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -77,4 +80,19 @@ public class ProjectionsManager {
         }
     }
 
+    /**
+     * Creates and initializes a Mercator projection with a spherical coordinate
+     * system commonly used by web map services, such as OpenStreetMap.
+     *
+     * @return a new Mercator projection for web maps
+     */
+    public static MercatorProjection createWebMercatorProjection() {
+        MercatorProjection mercator = new MercatorProjection();
+        mercator.setMaxLatitude(OpenStreetMap.MAX_LAT);
+        mercator.setMinLatitude(OpenStreetMap.MIN_LAT);
+        Ellipsoid osmSphere = new Ellipsoid("osm", 6378137.0, 6378137.0, 0.0, "OSM Sphere");
+        mercator.setEllipsoid(osmSphere);
+        mercator.initialize();
+        return mercator;
+    }
 }
