@@ -19,7 +19,10 @@ leac Lambert Equal Area Conic
 merc Mercator
 nicol Nicolosi Globular
 ortel Ortelius Oval
+// Ptolemy I (a combination of two equidistant conic projections), Snyder p. 10-14
+// Ptolemy II (pseudoconic), Snyder p. 10-14
 sinu Sinusoidal
 stere Stereographic Azimuthal
 tcea Transverse Cylindrical Equal Area
+// trapezoidal, see dissertation by D. Beineke for equations
 utm Transverse Mercator
