@@ -7,7 +7,6 @@
 package ika.map.tools;
 
 import java.awt.geom.*;
-import java.awt.event.*;
 import ika.gui.MapComponent;
 
 /**

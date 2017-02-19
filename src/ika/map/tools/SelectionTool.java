@@ -6,7 +6,6 @@
 
 package ika.map.tools;
 
-import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import ika.geo.*;
@@ -61,7 +60,7 @@ public class SelectionTool extends RectangleTool {
         //super.mouseClicked(point, evt);
         
         // try selecting objects close to the mouse click.
-        final boolean selectionChanged = this.selectWithMouseClick(point, evt);
+        final boolean selectionChanged = selectWithMouseClick(point, evt);
         
         // inform MapToolActionListeners about action
         if (selectionChanged)
