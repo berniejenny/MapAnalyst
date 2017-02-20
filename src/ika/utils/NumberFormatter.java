@@ -6,11 +6,9 @@
 
 package ika.utils;
 
-import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-import java.text.FieldPosition;
 
 /**
  * Utility class for formatting double values.
@@ -20,7 +18,7 @@ import java.text.FieldPosition;
  */
 public class NumberFormatter {
     
-    private static DecimalFormat formatter;
+    private static final DecimalFormat formatter;
     static { // static initialization block for formatter
         formatter = new DecimalFormat();
         formatter.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
@@ -50,7 +48,7 @@ public class NumberFormatter {
      * @return The value converted to a string.
      */
     public static String format(double value, int width, int decimals, int leadingSpaces) {
-        StringBuffer str = new StringBuffer(width);
+        StringBuilder str = new StringBuilder(width);
         width+= 1+leadingSpaces;
         NumberFormatter.formatter.setMaximumFractionDigits(decimals);
         NumberFormatter.formatter.setMinimumFractionDigits(decimals);
@@ -93,7 +91,7 @@ public class NumberFormatter {
             scaleFormatter = new java.text.DecimalFormat("###,###.###");
         else
             scaleFormatter = new java.text.DecimalFormat("###,###.#");
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         if (prefix != null) {
             str.append(prefix);
             str.append(":\t");
@@ -102,5 +100,46 @@ public class NumberFormatter {
         str.append(scaleFormatter.format(scale));
         
         return str.toString();
+    }
+    
+    private static final DecimalFormat secondsFormatter
+            = new DecimalFormat("###,##0.####");
+    
+    /**
+     * Format a decimal angle in degrees, minutes, seconds.
+     *
+     * @param angleDeg decimal angle in degrees
+     * @param longitude if true, W or E are appended, otherwise, N or S
+     * @return formatted degrees, minutes, seconds string
+     */
+    public static String formatDegreesMinutesSeconds(double angleDeg,
+            boolean longitude) {
+
+        boolean negative = Math.signum(angleDeg) == -1d;
+        angleDeg = Math.abs(angleDeg);
+        while (angleDeg > 180) {
+            angleDeg -= 360;
+        }
+        int deg = (int) angleDeg;
+        int min = (int) ((angleDeg - deg) * 60);
+        double sec = ((angleDeg - deg) * 60 - min) * 60;
+        
+        // rounding of decimal seconds can result in 60''
+        String secStr = secondsFormatter.format(sec);
+        if ("60".equals(secStr)) {
+            secStr = "0";
+            min += 1;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(deg).append("\u00B0 ");
+        sb.append(min).append("\u2032 ");
+        sb.append(secStr).append("\u2033 ");
+        if (longitude) {
+            sb.append(negative ? "W" : "E");
+        } else {
+            sb.append(negative ? "S" : "N");
+        }
+        
+        return sb.toString();
     }
 }

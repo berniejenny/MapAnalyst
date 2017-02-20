@@ -109,8 +109,8 @@ public final class Manager implements Serializable {
 
     public byte[] serializeManager() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        java.util.zip.GZIPOutputStream zip =
-                new java.util.zip.GZIPOutputStream(baos);
+        java.util.zip.GZIPOutputStream zip
+                = new java.util.zip.GZIPOutputStream(baos);
         BufferedOutputStream bos = new BufferedOutputStream(zip);
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(this);
@@ -180,8 +180,9 @@ public final class Manager implements Serializable {
     }
 
     /**
-     * Computes the mean longitude in degrees of all linked control points
-     * in the reference map.
+     * Computes the mean longitude in degrees of all linked control points in
+     * the reference map.
+     *
      * @return The mean longitude in degrees.
      */
     public Double meanLongitudeOfLinkedPointsInNewMap() {
@@ -218,6 +219,7 @@ public final class Manager implements Serializable {
         projector.setInitializedProjection(projection);
         return projector;
     }
+
     /**
      * Analyze the map and generate graphics visualizing the results.
      */
@@ -243,7 +245,7 @@ public final class Manager implements Serializable {
         } else {
             this.getDistortionGrid().setMeshSizeScale(transformation.getScale());
         }
-        
+
         // initialize the multiquadratic interpolation
         MultiquadraticInterpolation multiQuadra;
         try {
@@ -255,8 +257,8 @@ public final class Manager implements Serializable {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, e);
             multiQuadra = null;
             if (!GraphicsEnvironment.isHeadless()) {
-                String msg = "A system of linear equations cannot be solved. " +
-                        "Some visualizations can therefore not be generated.";
+                String msg = "A system of linear equations cannot be solved. "
+                        + "Some visualizations can therefore not be generated.";
                 String title = "Numerical Problem";
                 javax.swing.Icon icon = ika.mapanalyst.ApplicationInfo.getApplicationIcon();
                 javax.swing.JOptionPane.showMessageDialog(parentComponent, msg, title,
@@ -354,7 +356,6 @@ public final class Manager implements Serializable {
         str.append(this.getTransformationReport(transformation));
         str.append(nl);
          */
-
         return str.toString();
     }
 
@@ -404,7 +405,6 @@ public final class Manager implements Serializable {
         return mapOld;
     }
 
-
     public GeoSet getNewGeoSet() {
         return mapNew;
     }
@@ -426,8 +426,8 @@ public final class Manager implements Serializable {
         if (filePath == null) {
             throw new IllegalArgumentException();
         }
-        ImageReaderProgressDialog progressDialog =
-                new ImageReaderProgressDialog(parentFrame, true);
+        ImageReaderProgressDialog progressDialog
+                = new ImageReaderProgressDialog(parentFrame, true);
 
         ImageImporter imageImporter = new ImageImporter();
         imageImporter.setMapComponent(mapComponent);
@@ -464,11 +464,11 @@ public final class Manager implements Serializable {
     /**
      * Reads an ASCII file with linked points (for the old and the new map).
      * Values in this file have to be separated by commas (place names can
-     * contain other ';', spaces, etc.)
-     * There is one link per line, i.e. the ID, x old, y old, x new, y new.
-     * Two GeoPoints are created, one for the old coordinates, one for the
-     * new coordinates. The two points are linked and the Link is added to the
-     * linksList in the LinkManager.
+     * contain other ';', spaces, etc.) There is one link per line, i.e. the ID,
+     * x old, y old, x new, y new. Two GeoPoints are created, one for the old
+     * coordinates, one for the new coordinates. The two points are linked and
+     * the Link is added to the linksList in the LinkManager.
+     *
      * @param filePath path to the file that will be read.
      */
     public void importLinksFromFile(String filePath, Component parentComponent) throws Exception {
@@ -487,13 +487,13 @@ public final class Manager implements Serializable {
     }
 
     /**
-     * Reads a String with linked points (for the old and the new map).
-     * Values in this file have to be separated by commas (place names can
-     * contain other ';', spaces, etc.)
-     * There is one link per line, i.e. the ID, x old, y old, x new, y new.
-     * Two GeoPoints are created, one for the old coordinates, one for the
-     * new coordinates. The two points are linked and the Link is added to the
-     * linksList in the LinkManager.
+     * Reads a String with linked points (for the old and the new map). Values
+     * in this file have to be separated by commas (place names can contain
+     * other ';', spaces, etc.) There is one link per line, i.e. the ID, x old,
+     * y old, x new, y new. Two GeoPoints are created, one for the old
+     * coordinates, one for the new coordinates. The two points are linked and
+     * the Link is added to the linksList in the LinkManager.
+     *
      * @param links The string that will be parsed.
      */
     public void importLinksFromString(String links, Component parentComponent) throws Exception {
@@ -514,11 +514,11 @@ public final class Manager implements Serializable {
     /**
      * Reads linked points from a BufferedStream (for the old and the new map).
      * Values in this file have to be seperated by commas (place names can
-     * contain other ';', spaces, etc.)
-     * There is one link per line, i.e. the ID, x old, y old, x new, y new.
-     * Two GeoPoints are created, one for the old coordinates, one for the
-     * new coordinates. The two points are linked and the Link is added to the
-     * linksList in the LinkManager.
+     * contain other ';', spaces, etc.) There is one link per line, i.e. the ID,
+     * x old, y old, x new, y new. Two GeoPoints are created, one for the old
+     * coordinates, one for the new coordinates. The two points are linked and
+     * the Link is added to the linksList in the LinkManager.
+     *
      * @param in The stream to read from. in will not be closed.
      */
     private void importLinks(BufferedReader in, Component parentComponent) throws IOException {
@@ -575,7 +575,7 @@ public final class Manager implements Serializable {
                     }
                 }
             }
-            
+
         } finally {
             this.linkManager.updateConvexHull();
             if (oldPointsGeoSet != null) {
@@ -588,9 +588,9 @@ public final class Manager implements Serializable {
     }
 
     /**
-     * Reads an ASCII file with points.
-     * Values in this file have to be seperated by comma.
-     * There is one point per line, i.e. the ID, x, y.
+     * Reads an ASCII file with points. Values in this file have to be seperated
+     * by comma. There is one point per line, i.e. the ID, x, y.
+     *
      * @param filePath path to the file that will be read.
      * @param dstGeoSet The GeoSet to receive the new GeoPoints.
      */
@@ -710,7 +710,7 @@ public final class Manager implements Serializable {
 
         String sep = toExcel ? "" : ",";
         boolean header = !toExcel;
-        String report = getLinkManager().getReport(sep, header, null, 
+        String report = getLinkManager().getReport(sep, header, null,
                 transformation, buildProjector());
         if (report == null) {
             return;
@@ -725,9 +725,10 @@ public final class Manager implements Serializable {
 
     /**
      * Export the paired control points to a text file.
+     *
      * @param filePath
      * @param oldMap If not null, coordinates of the old map are exported in
-     * pixels relative to the top-left corner of the georeferenced image, and 
+     * pixels relative to the top-left corner of the georeferenced image, and
      * not in meters.
      * @param toExcel if true, file extension is xls, otherwise txt.
      * @throws java.lang.Exception
@@ -761,6 +762,7 @@ public final class Manager implements Serializable {
 
     /**
      * Writes the point in the old or the new map to a text file.
+     *
      * @param filePath The path to the file to write to.
      * @param oldMap True if the points of the old map are to be exported, false
      * otherwise.
@@ -797,14 +799,15 @@ public final class Manager implements Serializable {
 
         // find longest name
         int maxNameLength = 10; // 10 is minimum
-        for(int i = 0; i < ptsGeoSet.getNumberOfChildren(); i++){
+        for (int i = 0; i < ptsGeoSet.getNumberOfChildren(); i++) {
             GeoObject obj = ptsGeoSet.getGeoObject(i);
             if (obj == null || obj.getName() == null) {
                 continue;
             }
             final int nameLength = obj.getName().length();
-            if (nameLength > maxNameLength)
+            if (nameLength > maxNameLength) {
                 maxNameLength = nameLength;
+            }
         }
 
         if (toExcel) {
@@ -816,7 +819,7 @@ public final class Manager implements Serializable {
                 new FileWriter(filePath)))) {
             for (int i = 0; i < nbrPts; i++) {
                 GeoPoint geoPoint = (GeoPoint) (ptsGeoSet.getGeoObject(i));
-                
+
                 // print name or id of point
                 String name = geoPoint.getName();
                 if (name == null) {
@@ -831,13 +834,13 @@ public final class Manager implements Serializable {
                 for (int j = name.length(); j < maxNameLength; j++) {
                     writer.print(" ");
                 }
-                
+
                 writer.print(VALUE_SEPARATOR);
-                
+
                 double x = geoPoint.getX();
                 double y = geoPoint.getY();
                 if (scale == -1d) {
-                    double[][] in = new double[][] {{x, y}};
+                    double[][] in = new double[][]{{x, y}};
                     double[][] out = new double[1][2];
                     Projector.OSM2Geo(in, out);
                     x = Math.toDegrees(out[0][0]);
@@ -846,7 +849,7 @@ public final class Manager implements Serializable {
                     x *= scale;
                     y *= scale;
                 }
-                
+
                 // print coordinates of point
                 // Don't just use a standard DecimalFormat since localized characters for
                 // the decimal separator could be used. We require '.'.
@@ -880,9 +883,9 @@ public final class Manager implements Serializable {
         GeoPoint pointWithSameName = this.linkManager.searchPoint(newPointName, false);
         if (pointWithSameName != null) {
             if (!GraphicsEnvironment.isHeadless()) {
-                String msg = "A point with the name \"" + newPointName +
-                        "\" already exists.\n" +
-                        "Do you really want to add another point with the the same name?";
+                String msg = "A point with the name \"" + newPointName
+                        + "\" already exists.\n"
+                        + "Do you really want to add another point with the the same name?";
                 String title = "Point With Identical Name";
                 Object[] options = {"Add Point", "Cancel"};
                 javax.swing.Icon icon = ika.mapanalyst.ApplicationInfo.getApplicationIcon();
@@ -942,16 +945,16 @@ public final class Manager implements Serializable {
     }
 
     public void initOSM(MapComponent map) {
-        OpenStreetMap osm = (OpenStreetMap)
-                newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        OpenStreetMap osm = (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
         if (osm != null) {
             osm.setMap(map);
         }
     }
-    
+
     public boolean isUsingOpenStreetMap() {
         return this.newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false) != null;
     }
+
     public void undo() {
         System.out.println("undo");
     }
@@ -973,7 +976,7 @@ public final class Manager implements Serializable {
     }
 
     public void setInitializedProjection(Projection p) {
-        assert(p != null);
+        assert (p != null);
         this.projection = p;
     }
 

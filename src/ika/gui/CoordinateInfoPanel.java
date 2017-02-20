@@ -10,6 +10,7 @@ import ika.map.tools.*;
 import ika.mapanalyst.Manager;
 import ika.proj.ProjectionsManager;
 import ika.utils.CoordinateFormatter;
+import ika.utils.NumberFormatter;
 import java.awt.geom.Point2D;
 import java.text.*;
 
@@ -22,9 +23,6 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
 
     private static final DecimalFormat angleFormatter
             = new DecimalFormat("###,##0.0");
-    
-    private static final DecimalFormat sphericalFormatter
-            = new DecimalFormat("###,##0.###");
 
     private Manager manager = null;
 
@@ -63,7 +61,7 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         xCoordLabel.setFont(xCoordLabel.getFont().deriveFont(xCoordLabel.getFont().getSize()-2f));
         xCoordLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         xCoordLabel.setToolTipText("Horizontal coordinate of the mouse pointer.");
-        xCoordLabel.setPreferredSize(new java.awt.Dimension(90, 13));
+        xCoordLabel.setPreferredSize(new java.awt.Dimension(130, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -73,7 +71,7 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         yCoordLabel.setFont(yCoordLabel.getFont().deriveFont(yCoordLabel.getFont().getSize()-2f));
         yCoordLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         yCoordLabel.setToolTipText("Vertical coordinate of the mouse pointer.");
-        yCoordLabel.setPreferredSize(new java.awt.Dimension(90, 13));
+        yCoordLabel.setPreferredSize(new java.awt.Dimension(130, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -161,13 +159,14 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
     private void updateCoordinates(java.awt.geom.Point2D.Double point,
             ika.gui.MapComponent mapComponent) {
         if (point != null) {
-            if (manager != null && manager.isUsingOpenStreetMap()) {
+            if ("new".equals(mapComponent.getName()) && manager != null && manager.isUsingOpenStreetMap()) {
                 Projection proj = ProjectionsManager.createWebMercatorProjection();
                 Point2D.Double lonLat = new Point2D.Double();
                 proj.inverseTransform(point, lonLat);
-                xCoordLabel.setText("\u03BB : " + sphericalFormatter.format(lonLat.x) + "\u00B0");
-                yCoordLabel.setText("\u03D5 : " + sphericalFormatter.format(lonLat.y) + "\u00B0");
-
+                String lonStr = NumberFormatter.formatDegreesMinutesSeconds(lonLat.x, true);
+                String latStr = NumberFormatter.formatDegreesMinutesSeconds(lonLat.y, false);
+                xCoordLabel.setText("\u03BB : " + lonStr);
+                yCoordLabel.setText("\u03D5 : " + latStr);
             } else {
                 CoordinateFormatter formatter = mapComponent.getCoordinateFormatter();
                 xCoordLabel.setText("X : " + formatter.format(point.getX()));
