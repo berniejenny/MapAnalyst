@@ -149,7 +149,7 @@ public class MainWindow extends javax.swing.JFrame
 
             // display coordinates in tooltip for the new map
             newMapComponent.setCoordinatesTooltip(new CoordinatesTooltip(newMapComponent, manager));
-            
+
             // set the initial tool
             this.oldMapComponent.setMapTool(new ZoomInTool(this.oldMapComponent));
             this.newMapComponent.setMapTool(new ZoomInTool(this.newMapComponent));
@@ -289,7 +289,7 @@ public class MainWindow extends javax.swing.JFrame
 
         localScaleRotationInfoPanel.setManager(manager);
         coordinateInfoPanel.setManager(manager);
-        
+
         // create a new MapTool to make sure the tool knows about the new Manager.
         // only for MapTools that have reference to some data of the Manager.
         // not really elegant!
@@ -636,10 +636,8 @@ public class MainWindow extends javax.swing.JFrame
         xLabel = new javax.swing.JLabel();
         pointOldXLabel = new javax.swing.JLabel();
         yLabel = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
         pointNewXLabel = new javax.swing.JLabel();
         newMapCoordsTitleLabel = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
         pointNewYLabel = new javax.swing.JLabel();
         jSeparator21 = new javax.swing.JSeparator();
         transformationInfoPanel = new javax.swing.JPanel();
@@ -2230,7 +2228,7 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridwidth = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         linkNamePanel.add(linkToggleButton, gridBagConstraints);
@@ -2243,7 +2241,7 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         linkNamePanel.add(linkNameLabel, gridBagConstraints);
@@ -2252,7 +2250,7 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         linkNamePanel.add(nameLabel, gridBagConstraints);
 
@@ -2267,7 +2265,7 @@ public class MainWindow extends javax.swing.JFrame
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         linkNamePanel.add(linkNameButton, gridBagConstraints);
@@ -2280,12 +2278,12 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         linkNamePanel.add(oldMapCoordsTitleLabel, gridBagConstraints);
 
         pointOldYLabel.setFont(pointOldYLabel.getFont().deriveFont(pointOldYLabel.getFont().getSize()-2f));
         pointOldYLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        pointOldYLabel.setToolTipText("The vertical coordinates of the currently selected point in the old map.");
+        pointOldYLabel.setToolTipText("The vertical coordinate of a selected point in the old map.");
         pointOldYLabel.setMinimumSize(new java.awt.Dimension(80, 16));
         pointOldYLabel.setPreferredSize(new java.awt.Dimension(80, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2306,7 +2304,7 @@ public class MainWindow extends javax.swing.JFrame
 
         pointOldXLabel.setFont(pointOldXLabel.getFont().deriveFont(pointOldXLabel.getFont().getSize()-2f));
         pointOldXLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        pointOldXLabel.setToolTipText("The horizontal coordinates of the currently selected point in the old map.");
+        pointOldXLabel.setToolTipText("The horizontal coordinate of a selected point in the old map.");
         pointOldXLabel.setMinimumSize(new java.awt.Dimension(80, 16));
         pointOldXLabel.setPreferredSize(new java.awt.Dimension(80, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2325,21 +2323,14 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         linkNamePanel.add(yLabel, gridBagConstraints);
 
-        jLabel12.setFont(jLabel12.getFont().deriveFont(jLabel12.getFont().getSize()-2f));
-        jLabel12.setText("X");
+        pointNewXLabel.setFont(pointNewXLabel.getFont().deriveFont(pointNewXLabel.getFont().getSize()-2f));
+        pointNewXLabel.setToolTipText("The horizontal coordinate of a selected point in the new map.");
+        pointNewXLabel.setMinimumSize(new java.awt.Dimension(80, 16));
+        pointNewXLabel.setPreferredSize(new java.awt.Dimension(130, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        linkNamePanel.add(jLabel12, gridBagConstraints);
-
-        pointNewXLabel.setFont(pointNewXLabel.getFont().deriveFont(pointNewXLabel.getFont().getSize()-2f));
-        pointNewXLabel.setToolTipText("The horizontal coordinates of the currently selected point in the new map.");
-        pointNewXLabel.setMinimumSize(new java.awt.Dimension(80, 16));
-        pointNewXLabel.setPreferredSize(new java.awt.Dimension(100, 16));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         linkNamePanel.add(pointNewXLabel, gridBagConstraints);
@@ -2350,26 +2341,19 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         linkNamePanel.add(newMapCoordsTitleLabel, gridBagConstraints);
 
-        jLabel11.setFont(jLabel11.getFont().deriveFont(jLabel11.getFont().getSize()-2f));
-        jLabel11.setText("Y");
+        pointNewYLabel.setFont(pointNewYLabel.getFont().deriveFont(pointNewYLabel.getFont().getSize()-2f));
+        pointNewYLabel.setToolTipText("The vertical coordinate of a selected point in the new map.");
+        pointNewYLabel.setMinimumSize(new java.awt.Dimension(80, 16));
+        pointNewYLabel.setPreferredSize(new java.awt.Dimension(130, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 6;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        linkNamePanel.add(jLabel11, gridBagConstraints);
-
-        pointNewYLabel.setFont(pointNewYLabel.getFont().deriveFont(pointNewYLabel.getFont().getSize()-2f));
-        pointNewYLabel.setToolTipText("The vertical coordinates of the currently selected point in the new map.");
-        pointNewYLabel.setMinimumSize(new java.awt.Dimension(80, 16));
-        pointNewYLabel.setPreferredSize(new java.awt.Dimension(100, 16));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         linkNamePanel.add(pointNewYLabel, gridBagConstraints);
@@ -5678,7 +5662,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         if (updatingGUI) {
             return;
         }
-        Projection p = (Projection)projectionComboBox.getSelectedItem();
+        Projection p = (Projection) projectionComboBox.getSelectedItem();
         double lon0 = ((Number) longitudeFormattedTextField.getValue()).doubleValue();
         p.setProjectionLongitudeDegrees(lon0);
         p.setTrueScaleLatitudeDegrees(latTrueScaleDeg);
@@ -5715,7 +5699,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void updateProjectionInfo() {
         Projection p = manager.getProjection();
         String desc = p.getDescription();
@@ -5914,12 +5898,16 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         this.manager.setNewMap(null);
         // the visualization have to be recalculated when switching from/to OSM
         clearTemporaryGUI();
+        // switch from spherical to Cartesian coordinates of selected point
+        updateLinkGUI();
     }//GEN-LAST:event_removeOSMMenuItemActionPerformed
 
     private void addOSMMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addOSMMenuItemActionPerformed
         this.manager.setNewMap(new OpenStreetMap(newMapComponent));
         // the visualization have to be recalculated when switching from/to OSM
         clearTemporaryGUI();
+        // switch from Cartesian to spherical coordinates of selected point
+        updateLinkGUI();
     }//GEN-LAST:event_addOSMMenuItemActionPerformed
 
     private void mapsMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_mapsMenuMenuSelected
@@ -6059,7 +6047,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // OSM coordinate system
             MercatorProjection osmMercator = ProjectionsManager.createWebMercatorProjection();
-            
+
             // convert from buggy OSM to spherical coordinates, then to OSM coordinates
             for (int i = 0; i < nbrPoints; i++) {
                 GeoPoint pt = (GeoPoint) (ptsGeoSet.getGeoObject(i));
@@ -6069,7 +6057,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
                 pt.setX(lonLat.getX());
                 pt.setY(lonLat.getY());
             }
-            
+
             newMapComponent.repaint();
             addUndo(title);
         }
@@ -6113,9 +6101,13 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void writePointCoords(GeoPoint oldPt, GeoPoint newPt) {
         if (newPt != null) {
-            CoordinateFormatter newFormatter = this.newMapComponent.getCoordinateFormatter();
-            pointNewXLabel.setText(newFormatter.format(newPt.getX()));
-            pointNewYLabel.setText(newFormatter.format(newPt.getY()));
+            Point2D.Double pt = new Point2D.Double(newPt.getX(), newPt.getY());
+            // test whether spherical coordinates for OpenStreetMap should be displayed
+            boolean osm = manager != null && manager.isUsingOpenStreetMap();
+            // format coordinate strings
+            String[] str = newMapComponent.coordinatesStrings(pt, osm);
+            pointNewXLabel.setText(str[0]);
+            pointNewYLabel.setText(str[1]);
         }
         if (oldPt != null) {
             CoordinateFormatter oldFormatter = this.oldMapComponent.getCoordinateFormatter();
@@ -6157,9 +6149,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
                 || newSingleSelectedGeoPoint == null) {
             disableLinkingGUI();
             writePointCoords(oldSingleSelectedGeoPoint, newSingleSelectedGeoPoint);
-            return;
-        }
-        if (oldSingleSelectedGeoPoint != null && newSingleSelectedGeoPoint != null) {
+        } else {
             enableLinkingGUIForUnlinkedPoints(oldSingleSelectedGeoPoint,
                     newSingleSelectedGeoPoint);
         }
@@ -6238,6 +6228,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         this.showPointsCheckBoxMenuItem.setSelected(true);
     }
 
+    @Override
     public void geoSetChanged(ika.geo.GeoSet geoSet) {
         manager.clearGraphics();
         this.clearTemporaryGUI();
@@ -6247,6 +6238,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         this.updateAllMenus();
     }
 
+    @Override
     public void geoSetSelectionChanged(GeoSet geoSet) {
         this.updateLinkGUI();
         this.updateAllMenus();
@@ -6416,8 +6408,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JLabel isolinesSmoothnessLabel;
     private javax.swing.JPanel isoscalesPanel;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel6;
