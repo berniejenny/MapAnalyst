@@ -159,9 +159,9 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
     private void updateCoordinates(java.awt.geom.Point2D.Double point,
             ika.gui.MapComponent mapComponent) {
         if (point != null) {
-            boolean spherical = "new".equals(mapComponent.getName()) 
+            boolean osm = "new".equals(mapComponent.getName()) 
                     && manager != null && manager.isUsingOpenStreetMap();
-            String[] str = mapComponent.coordinatesStrings(point, spherical);
+            String[] str = mapComponent.coordinatesStrings(point, osm);
             xCoordLabel.setText(str[0]);
             yCoordLabel.setText(str[1]);
         } else {

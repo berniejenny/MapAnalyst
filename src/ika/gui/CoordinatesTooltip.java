@@ -1,10 +1,6 @@
 package ika.gui;
 
-import com.jhlabs.map.proj.Projection;
 import ika.mapanalyst.Manager;
-import ika.proj.ProjectionsManager;
-import ika.utils.CoordinateFormatter;
-import ika.utils.NumberFormatter;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -30,7 +26,6 @@ class CoordinatesTooltip implements MouseListener, MouseMotionListener {
 
     private final MapComponent mapComponent;
     private final Manager manager;
-    private Point2D.Double mousePositionWorld = null;
     private Point mousePositionPixel = null;
 
     public CoordinatesTooltip(MapComponent mapComponent, Manager manager) {
@@ -44,7 +39,6 @@ class CoordinatesTooltip implements MouseListener, MouseMotionListener {
      * Clear the current coordinates. Should be called after the map zooms.
      */
     public void clearCoordinates() {
-        mousePositionWorld = null;
         mousePositionPixel = null;
         mapComponent.repaint();
     }
@@ -62,17 +56,18 @@ class CoordinatesTooltip implements MouseListener, MouseMotionListener {
     void paintTooltip(Graphics2D g2d) {
         if (mousePositionPixel == null) {
             return;
-        }
+        }        
+        Point2D.Double xy = mapComponent.userToWorldSpace(mousePositionPixel);
 
         // test whether spherical coordinates for OpenStreetMap should be displayed
         boolean osm = "new".equals(mapComponent.getName())
                 && manager != null && manager.isUsingOpenStreetMap();
-        if (osm && manager.isPointOnOpenStreetMap(mousePositionWorld) == false) {
+        if (osm && manager.isPointOnOpenStreetMap(xy) == false) {
             return;
         }
 
         // format coordinate strings
-        String[] str = mapComponent.coordinatesStrings(mousePositionWorld, osm);
+        String[] str = mapComponent.coordinatesStrings(xy, osm);
 
         // background rectangle, which is a bit larger than the text
         g2d.setColor(BACKGROUND_COLOR);
@@ -118,7 +113,6 @@ class CoordinatesTooltip implements MouseListener, MouseMotionListener {
 
     private void updatePosition(MouseEvent e) {
         mousePositionPixel = (Point) e.getPoint().clone();
-        mousePositionWorld = mapComponent.userToWorldSpace(e.getPoint());
         mapComponent.repaint();
     }
 }
