@@ -15,7 +15,7 @@ import javax.swing.event.*;
  *
  * @author  jenny
  */
-public class LineAppearancePanel extends javax.swing.JPanel {
+public class LineAppearancePanel extends ika.gui.TransparentPanel {
 
     private boolean updatingGUI = false;
     private VectorSymbol vectorSymbol;

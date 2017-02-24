@@ -92,8 +92,8 @@ public class MainWindow extends javax.swing.JFrame
      * data manager
      */
     private Manager manager;
-    private static final String linkButtonSelectedLabel = "Unlink Points";
-    private static final String linkButtonDeselectedLabel = "Link Points";
+    private static final String linkButtonSelectedLabel = "Unlink";
+    private static final String linkButtonDeselectedLabel = "Link";
     /**
      * A text window displaying a report for the last transformation computed.
      */
@@ -558,12 +558,10 @@ public class MainWindow extends javax.swing.JFrame
         bottomPanel1 = new javax.swing.JPanel();
         bottomPanel2 = new javax.swing.JPanel();
         visualizationTabbedPane = new javax.swing.JTabbedPane();
-        DistortionGridPanel = new javax.swing.JPanel();
-        if (ika.utils.Sys.isMacOSX_10_5_orHigherWithJava5())
-        DistortionGridPanel.setOpaque(false);
-        distortionGridPanel = new javax.swing.JPanel();
+        DistortionGridPanel = new TransparentPanel();
+        distortionGridPanel = new TransparentPanel();
         distortionGridVisibleCheckBox = new javax.swing.JCheckBox();
-        distortionControlSizePanel = new javax.swing.JPanel();
+        distortionControlSizePanel = new TransparentPanel();
         distortionGridMeshSizeLabel = new javax.swing.JLabel();
         distortionGridSmoothnessLabel = new javax.swing.JLabel();
         distortionGridSmoothnessSlider = new javax.swing.JSlider();
@@ -575,26 +573,27 @@ public class MainWindow extends javax.swing.JFrame
         distortionGridLineAppearancePanel = new ika.gui.LineAppearancePanel();
         jLabel2 = new javax.swing.JLabel();
         distortionGridMeshSizeNumberField = new ika.gui.NumberField();
-        gridOptionsButton = new javax.swing.JButton();
-        gridExaggerationWarningLabel = new javax.swing.JLabel();
-        distortionGridShowUndistortedCheckBox = new javax.swing.JCheckBox();
         gridUnitComboBox = new javax.swing.JComboBox();
-        ErrorVectorsPanel = new javax.swing.JPanel();
-        errorVectorsPanel = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        distortionGridShowUndistortedCheckBox = new javax.swing.JCheckBox();
+        gridExaggerationWarningLabel = new javax.swing.JLabel();
+        gridOptionsButton = new javax.swing.JButton();
+        ErrorVectorsPanel = new TransparentPanel();
+        errorVectorsPanel = new TransparentPanel();
         errorVectorsVisibleCheckBox = new javax.swing.JCheckBox();
-        errorVectorScalePanel = new javax.swing.JPanel();
-        errorVectorOutlierPanel = new javax.swing.JPanel();
+        errorVectorScalePanel = new TransparentPanel();
+        errorVectorOutlierPanel = new TransparentPanel();
         errorVectorsOutliersCheckBox = new javax.swing.JCheckBox();
         errorVectorsOutliersColorButton = new ika.gui.ColorButton();
         errorVectorsShowComboBox = new javax.swing.JComboBox();
-        errorVectorsScalePanel = new javax.swing.JPanel();
+        errorVectorsScalePanel = new TransparentPanel();
         errorVectorsScaleLabel = new javax.swing.JLabel();
         errorVectorsScaleNumberField = new ika.gui.NumberField();
         errorVectorsLineAppearancePanel = new ika.gui.LineAppearancePanel();
         errorVectorsFillCirclesCheckBox = new javax.swing.JCheckBox();
         errorVectorsFillColorButton = new ika.gui.ColorButton();
-        IsoscalesPanel = new javax.swing.JPanel();
-        isoscalesPanel = new javax.swing.JPanel();
+        IsoscalesPanel = new TransparentPanel();
+        isoscalesPanel = new TransparentPanel();
         isolinesScaleIntervalLabel = new javax.swing.JLabel();
         isolinesScaleLabel = new javax.swing.JLabel();
         isolinesRotationLabel = new javax.swing.JLabel();
@@ -603,20 +602,20 @@ public class MainWindow extends javax.swing.JFrame
         isolinesRotationVisibleCheckBox = new javax.swing.JCheckBox();
         isolinesScaleAppearancePanel = new ika.gui.LineAppearancePanel();
         isolinesRotationAppearancePanel = new ika.gui.LineAppearancePanel();
-        jPanel1 = new javax.swing.JPanel();
+        jPanel1 = new TransparentPanel();
         isolinesSmoothnessLabel = new javax.swing.JLabel();
         isolinesRadiusNumberField = new ika.gui.NumberField();
         jLabel3 = new javax.swing.JLabel();
         isolinesScaleIntervalNumberField = new ika.gui.NumberField();
         isolinesRotationIntervalNumberField = new ika.gui.NumberField();
-        DrawingPanel = new javax.swing.JPanel();
-        drawingPanel = new javax.swing.JPanel();
+        DrawingPanel = new TransparentPanel();
+        drawingPanel = new TransparentPanel();
         drawingVisibleCheckBox = new javax.swing.JCheckBox();
         drawingInfoTextArea = new javax.swing.JTextArea();
         drawingImportButton = new javax.swing.JButton();
         drawingClearButton = new javax.swing.JButton();
-        CirclePanel = new javax.swing.JPanel();
-        circlePanel = new javax.swing.JPanel();
+        CirclePanel = new TransparentPanel();
+        circlePanel = new TransparentPanel();
         circlesVisibleCheckBox = new javax.swing.JCheckBox();
         circlesScalePanel = new javax.swing.JPanel();
         circlesScaleLabel = new javax.swing.JLabel();
@@ -627,7 +626,7 @@ public class MainWindow extends javax.swing.JFrame
         linksPanel = new javax.swing.JPanel();
         linkNamePanel = new javax.swing.JPanel();
         linkToggleButton = new javax.swing.JToggleButton();
-        linkToggleButton.putClientProperty("JButton.buttonType", "roundRect");
+        // linkToggleButton.putClientProperty("JButton.buttonType", "roundRect");
         linkNameLabel = new javax.swing.JLabel();
         nameLabel = new javax.swing.JLabel();
         linkNameButton = new javax.swing.JButton();
@@ -639,6 +638,8 @@ public class MainWindow extends javax.swing.JFrame
         pointNewXLabel = new javax.swing.JLabel();
         newMapCoordsTitleLabel = new javax.swing.JLabel();
         pointNewYLabel = new javax.swing.JLabel();
+        jSeparator23 = new javax.swing.JSeparator();
+        jLabel4 = new javax.swing.JLabel();
         jSeparator21 = new javax.swing.JSeparator();
         transformationInfoPanel = new javax.swing.JPanel();
         transformationLabel = new javax.swing.JLabel();
@@ -1391,8 +1392,7 @@ public class MainWindow extends javax.swing.JFrame
         computeButton.setToolTipText("Click to compute the scale, the rotation and statistical values of the map to analyze; and update the visualizations.");
         computeButton.setMaximumSize(new java.awt.Dimension(100, 29));
         computeButton.setMinimumSize(new java.awt.Dimension(100, 29));
-        computeButton.setPreferredSize(new java.awt.Dimension(100, 29));
-        computeButton.putClientProperty("JButton.buttonType", "gradient");
+        computeButton.setPreferredSize(new java.awt.Dimension(100, 31));
         computeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 computeButtonActionPerformed(evt);
@@ -1559,8 +1559,8 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 6);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         distortionGridPanel.add(distortionGridVisibleCheckBox, gridBagConstraints);
 
         distortionControlSizePanel.setForeground(new java.awt.Color(255, 0, 0));
@@ -1592,12 +1592,13 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 3, 0);
         distortionControlSizePanel.add(distortionGridSmoothnessSlider, gridBagConstraints);
 
-        distortionGridLabelLabel.setText("Label Size:");
+        distortionGridLabelLabel.setText("Labels:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         distortionControlSizePanel.add(distortionGridLabelLabel, gridBagConstraints);
 
@@ -1614,7 +1615,7 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 0);
         distortionControlSizePanel.add(distortionGridExtensionComboBox, gridBagConstraints);
 
         distortionGridLabelComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "None", "10 Pt", "12 Pt", "15 Pt" }));
@@ -1627,11 +1628,10 @@ public class MainWindow extends javax.swing.JFrame
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 0);
         distortionControlSizePanel.add(distortionGridLabelComboBox, gridBagConstraints);
 
         distortionGridLabelSequenceComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "3", "4", "5", "6", "10", "20" }));
@@ -1643,19 +1643,19 @@ public class MainWindow extends javax.swing.JFrame
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
         distortionControlSizePanel.add(distortionGridLabelSequenceComboBox, gridBagConstraints);
 
-        distortionGridFrequencyLabel.setText("Label Frequency:");
+        distortionGridFrequencyLabel.setText("Frequency:");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 0);
         distortionControlSizePanel.add(distortionGridFrequencyLabel, gridBagConstraints);
 
         distortionGridLineAppearancePanel.setName("grid"); // NOI18N
@@ -1666,10 +1666,10 @@ public class MainWindow extends javax.swing.JFrame
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 0);
         distortionControlSizePanel.add(distortionGridLineAppearancePanel, gridBagConstraints);
 
         jLabel2.setText("Extension:");
@@ -1695,47 +1695,11 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 0);
-        distortionControlSizePanel.add(distortionGridMeshSizeNumberField, gridBagConstraints);
-
-        gridOptionsButton.setText("More…");
-        gridOptionsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                gridOptionsButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
-        distortionControlSizePanel.add(gridOptionsButton, gridBagConstraints);
-
-        gridExaggerationWarningLabel.setForeground(new java.awt.Color(255, 0, 0));
-        gridExaggerationWarningLabel.setText("Exaggeration Factor is not 1!");
-        gridExaggerationWarningLabel.setVisible(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        distortionControlSizePanel.add(gridExaggerationWarningLabel, gridBagConstraints);
-
-        distortionGridShowUndistortedCheckBox.setText("Show Undistorted Grid");
-        distortionGridShowUndistortedCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                distortionGridShowUndistortedCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        distortionControlSizePanel.add(distortionGridShowUndistortedCheckBox, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(3, 4, 3, 0);
+        distortionControlSizePanel.add(distortionGridMeshSizeNumberField, gridBagConstraints);
 
         gridUnitComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "m", "\u00B0" }));
         gridUnitComboBox.setToolTipText("Units of the mesh size");
@@ -1745,17 +1709,62 @@ public class MainWindow extends javax.swing.JFrame
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         distortionControlSizePanel.add(gridUnitComboBox, gridBagConstraints);
+
+        jLabel8.setText("Appearance:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        distortionControlSizePanel.add(jLabel8, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 12, 4, 12);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 12);
         distortionGridPanel.add(distortionControlSizePanel, gridBagConstraints);
+
+        distortionGridShowUndistortedCheckBox.setText("Show Undistorted Grid");
+        distortionGridShowUndistortedCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                distortionGridShowUndistortedCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        distortionGridPanel.add(distortionGridShowUndistortedCheckBox, gridBagConstraints);
+
+        gridExaggerationWarningLabel.setForeground(new java.awt.Color(255, 0, 0));
+        gridExaggerationWarningLabel.setText("Exaggeration Factor not 1!");
+        gridExaggerationWarningLabel.setVisible(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+        distortionGridPanel.add(gridExaggerationWarningLabel, gridBagConstraints);
+
+        gridOptionsButton.setText("More…");
+        gridOptionsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                gridOptionsButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_START;
+        distortionGridPanel.add(gridOptionsButton, gridBagConstraints);
 
         DistortionGridPanel.add(distortionGridPanel);
 
@@ -2216,21 +2225,20 @@ public class MainWindow extends javax.swing.JFrame
         linkNamePanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         linkNamePanel.setLayout(new java.awt.GridBagLayout());
 
-        linkToggleButton.setText("Link Points");
+        linkToggleButton.setText("Link");
         linkToggleButton.setToolTipText("Link or unlink two selected points.");
         linkToggleButton.setEnabled(false);
-        linkToggleButton.setPreferredSize(new java.awt.Dimension(120, 29));
         linkToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 linkToggleButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         linkNamePanel.add(linkToggleButton, gridBagConstraints);
 
         linkNameLabel.setFont(linkNameLabel.getFont().deriveFont(linkNameLabel.getFont().getSize()-2f));
@@ -2240,25 +2248,24 @@ public class MainWindow extends javax.swing.JFrame
         linkNameLabel.setPreferredSize(new java.awt.Dimension(120, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         linkNamePanel.add(linkNameLabel, gridBagConstraints);
 
-        nameLabel.setText("Selected Link:");
+        nameLabel.setText("Selected Link");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         linkNamePanel.add(nameLabel, gridBagConstraints);
 
         linkNameButton.setText("Rename");
         linkNameButton.setToolTipText("Rename two linked points.");
         linkNameButton.setEnabled(false);
-        linkNameButton.putClientProperty("JButton.buttonType", "roundRect");
-        linkNameButton.putClientProperty("JComponent.sizeVariant", "small");
+        //linkNameButton.putClientProperty("JButton.buttonType", "roundRect"); linkNameButton.putClientProperty("JComponent.sizeVariant", "small");
         linkNameButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 linkNameButtonActionPerformed(evt);
@@ -2266,7 +2273,7 @@ public class MainWindow extends javax.swing.JFrame
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         linkNamePanel.add(linkNameButton, gridBagConstraints);
 
@@ -2275,10 +2282,10 @@ public class MainWindow extends javax.swing.JFrame
         oldMapCoordsTitleLabel.setToolTipText("The coordinates of the currently selected point in the old map.");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(6, 2, 3, 0);
         linkNamePanel.add(oldMapCoordsTitleLabel, gridBagConstraints);
 
         pointOldYLabel.setFont(pointOldYLabel.getFont().deriveFont(pointOldYLabel.getFont().getSize()-2f));
@@ -2288,9 +2295,9 @@ public class MainWindow extends javax.swing.JFrame
         pointOldYLabel.setPreferredSize(new java.awt.Dimension(80, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 22);
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 30);
         linkNamePanel.add(pointOldYLabel, gridBagConstraints);
 
         xLabel.setFont(xLabel.getFont().deriveFont(xLabel.getFont().getSize()-2f));
@@ -2298,8 +2305,9 @@ public class MainWindow extends javax.swing.JFrame
         xLabel.setMinimumSize(new java.awt.Dimension(30, 15));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         linkNamePanel.add(xLabel, gridBagConstraints);
 
         pointOldXLabel.setFont(pointOldXLabel.getFont().deriveFont(pointOldXLabel.getFont().getSize()-2f));
@@ -2309,9 +2317,9 @@ public class MainWindow extends javax.swing.JFrame
         pointOldXLabel.setPreferredSize(new java.awt.Dimension(80, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 22);
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 30);
         linkNamePanel.add(pointOldXLabel, gridBagConstraints);
 
         yLabel.setFont(yLabel.getFont().deriveFont(yLabel.getFont().getSize()-2f));
@@ -2319,8 +2327,9 @@ public class MainWindow extends javax.swing.JFrame
         yLabel.setMinimumSize(new java.awt.Dimension(30, 15));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         linkNamePanel.add(yLabel, gridBagConstraints);
 
         pointNewXLabel.setFont(pointNewXLabel.getFont().deriveFont(pointNewXLabel.getFont().getSize()-2f));
@@ -2329,7 +2338,7 @@ public class MainWindow extends javax.swing.JFrame
         pointNewXLabel.setPreferredSize(new java.awt.Dimension(130, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
@@ -2340,10 +2349,10 @@ public class MainWindow extends javax.swing.JFrame
         newMapCoordsTitleLabel.setToolTipText("The coordinates of the currently selected point in the new map.");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(6, 5, 3, 0);
         linkNamePanel.add(newMapCoordsTitleLabel, gridBagConstraints);
 
         pointNewYLabel.setFont(pointNewYLabel.getFont().deriveFont(pointNewYLabel.getFont().getSize()-2f));
@@ -2352,11 +2361,26 @@ public class MainWindow extends javax.swing.JFrame
         pointNewYLabel.setPreferredSize(new java.awt.Dimension(130, 16));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         linkNamePanel.add(pointNewYLabel, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(20, 0, 20, 0);
+        linkNamePanel.add(jSeparator23, gridBagConstraints);
+
+        jLabel4.setText("Selected Points");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        linkNamePanel.add(jLabel4, gridBagConstraints);
 
         linksPanel.add(linkNamePanel);
 
@@ -2381,7 +2405,7 @@ public class MainWindow extends javax.swing.JFrame
         transformationInfoPanel.add(transformationLabel, java.awt.BorderLayout.NORTH);
 
         transformationInfoTextArea.setEditable(false);
-        transformationInfoTextArea.setFont(new java.awt.Font("SansSerif", 0, 9)); // NOI18N
+        transformationInfoTextArea.setFont(transformationInfoTextArea.getFont().deriveFont(transformationInfoTextArea.getFont().getSize()-2f));
         transformationInfoTextArea.setRows(8);
         transformationInfoTextArea.setTabSize(10);
         transformationInfoTextArea.setFocusable(false);
@@ -2749,8 +2773,6 @@ pasteMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     editMenu.add(preferencesMenuItem);
 
-    menuBar.add(editMenu);
-
     pointsMenu.setText("Points");
 
     selectPointsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A,
@@ -2887,7 +2909,9 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     pointsMenu.add(placePointMenuItem);
 
-    menuBar.add(pointsMenu);
+    editMenu.add(pointsMenu);
+
+    menuBar.add(editMenu);
 
     mapsMenu.setText("Maps");
     mapsMenu.addMenuListener(new javax.swing.event.MenuListener() {
@@ -6060,6 +6084,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             newMapComponent.repaint();
             addUndo(title);
+            clearTemporaryGUI();
         }
     }//GEN-LAST:event_correctOSMMisalignmentBugMenuItemActionPerformed
 
@@ -6410,8 +6435,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
@@ -6427,6 +6454,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator20;
     private javax.swing.JSeparator jSeparator21;
+    private javax.swing.JSeparator jSeparator23;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
