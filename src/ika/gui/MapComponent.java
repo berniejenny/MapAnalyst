@@ -5,11 +5,13 @@
  */
 package ika.gui;
 
+import com.jhlabs.map.proj.Projection;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
 import ika.geo.*;
 import ika.map.tools.*;
+import ika.proj.ProjectionsManager;
 import ika.utils.*;
 
 
@@ -70,13 +72,15 @@ public class MapComponent extends javax.swing.JComponent
     private CoordinateFormatter coordinateFormatter = 
             new CoordinateFormatter("###,##0.00", "###,##0", 1);
     
+    private CoordinatesTooltip coordinatesTooltip;
+    
     /** Creates a new instance of MapComponent */
     public MapComponent() {
-        this.geoSet = new GeoSet();
-        this.geoSet.setName("MapComponent GeoSet");
-        this.geoSet.addGeoSetChangeListener(this);
-        this.geoSet.addGeoSetSelectionChangeListener(this);
-        this.mapEventHandler = new MapEventHandler(this);
+        geoSet = new GeoSet();
+        geoSet.setName("MapComponent GeoSet");
+        geoSet.addGeoSetChangeListener(this);
+        geoSet.addGeoSetSelectionChangeListener(this);
+        mapEventHandler = new MapEventHandler(this);
     }
     
     /**
@@ -141,7 +145,10 @@ public class MapComponent extends javax.swing.JComponent
         final double dx = visibleRect.getCenterX() - topLeft.getX();
         final double dy = visibleRect.getCenterY() - topLeft.getY();
         topLeft.setLocation(cx - dx, cy - dy);
-        this.repaint();
+        if (coordinatesTooltip != null) {
+            coordinatesTooltip.clearCoordinates();
+        }
+        repaint();
     }
     
     /**
@@ -190,7 +197,7 @@ public class MapComponent extends javax.swing.JComponent
      * @param zoomFactor The new zoom factor.
      */
     public void zoom(double zoomFactor) {
-        this.setScaleFactor(scale * zoomFactor);
+        setScaleFactor(scale * zoomFactor);
     }
     
     /**
@@ -205,6 +212,9 @@ public class MapComponent extends javax.swing.JComponent
         final double dy = (pt.y - this.topLeft.y) / zoomFactor;
         this.topLeft.x = pt.x - dx;
         this.topLeft.y = pt.y - dy;
+        if (coordinatesTooltip != null) {
+            coordinatesTooltip.clearCoordinates();
+        }
         this.repaint();
     }
     
@@ -274,7 +284,10 @@ public class MapComponent extends javax.swing.JComponent
         dy *= this.scale/scale;
         topLeft.setLocation(cx - dx, cy - dy);
         this.scale = scale;
-        this.repaint();
+        if (coordinatesTooltip != null) {
+            coordinatesTooltip.clearCoordinates();
+        }
+        repaint();
     }
     
     /**
@@ -411,6 +424,25 @@ public class MapComponent extends javax.swing.JComponent
         pt.setLocation(x, y);
     }
     
+    public String[] coordinatesStrings(java.awt.geom.Point2D.Double point, boolean spherical) {
+        final String str1, str2;
+        if (spherical) {
+            Projection proj = ProjectionsManager.createWebMercatorProjection();
+            Point2D.Double lonLat = new Point2D.Double();
+            proj.inverseTransform(point, lonLat);
+            String lonStr = NumberFormatter.formatDegreesMinutesSeconds(lonLat.x, true);
+            String latStr = NumberFormatter.formatDegreesMinutesSeconds(lonLat.y, false);
+            str1 = "\u03BB : " + lonStr;
+            str2 = "\u03D5 : " + latStr;
+
+        } else {
+            CoordinateFormatter formatter = getCoordinateFormatter();
+            str1 = "X : " + formatter.format(point.getX());
+            str2 = "Y : " + formatter.format(point.getY());
+        }
+        return new String[]{str1, str2};
+    }
+    
     /**
      * Paints the GeoMap.
      * @param g2d The drawing destination.
@@ -444,19 +476,6 @@ public class MapComponent extends javax.swing.JComponent
         
         // draw the map tree
         geoSet.draw(g2d, this.scale, drawSelectionState);
-    }
-    
-    /**
-     * Utility method that returns the bounding box of the area that needs to be redrawn.
-     * @param g The graphics object that needs to be redrawn.
-     * @return The bounding box of the area that must be redrawn.
-     */
-    private Rectangle getDirtyArea(Graphics g) {
-        Dimension size = this.getSize();
-        Rectangle drawingArea = new Rectangle(0, 0, size.width, size.height);
-        // The clipping area is the part of the component that needs to be
-        // repainted, which might be smaller than the entire component area.
-        return g.getClipBounds(drawingArea);
     }
     
     /**
@@ -548,8 +567,11 @@ public class MapComponent extends javax.swing.JComponent
             g2d.drawImage(doubleBuffer, insets.left, insets.top, this);
         }
         paintToolForeground(g2d);
-        
         g2d.dispose(); //release the copy's resources. Recomended by Sun tutorial.
+                
+        if (coordinatesTooltip != null) {
+            coordinatesTooltip.paintTooltip((Graphics2D)g);
+        }
     }
     
     /**
@@ -624,5 +646,12 @@ public class MapComponent extends javax.swing.JComponent
 
     public void setCoordinateFormatter(CoordinateFormatter coordinateFormatter) {
         this.coordinateFormatter = coordinateFormatter;
+    }
+
+    /**
+     * @param coordinatesTooltip the coordinatesTooltip to set
+     */
+    public void setCoordinatesTooltip(CoordinatesTooltip coordinatesTooltip) {
+        this.coordinatesTooltip = coordinatesTooltip;
     }
 }

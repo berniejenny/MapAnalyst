@@ -147,6 +147,9 @@ public class MainWindow extends javax.swing.JFrame
             // this.newMapComponent.addMouseMotionListener(this.localScaleRotationInfoPanel);
             this.oldMapComponent.addMouseMotionListener(this.localScaleRotationInfoPanel);
 
+            // display coordinates in tooltip for the new map
+            newMapComponent.setCoordinatesTooltip(new CoordinatesTooltip(newMapComponent, manager));
+            
             // set the initial tool
             this.oldMapComponent.setMapTool(new ZoomInTool(this.oldMapComponent));
             this.newMapComponent.setMapTool(new ZoomInTool(this.newMapComponent));

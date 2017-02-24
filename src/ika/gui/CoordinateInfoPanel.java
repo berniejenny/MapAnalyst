@@ -159,19 +159,11 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
     private void updateCoordinates(java.awt.geom.Point2D.Double point,
             ika.gui.MapComponent mapComponent) {
         if (point != null) {
-            if ("new".equals(mapComponent.getName()) && manager != null && manager.isUsingOpenStreetMap()) {
-                Projection proj = ProjectionsManager.createWebMercatorProjection();
-                Point2D.Double lonLat = new Point2D.Double();
-                proj.inverseTransform(point, lonLat);
-                String lonStr = NumberFormatter.formatDegreesMinutesSeconds(lonLat.x, true);
-                String latStr = NumberFormatter.formatDegreesMinutesSeconds(lonLat.y, false);
-                xCoordLabel.setText("\u03BB : " + lonStr);
-                yCoordLabel.setText("\u03D5 : " + latStr);
-            } else {
-                CoordinateFormatter formatter = mapComponent.getCoordinateFormatter();
-                xCoordLabel.setText("X : " + formatter.format(point.getX()));
-                yCoordLabel.setText("Y : " + formatter.format(point.getY()));
-            }
+            boolean spherical = "new".equals(mapComponent.getName()) 
+                    && manager != null && manager.isUsingOpenStreetMap();
+            String[] str = mapComponent.coordinatesStrings(point, spherical);
+            xCoordLabel.setText(str[0]);
+            yCoordLabel.setText(str[1]);
         } else {
             this.xCoordLabel.setText("-");
             this.yCoordLabel.setText("-");

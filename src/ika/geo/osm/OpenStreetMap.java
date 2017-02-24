@@ -77,6 +77,16 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
      */
     public static final double R = 6378137;
 
+    /**
+     * Maximum mapped Cartesian x value
+     */
+    public static final double MAX_X = Math.PI * R;
+    
+    /**
+     * Maximum mapped Cartesian y value
+     */
+    public static final double MAX_Y = Math.log(Math.tan(Math.PI / 4d + 0.5 * MAX_LAT / 180d * Math.PI)) * R;
+
     public OpenStreetMap() {
         this.init();
     }
@@ -195,7 +205,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         if (map == null) {
             return;
         }
-        
+
         // compute OSM zoom level
         double boundsWidthPx = bounds.getWidth() * scale;
         int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
@@ -244,17 +254,17 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                  */
             }
         }
-        
+
         drawGraticule(g2d, scale);
     }
-    
+
     private void drawGraticule(Graphics2D g2d, double scale) {
         // compute OSM zoom level
         double boundsWidthPx = bounds.getWidth() * scale;
         int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
-        
+
         Rectangle2D.Double visRect = map.getVisibleArea();
-        
+
         MercatorProjection mercator = ProjectionsManager.createWebMercatorProjection();
         double r = mercator.getEquatorRadius();
 
@@ -325,9 +335,6 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                 RenderingHints.VALUE_ANTIALIAS_OFF);
 
         // find map extension in degrees
-        double latMaxRad = Math.toRadians(mercator.getMinLatitude());
-        double maxX = Math.PI * r;
-        double maxY = Math.log(Math.tan(Math.PI / 4d + 0.5 * latMaxRad)) * r;
         Point2D.Double lonLatBottomLeftDeg = new Point2D.Double();
         mercator.inverseTransform(new Point2D.Double(visRect.getMinX(), visRect.getMinY()), lonLatBottomLeftDeg);
         Point2D.Double lonLatTopRightDeg = new Point2D.Double();
@@ -345,7 +352,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         for (int i = 0; i < nbrMeridians; i++) {
             double lonDeg = firstLon + i * dDeg;
             double meridianX = r * Math.toRadians(lonDeg);
-            Line2D meridian = new Line2D.Double(meridianX, -maxY, meridianX, maxY);
+            Line2D meridian = new Line2D.Double(meridianX, -MAX_Y, meridianX, MAX_Y);
             g2d.draw(meridian);
         }
 
@@ -364,7 +371,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
             double latDeg = firstLat + i * dDeg;
             double latRad = Math.toRadians(latDeg);
             double parallelY = r * Math.log(Math.tan(Math.PI / 4 + 0.5 * latRad));
-            Line2D parallel = new Line2D.Double(maxX, parallelY, -maxX, parallelY);
+            Line2D parallel = new Line2D.Double(MAX_X, parallelY, -MAX_X, parallelY);
             g2d.draw(parallel);
         }
 
@@ -374,7 +381,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     @Override
     public boolean isPointOnSymbol(Point2D point, double tolDist, double scale) {
-        return false;
+        return point.getX() >= -MAX_X && point.getX() <= MAX_X
+                && point.getY() >= -MAX_Y && point.getY() <= MAX_Y;
     }
 
     @Override

@@ -103,7 +103,7 @@ public class NumberFormatter {
     }
     
     private static final DecimalFormat secondsFormatter
-            = new DecimalFormat("###,##0.####");
+            = new DecimalFormat("###,##0.##");
     
     /**
      * Format a decimal angle in degrees, minutes, seconds.

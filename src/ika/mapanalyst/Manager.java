@@ -955,6 +955,19 @@ public final class Manager implements Serializable {
         return this.newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false) != null;
     }
 
+    /**
+     * Returns true if the passed point is over the OpenStreetMap. Returns false
+     * if the point is not on the OpenStreetMap or if the OpenStreetMap is not
+     * being used.
+     *
+     * @param point point in world coordinates
+     * @return true if over OSM.
+     */
+    public boolean isPointOnOpenStreetMap(Point2D point) {
+        OpenStreetMap osm = (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        return osm == null ? false : osm.isPointOnSymbol(point, 0, 0);
+    }
+
     public void undo() {
         System.out.println("undo");
     }
