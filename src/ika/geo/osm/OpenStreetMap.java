@@ -16,6 +16,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 
@@ -32,9 +34,9 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     /**
      * Number of cached image tiles. Estimation of required memory:
-     * DEF_CACHED_IMAGES * 256 * 256 * 4 [bytes] 200 * 256 * 256 * 4 = 50MB
+     * DEF_CACHED_IMAGES * 256 * 256 * 4 [bytes] = 500 * 256 * 256 * 4 = 125MB
      */
-    private static final int DEF_CACHED_IMAGES = 200;
+    private static final int DEF_CACHED_IMAGES = 500;
     /**
      * OSM zoom levels vary between 0 (1 image for the whole globe) and 18
      * (large scale tiles).
@@ -85,35 +87,40 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
     /**
      * Maximum mapped Cartesian y value
      */
-    public static final double MAX_Y = Math.log(Math.tan(Math.PI / 4d + 0.5 * MAX_LAT / 180d * Math.PI)) * R;
+    public static final double MAX_Y = Math.log(Math.tan(Math.PI / 4d + 0.5 * Math.toRadians(MAX_LAT))) * R;
 
     private static final double POLAR_CIRCLE_LAT = 66.562944;
     private static final double POLAR_CIRCLE_Y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(POLAR_CIRCLE_LAT)));
 
     private static final double TROPIC_CIRCLE_LAT = 23.43706;
     private static final double TROPIC_CIRCLE_Y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(TROPIC_CIRCLE_LAT)));
+    
+    /**
+     * Color for drawing polar and tropic circles
+     */
+    private static final Color POLAR_CIRCLE_COLOR = new Color(168, 197, 205);
+    
+    /**
+     * Color for drawing graticule
+     */
+    private static final Color GRATICULE_COLOR = new Color (125, 150, 160);
 
     public OpenStreetMap() {
-        this.init();
+        init();
     }
 
     public OpenStreetMap(MapComponent map) {
-        this.init();
-        this.setMap(map);
+        init();
+        setMap(map);
     }
 
-    public void setMap(MapComponent map) {
+    public final void setMap(MapComponent map) {
         this.map = map;
     }
 
     private void init() {
-
-        // compute the bounding box including all tiles with a spherical
-        // Mercator projection. OSM uses a sphere.
-        final double maxLat = Math.toRadians(MAX_LAT);
-        final double x = R * Math.PI;
-        final double y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * maxLat));
-        bounds = new Rectangle2D.Double(-x, -y, 2 * x, 2 * y);
+        // bounding box around all tiles
+        bounds = new Rectangle2D.Double(-MAX_X, -MAX_Y, 2 * MAX_X, 2 * MAX_Y);
 
         // init caching and loading of tiles
         tileCache = new MemoryTileCache();
@@ -124,20 +131,18 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         try {
             missingTileImage = ImageIO.read(getClass().getResourceAsStream(
                     MISSING_TILE_IMAGE_NAME));
-        } catch (IOException e1) {
+        } catch (IOException ex) { 
+            Logger.getLogger(OpenStreetMap.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        this.setSelectable(false);
-        this.setName("OpenStreetMap");
+        setSelectable(false);
+        setName("OpenStreetMap");
     }
 
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
-
-        // read the serializable part of this GeoPath.
         stream.defaultReadObject();
-
-        this.init();
+        init();
     }
 
     /**
@@ -163,6 +168,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         if (!tile.isLoaded()) {
             jobDispatcher.addJob(new Runnable() {
 
+                @Override
                 public void run() {
                     Tile tile = tileCache.getTile(tilex, tiley, zoom);
                     if (tile.isLoaded()) {
@@ -172,6 +178,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                         tile.loadTileImage();
                         SwingUtilities.invokeLater(new Runnable() {
 
+                            @Override
                             public void run() {
                                 if (map != null) {
                                     map.repaint();
@@ -179,8 +186,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                             }
                         });
 
-                    } catch (Exception e) {
-                        //System.err.println("failed loading " + zoom + "/" + tilex + "/" + tiley + " " + e.getMessage());
+                    } catch (IOException ex) {
+                        Logger.getLogger(OpenStreetMap.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
@@ -195,14 +202,11 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     protected void drawTile(BufferedImage image, Graphics2D g2d,
             double xWC, double yWC, double tileWidthWC, double tileHeightWC) {
-
         AffineTransform trans = new AffineTransform();
         trans.scale(1, -1);
         trans.translate(xWC, -yWC);
-        trans.scale(tileWidthWC / image.getWidth(),
-                tileHeightWC / image.getHeight());
+        trans.scale(tileWidthWC / image.getWidth(), tileHeightWC / image.getHeight());
         g2d.drawImage(image, trans, null);
-
     }
 
     @Override
@@ -246,18 +250,10 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
             double y = this.bounds.getMaxY() - row * tileDim;
             for (int col = firstCol; col < lastCol; col++) {
                 double x = this.bounds.getMinX() + col * tileDim;
-
-                // draw the tile
                 Tile tile = getTile(col, row, zoom);
                 if (tile != null) {
                     drawTile(tile.image, g2d, x, y, tileDim, tileDim);
                 }
-
-                /*
-            // draw a grid showing the tiling
-            Rectangle2D r = new Rectangle2D.Double(x, y-tileDim, tileDim, tileDim);
-            rp.g2d.draw(r);
-                 */
             }
         }
 
@@ -334,7 +330,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         }
 
         g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-        g2d.setColor(Color.GRAY);
+        g2d.setColor(GRATICULE_COLOR);
         // without the KEY_STROKE_CONTROL rendering hint the meridian at 0 deg longitude is sometimes not drawn on OS X
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -382,7 +378,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         }
 
         // polar circles
-        g2d.setColor(new Color(168, 197, 205));
+        g2d.setColor(POLAR_CIRCLE_COLOR);
         g2d.draw(new Line2D.Double(MAX_X, POLAR_CIRCLE_Y, -MAX_X, POLAR_CIRCLE_Y));
         g2d.draw(new Line2D.Double(MAX_X, -POLAR_CIRCLE_Y, -MAX_X, -POLAR_CIRCLE_Y));
         // tropic circles
@@ -401,10 +397,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     @Override
     public boolean isIntersectedByRectangle(Rectangle2D rect, double scale) {
-        return false;
-    }
-
-    public void transform(AffineTransform affineTransform) {
+        return bounds.intersects(rect);
     }
 
     /**
@@ -428,7 +421,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
     public void move(double dx, double dy) {
     }
 
-    private static final double log2(double x) {
+    private double log2(double x) {
         return Math.log(x) / Math.log(2.);
     }
 }
