@@ -81,11 +81,17 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
      * Maximum mapped Cartesian x value
      */
     public static final double MAX_X = Math.PI * R;
-    
+
     /**
      * Maximum mapped Cartesian y value
      */
     public static final double MAX_Y = Math.log(Math.tan(Math.PI / 4d + 0.5 * MAX_LAT / 180d * Math.PI)) * R;
+
+    private static final double POLAR_CIRCLE_LAT = 66.562944;
+    private static final double POLAR_CIRCLE_Y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(POLAR_CIRCLE_LAT)));
+
+    private static final double TROPIC_CIRCLE_LAT = 23.43706;
+    private static final double TROPIC_CIRCLE_Y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(TROPIC_CIRCLE_LAT)));
 
     public OpenStreetMap() {
         this.init();
@@ -374,6 +380,14 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
             Line2D parallel = new Line2D.Double(MAX_X, parallelY, -MAX_X, parallelY);
             g2d.draw(parallel);
         }
+
+        // polar circles
+        g2d.setColor(new Color(168, 197, 205));
+        g2d.draw(new Line2D.Double(MAX_X, POLAR_CIRCLE_Y, -MAX_X, POLAR_CIRCLE_Y));
+        g2d.draw(new Line2D.Double(MAX_X, -POLAR_CIRCLE_Y, -MAX_X, -POLAR_CIRCLE_Y));
+        // tropic circles
+        g2d.draw(new Line2D.Double(MAX_X, TROPIC_CIRCLE_Y, -MAX_X, TROPIC_CIRCLE_Y));
+        g2d.draw(new Line2D.Double(MAX_X, -TROPIC_CIRCLE_Y, -MAX_X, -TROPIC_CIRCLE_Y));
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
