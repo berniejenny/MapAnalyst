@@ -14,55 +14,45 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
+import org.openstreetmap.gui.jmapviewer.MemoryTileCache;
+import org.openstreetmap.gui.jmapviewer.Tile;
+import org.openstreetmap.gui.jmapviewer.TileController;
+import org.openstreetmap.gui.jmapviewer.interfaces.TileCache;
+import org.openstreetmap.gui.jmapviewer.interfaces.TileLoaderListener;
+import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
+import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 /**
- * Displays OpenStreetMap tiles
+ * Load and displays OpenStreetMap tiles using the excellent JMapViewer project:
+ * http://wiki.openstreetmap.org/wiki/JMapViewer
  *
- * @author Bernhard Jenny, Institute of Cartography, ETH Zurich; based on OSMMap
- * by Jan Peter Stotz
- * http://www.nabble.com/Java-component-for-displaying-OSM-Maps-td18361634.html
+ * @author Bernhard Jenny
  */
-public class OpenStreetMap extends GeoObject implements java.io.Serializable {
+public class OpenStreetMap extends GeoObject implements java.io.Serializable, TileLoaderListener {
 
     private static final long serialVersionUID = -6328405447473299261L;
 
     /**
-     * Number of cached image tiles. Estimation of required memory:
-     * DEF_CACHED_IMAGES * 256 * 256 * 4 [bytes] = 500 * 256 * 256 * 4 = 125MB
+     * OpenStreetMap JMapViewer access point
      */
-    private static final int DEF_CACHED_IMAGES = 500;
+    private transient TileController tileController;
+
+    /**
+     * Number of cached image tiles. Estimation of required memory:
+     * NBR_CACHED_IMAGES * 256 * 256 * 4 [bytes] = 1000 * 256 * 256 * 4 = 250MB
+     */
+    private static final int NBR_CACHED_IMAGES = 1000;
+
     /**
      * OSM zoom levels vary between 0 (1 image for the whole globe) and 18
      * (large scale tiles).
      */
     private static final int OSM_MAX_ZOOM = 18;
     private static final int OSM_MIN_ZOOM = 0;
+
     /**
-     * name of image that is displayed when a map tile image is not available
+     * parent map component
      */
-    private static final String MISSING_TILE_IMAGE_NAME = "hourglass.png";
-    /**
-     * bounding box including all tiles
-     */
-    protected transient Rectangle2D bounds;
-    /**
-     * needed to load tiles
-     */
-    protected transient JobDispatcher jobDispatcher;
-    /**
-     * cache for tiles
-     */
-    protected transient MemoryTileCache tileCache;
-    /**
-     * image rendered when map tile image is not available
-     */
-    private transient BufferedImage missingTileImage;
     protected transient MapComponent map;
 
     /**
@@ -80,30 +70,54 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
     public static final double R = 6378137;
 
     /**
+     * Mercator y coordinate for latitude.
+     *
+     * @param latDeg latitude in degrees
+     * @return y coordinate in meters
+     */
+    private static double yMercator(double latDeg) {
+        return R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(latDeg)));
+    }
+
+    /**
      * Maximum mapped Cartesian x value
      */
-    public static final double MAX_X = Math.PI * R;
+    private static final double MAX_X = Math.PI * R;
 
     /**
      * Maximum mapped Cartesian y value
      */
-    public static final double MAX_Y = Math.log(Math.tan(Math.PI / 4d + 0.5 * Math.toRadians(MAX_LAT))) * R;
+    private static final double MAX_Y = yMercator(MAX_LAT);
 
-    private static final double POLAR_CIRCLE_LAT = 66.562944;
-    private static final double POLAR_CIRCLE_Y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(POLAR_CIRCLE_LAT)));
+    /**
+     * bounding box including all tiles
+     */
+    private static final Rectangle2D BOUNDS = new Rectangle2D.Double(-MAX_X, -MAX_Y, 2 * MAX_X, 2 * MAX_Y);
 
-    private static final double TROPIC_CIRCLE_LAT = 23.43706;
-    private static final double TROPIC_CIRCLE_Y = R * Math.log(Math.tan(Math.PI / 4 + 0.5 * Math.toRadians(TROPIC_CIRCLE_LAT)));
-    
+    /**
+     * location of polar circles on Mercator projection
+     */
+    private static final double POLAR_CIRCLE_Y = yMercator(66.562944);
+
+    /**
+     * location of tropic circles on Mercator projection
+     */
+    private static final double TROPIC_CIRCLE_Y = yMercator(23.43706);
+
     /**
      * Color for drawing polar and tropic circles
      */
-    private static final Color POLAR_CIRCLE_COLOR = new Color(168, 197, 205);
-    
+    private static final Color POLAR_TROPIC_COLOR = new Color(150, 180, 150);
+
     /**
      * Color for drawing graticule
      */
-    private static final Color GRATICULE_COLOR = new Color (125, 150, 160);
+    private static final Color GRATICULE_COLOR = new Color(150, 155, 180);
+
+    /**
+     * size of a map tile in pixels
+     */
+    private static final int TILE_SIZE = 256;
 
     public OpenStreetMap() {
         init();
@@ -119,92 +133,40 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
     }
 
     private void init() {
-        // bounding box around all tiles
-        bounds = new Rectangle2D.Double(-MAX_X, -MAX_Y, 2 * MAX_X, 2 * MAX_Y);
-
-        // init caching and loading of tiles
-        tileCache = new MemoryTileCache();
-        tileCache.setCacheSizeMax(DEF_CACHED_IMAGES);
-        jobDispatcher = new JobDispatcher(1);
-
-        // load image that is displayed if a map tile image is not available
-        try {
-            missingTileImage = ImageIO.read(getClass().getResourceAsStream(
-                    MISSING_TILE_IMAGE_NAME));
-        } catch (IOException ex) { 
-            Logger.getLogger(OpenStreetMap.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
         setSelectable(false);
         setName("OpenStreetMap");
+        TileSource tileSource = new OsmTileSource.Mapnik();
+        TileCache cache = new MemoryTileCache(NBR_CACHED_IMAGES);
+        tileController = new TileController(tileSource, cache, this);
     }
 
-    private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-        init();
-    }
-
-    /**
-     * retrieves a tile from the cache. If the tile is not present in the cache
-     * a load job is added to the working queue of {@link JobThread}.
-     *
-     * @param tilex
-     * @param tiley
-     * @param zoom
-     * @return specified tile from the cache or <code>null</code> if the tile
-     * was not found in the cache.
-     */
-    protected Tile getTile(final int tilex, final int tiley, final int zoom) {
-        int max = (1 << zoom);
-        if (tilex < 0 || tilex >= max || tiley < 0 || tiley >= max) {
-            return null;
-        }
-        Tile tile = tileCache.getTile(tilex, tiley, zoom);
-        if (tile == null) {
-            tile = new Tile(tilex, tiley, zoom, missingTileImage);
-            tileCache.addTile(tile);
-        }
-        if (!tile.isLoaded()) {
-            jobDispatcher.addJob(new Runnable() {
-
-                @Override
-                public void run() {
-                    Tile tile = tileCache.getTile(tilex, tiley, zoom);
-                    if (tile.isLoaded()) {
-                        return;
-                    }
-                    try {
-                        tile.loadTileImage();
-                        SwingUtilities.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                if (map != null) {
-                                    map.repaint();
-                                }
-                            }
-                        });
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(OpenStreetMap.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            });
-        }
-        return tile;
+    @Override
+    public void tileLoadingFinished(Tile tile, boolean success) {
+        tile.setLoaded(success);
+        map.repaint();
     }
 
     @Override
     public Rectangle2D getBounds2D() {
-        return bounds;
+        return BOUNDS;
     }
 
+    /**
+     * applies an affine transformation to the Graphics2D to scale and translate
+     * the passed tile image.
+     *
+     * @param image image to draw
+     * @param g2d graphics destination
+     * @param x horizonal translation in meters
+     * @param y vertical translation in meters
+     * @param tileWidthWC
+     * @param tileHeightWC
+     */
     protected void drawTile(BufferedImage image, Graphics2D g2d,
-            double xWC, double yWC, double tileWidthWC, double tileHeightWC) {
+            double x, double y, double tileWidthWC, double tileHeightWC) {
         AffineTransform trans = new AffineTransform();
         trans.scale(1, -1);
-        trans.translate(xWC, -yWC);
+        trans.translate(x, -y);
         trans.scale(tileWidthWC / image.getWidth(), tileHeightWC / image.getHeight());
         g2d.drawImage(image, trans, null);
     }
@@ -217,8 +179,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         }
 
         // compute OSM zoom level
-        double boundsWidthPx = bounds.getWidth() * scale;
-        int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
+        double boundsWidthPx = BOUNDS.getWidth() * scale;
+        int zoom = (int) Math.round(log2(boundsWidthPx / TILE_SIZE));
         if (zoom > OSM_MAX_ZOOM) {
             zoom = OSM_MAX_ZOOM;
         } else if (zoom < OSM_MIN_ZOOM) {
@@ -228,7 +190,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         // compute number of tiles of the whole planet
         int tilesH = (int) Math.round(Math.pow(2, zoom));
         int tilesV = tilesH;
-        double tileDim = bounds.getWidth() / tilesH;
+        double tileDim = BOUNDS.getWidth() / tilesH;
 
         // the first and last tiles visible in horizontal and vertical direction
         Rectangle2D.Double visRect = map.getVisibleArea();
@@ -236,23 +198,23 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         double visLeft = visRect.getMinX();
         double visWidth = visRect.getWidth();
         double visHeight = visRect.getHeight();
-        int firstRow = (int) ((bounds.getMaxY() - (visBottom + visHeight)) / tileDim);
+        int firstRow = (int) ((BOUNDS.getMaxY() - (visBottom + visHeight)) / tileDim);
         firstRow = Math.max(firstRow, 0);
-        int firstCol = (int) ((visLeft - bounds.getMinX()) / tileDim);
+        int firstCol = (int) ((visLeft - BOUNDS.getMinX()) / tileDim);
         firstCol = Math.max(firstCol, 0);
-        int lastRow = tilesV - (int) ((visBottom - bounds.getMinY()) / tileDim);
+        int lastRow = tilesV - (int) ((visBottom - BOUNDS.getMinY()) / tileDim);
         lastRow = Math.min(tilesV, lastRow);
-        int lastCol = tilesH - (int) ((bounds.getMaxX() - (visLeft + visWidth)) / tileDim);
+        int lastCol = tilesH - (int) ((BOUNDS.getMaxX() - (visLeft + visWidth)) / tileDim);
         lastCol = Math.min(tilesH, lastCol);
 
         // load and draw all visible tiles
-        for (int row = firstRow; row < lastRow; row++) {
-            double y = this.bounds.getMaxY() - row * tileDim;
-            for (int col = firstCol; col < lastCol; col++) {
-                double x = this.bounds.getMinX() + col * tileDim;
-                Tile tile = getTile(col, row, zoom);
+        for (int tiley = firstRow; tiley < lastRow; tiley++) {
+            double y = BOUNDS.getMaxY() - tiley * tileDim;
+            for (int tilex = firstCol; tilex < lastCol; tilex++) {
+                double x = BOUNDS.getMinX() + tilex * tileDim;
+                org.openstreetmap.gui.jmapviewer.Tile tile = tileController.getTile(tilex, tiley, zoom);
                 if (tile != null) {
-                    drawTile(tile.image, g2d, x, y, tileDim, tileDim);
+                    drawTile(tile.getImage(), g2d, x, y, tileDim, tileDim);
                 }
             }
         }
@@ -262,13 +224,12 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     private void drawGraticule(Graphics2D g2d, double scale) {
         // compute OSM zoom level
-        double boundsWidthPx = bounds.getWidth() * scale;
-        int zoom = (int) Math.round(log2(boundsWidthPx / Tile.WIDTH));
+        double boundsWidthPx = BOUNDS.getWidth() * scale;
+        int zoom = (int) Math.round(log2(boundsWidthPx / TILE_SIZE));
 
         Rectangle2D.Double visRect = map.getVisibleArea();
 
         MercatorProjection mercator = ProjectionsManager.createWebMercatorProjection();
-        double r = mercator.getEquatorRadius();
 
         double dDeg;
         switch (zoom) {
@@ -304,7 +265,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
                 Point2D.Double xy1 = map.userToWorldSpace(new java.awt.Point(0, 0));
                 Point2D.Double xy2 = map.userToWorldSpace(new java.awt.Point(150, 0));
                 // inverse projection of horizontal distance to longitude
-                double dLonDeg = Math.toDegrees((xy2.x - xy1.x) / r);
+                double dLonDeg = Math.toDegrees((xy2.x - xy1.x) / R);
 
                 final double[] bases = new double[]{5, 2, 1};
                 // scale the cell size such that it is > 1
@@ -353,7 +314,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         int nbrMeridians = (int) Math.round((lastLon - firstLon) / dDeg) + 1;
         for (int i = 0; i < nbrMeridians; i++) {
             double lonDeg = firstLon + i * dDeg;
-            double meridianX = r * Math.toRadians(lonDeg);
+            double meridianX = R * Math.toRadians(lonDeg);
             Line2D meridian = new Line2D.Double(meridianX, -MAX_Y, meridianX, MAX_Y);
             g2d.draw(meridian);
         }
@@ -371,14 +332,13 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
         int nbrParallels = (int) Math.round((lastLat - firstLat) / dDeg) + 1;
         for (int i = 0; i < nbrParallels; i++) {
             double latDeg = firstLat + i * dDeg;
-            double latRad = Math.toRadians(latDeg);
-            double parallelY = r * Math.log(Math.tan(Math.PI / 4 + 0.5 * latRad));
+            double parallelY = yMercator(latDeg);
             Line2D parallel = new Line2D.Double(MAX_X, parallelY, -MAX_X, parallelY);
             g2d.draw(parallel);
         }
 
         // polar circles
-        g2d.setColor(POLAR_CIRCLE_COLOR);
+        g2d.setColor(POLAR_TROPIC_COLOR);
         g2d.draw(new Line2D.Double(MAX_X, POLAR_CIRCLE_Y, -MAX_X, POLAR_CIRCLE_Y));
         g2d.draw(new Line2D.Double(MAX_X, -POLAR_CIRCLE_Y, -MAX_X, -POLAR_CIRCLE_Y));
         // tropic circles
@@ -397,24 +357,12 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable {
 
     @Override
     public boolean isIntersectedByRectangle(Rectangle2D rect, double scale) {
-        return bounds.intersects(rect);
-    }
-
-    /**
-     * Sets the image that is displayed when a tile image is not available.
-     *
-     * @param img The image must be 256 x 256 pixels large.
-     */
-    public void setMissingTileImage(BufferedImage img) {
-        if (img.getWidth() != Tile.WIDTH || img.getHeight() != Tile.HEIGHT) {
-            throw new IllegalArgumentException();
-        }
-        this.missingTileImage = img;
+        return BOUNDS.intersects(rect);
     }
 
     @Override
     public PathIterator getPathIterator(AffineTransform affineTransform) {
-        return bounds.getPathIterator(affineTransform);
+        return BOUNDS.getPathIterator(affineTransform);
     }
 
     @Override
