@@ -191,26 +191,36 @@ public class MainWindow extends javax.swing.JFrame
             // default is the OpenStreetMap as reference map
             manager.setNewMap(new OpenStreetMap(newMapComponent));
 
-            // show everything in the new map
-            newMapComponent.addComponentListener(new ComponentAdapter() {
-
+            // show everything in the two maps. On macOS wati for window zoom animation to finish.
+            int delay = Sys.isMacOSX() ? 1000 : 0;
+            javax.swing.Timer timer = new javax.swing.Timer(delay, new ActionListener() {
                 @Override
-                public void componentResized(ComponentEvent e) {
+                public void actionPerformed(ActionEvent e) {
                     showAllInNewMap();
-                    newMapComponent.removeComponentListener(this);
-                }
-            });
-
-            // show everything in the old map
-            oldMapComponent.addComponentListener(new ComponentAdapter() {
-
-                @Override
-                public void componentResized(ComponentEvent e) {
                     oldMapComponent.showAll();
-                    oldMapComponent.removeComponentListener(this);
                 }
             });
+            timer.setRepeats(false);
+            timer.start();
 
+//            newMapComponent.addComponentListener(new ComponentAdapter() {
+//
+//                @Override
+//                public void componentResized(ComponentEvent e) {
+//                    showAllInNewMap();
+//                    newMapComponent.removeComponentListener(this);
+//                }
+//            });
+//
+//            // show everything in the old map
+//            oldMapComponent.addComponentListener(new ComponentAdapter() {
+//
+//                @Override
+//                public void componentResized(ComponentEvent e) {
+//                    oldMapComponent.showAll();
+//                    oldMapComponent.removeComponentListener(this);
+//                }
+//            });
             String nl = System.getProperty("line.separator");
             this.transformationInfoTextArea.setText("Scale:\t-" + nl + "Rotation:\t-");
             this.undo.setUndoMenuItems(this.undoMenuItem, this.redoMenuItem);
