@@ -1,7 +1,7 @@
 MapAnalyst
 
 This is the ReadMe file accompanying the free source code of MapAnalyst. 
-Homepage: http://mapanalyst.cartography.ch
+Homepage: http://mapanalyst.org
 Source code: https://github.com/berniejenny/MapAnalyst
 
 MapAnalyst uses the following libraries:
