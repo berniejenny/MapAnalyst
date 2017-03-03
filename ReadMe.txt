@@ -4,9 +4,12 @@ This is the ReadMe file accompanying the free source code of MapAnalyst.
 Homepage: http://mapanalyst.cartography.ch
 Source code: https://github.com/berniejenny/MapAnalyst
 
-MapAnalyst comes as a NetBeans project. You can download the NetBeans IDE at http://www.netbeans.org
+MapAnalyst uses the following libraries:
+JMapProjLib for map projections: https://github.com/OSUCartography/JMapProjLib
+JMapViewer for OpenStreetMap loading and rendering: http://wiki.openstreetmap.org/wiki/JMapViewer
+JAMA Java Matrix Package: http://math.nist.gov/javanumerics/jama/
 
-MapAnalyst uses JMapProjLib for map projections: https://github.com/OSUCartography/JMapProjLib
+MapAnalyst comes as a NetBeans project. You can download the NetBeans IDE at http://www.netbeans.org
 
 Feel free to improve or extend MapAnalyst. Please let us know when you've made any changes, and e-mail us the improved source code or push your changes to GitHub.
 
