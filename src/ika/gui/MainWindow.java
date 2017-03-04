@@ -545,6 +545,7 @@ public class MainWindow extends javax.swing.JFrame
         newMapComponent = new ika.gui.MapComponent();
         newMapLabelPanel = new javax.swing.JPanel();
         newMapLabel = new javax.swing.JLabel();
+        osmCopyrightLabel = new javax.swing.JLabel();
         topPanel = new javax.swing.JPanel();
         topLeftPanel = new javax.swing.JPanel();
         computeButton = new javax.swing.JButton();
@@ -1362,11 +1363,12 @@ public class MainWindow extends javax.swing.JFrame
 
         oldMapPanel.setLayout(new java.awt.BorderLayout());
 
-        oldMapLabelPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 3, 4));
+        oldMapLabelPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        oldMapLabelPanel.setLayout(new java.awt.BorderLayout());
 
         oldMapLabel.setText("Old Map");
         oldMapLabel.setFocusable(false);
-        oldMapLabelPanel.add(oldMapLabel);
+        oldMapLabelPanel.add(oldMapLabel, java.awt.BorderLayout.EAST);
 
         oldMapPanel.add(oldMapLabelPanel, java.awt.BorderLayout.NORTH);
 
@@ -1380,11 +1382,18 @@ public class MainWindow extends javax.swing.JFrame
         newMapComponent.setName("new"); // NOI18N
         newMapPanel.add(newMapComponent, java.awt.BorderLayout.CENTER);
 
-        newMapLabelPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 3, 4));
+        newMapLabelPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        newMapLabelPanel.setLayout(new java.awt.BorderLayout());
 
         newMapLabel.setText("New Reference Map");
         newMapLabel.setFocusable(false);
-        newMapLabelPanel.add(newMapLabel);
+        newMapLabelPanel.add(newMapLabel, java.awt.BorderLayout.WEST);
+
+        osmCopyrightLabel.setFont(osmCopyrightLabel.getFont().deriveFont(osmCopyrightLabel.getFont().getSize()-2f));
+        osmCopyrightLabel.setForeground(java.awt.Color.lightGray);
+        osmCopyrightLabel.setText("\u00A9 OpenStreetMap contributors");
+        osmCopyrightLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 10, 0, 3));
+        newMapLabelPanel.add(osmCopyrightLabel, java.awt.BorderLayout.EAST);
 
         newMapPanel.add(newMapLabelPanel, java.awt.BorderLayout.NORTH);
 
@@ -4383,7 +4392,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void placePointMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placePointMenuItemActionPerformed
         boolean newPointPlaced = this.manager.placePointFromList(this);
         // make new point visible on map
-        this.showAllInNewMap();
+        showAllInNewMap();
         if (newPointPlaced) {
             this.addUndo("Place Point");
         }
@@ -5340,6 +5349,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         writeTransformationToGUI();
         writeIsolinesToGUI();
         writeShowErrorInOldMapToGUI();
+        osmCopyrightLabel.setVisible(manager.isUsingOpenStreetMap());
     }
 
     public void synchronizeWithPreferences() {
@@ -5515,7 +5525,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             String title = "Import New Map Image";
             JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
         }
-        this.importRasterImage(false);
+        osmCopyrightLabel.setVisible(false);
+        importRasterImage(false);
 
     }//GEN-LAST:event_importNewMapMenuItemActionPerformed
 
@@ -5526,7 +5537,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_copyMenuItemActionPerformed
 
     private void importOldMapMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importOldMapMenuItemActionPerformed
-        this.importRasterImage(true);
+        importRasterImage(true);
     }//GEN-LAST:event_importOldMapMenuItemActionPerformed
 
     private void exportLinkedPointsAndVectorsInNewMapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportLinkedPointsAndVectorsInNewMapActionPerformed
@@ -5930,18 +5941,26 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void removeOSMMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeOSMMenuItemActionPerformed
         this.manager.setNewMap(null);
+
         // the visualization have to be recalculated when switching from/to OSM
         clearTemporaryGUI();
+
         // switch from spherical to Cartesian coordinates of selected point
         updateLinkGUI();
+
+        osmCopyrightLabel.setVisible(false);
     }//GEN-LAST:event_removeOSMMenuItemActionPerformed
 
     private void addOSMMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addOSMMenuItemActionPerformed
         this.manager.setNewMap(new OpenStreetMap(newMapComponent));
+
         // the visualization have to be recalculated when switching from/to OSM
         clearTemporaryGUI();
+
         // switch from Cartesian to spherical coordinates of selected point
         updateLinkGUI();
+
+        osmCopyrightLabel.setVisible(true);
     }//GEN-LAST:event_addOSMMenuItemActionPerformed
 
     private void mapsMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_mapsMenuMenuSelected
@@ -6499,6 +6518,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JPanel oldMapLabelPanel;
     private javax.swing.JPanel oldMapPanel;
     private javax.swing.JMenuItem openProjectMenuItem;
+    private javax.swing.JLabel osmCopyrightLabel;
     private javax.swing.JToggleButton panPointsToggleButton;
     private javax.swing.JMenuItem pasteMenuItem;
     private javax.swing.JToggleButton penToggleButton;
