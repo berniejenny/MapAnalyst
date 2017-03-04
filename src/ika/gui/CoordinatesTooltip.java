@@ -17,7 +17,7 @@ import java.awt.geom.Point2D;
  * @author Bernhard Jenny, Faculty of Information Technology, Monash University,
  * Melbourne, Australia
  */
-class CoordinatesTooltip implements MouseListener, MouseMotionListener {
+public class CoordinatesTooltip implements MouseListener, MouseMotionListener {
 
     private static final int TEXT_SIZE = 11;
     private static final int TEXT_PADDING = 3;

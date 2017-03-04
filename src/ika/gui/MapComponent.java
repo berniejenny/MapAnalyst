@@ -61,7 +61,7 @@ public class MapComponent extends javax.swing.JComponent
      * Keep track of the top left coordinate of the visible area in world
      * coordinates.
      */
-    private Point2D.Double topLeft = new Point2D.Double(0, 1000);
+    private final Point2D.Double topLeft = new Point2D.Double(0, 1000);
 
     /**
      * Rendering settings for all raster images in this map.
@@ -96,9 +96,9 @@ public class MapComponent extends javax.swing.JComponent
         if (geoObject == null) {
             return;
         }
-        this.geoSet.addGeoObject(geoObject);
+        geoSet.addGeoObject(geoObject);
         if (!isObjectVisibleOnMap(geoObject)) {
-            this.showAll();
+            showAll();
         } else {
             repaint();
         }
@@ -109,29 +109,29 @@ public class MapComponent extends javax.swing.JComponent
      * currently not selected, or are not selectable at all.
      */
     public void removeAllGeoObjects() {
-        this.geoSet.removeAllGeoObjects();
-        this.showAll();
+        geoSet.removeAllGeoObjects();
+        showAll();
     }
 
     /**
      * Removes all GeoObjects that are currently selected.
      */
     public void removeSelectedGeoObjects() {
-        this.geoSet.removeSelectedGeoObjects();
+        geoSet.removeSelectedGeoObjects();
     }
 
     /**
      * Selects all objects contained in the map.
      */
     public void selectAllGeoObjects() {
-        this.geoSet.setSelected(true);
+        geoSet.setSelected(true);
     }
 
     /**
      * Deselects all GeoObjects contained in the map.
      */
     public void deselectAllGeoObjects() {
-        this.geoSet.setSelected(false);
+        geoSet.setSelected(false);
     }
 
     /**
@@ -140,7 +140,7 @@ public class MapComponent extends javax.swing.JComponent
      * @param center The new center of the visible area in world coordinates.
      */
     public void centerOnPoint(Point2D.Double center) {
-        this.centerOnPoint(center.getX(), center.getY());
+        centerOnPoint(center.getX(), center.getY());
     }
 
     /**
@@ -150,10 +150,12 @@ public class MapComponent extends javax.swing.JComponent
      * @param cy The new center of the visible area in world coordinates.
      */
     public void centerOnPoint(double cx, double cy) {
-        final Rectangle2D.Double visibleRect = getVisibleArea();
-        final double dx = visibleRect.getCenterX() - topLeft.getX();
-        final double dy = visibleRect.getCenterY() - topLeft.getY();
+        Rectangle2D.Double visibleRect = getVisibleArea();
+        double dx = visibleRect.getCenterX() - topLeft.getX();
+        double dy = visibleRect.getCenterY() - topLeft.getY();
         topLeft.setLocation(cx - dx, cy - dy);
+
+        // TODO replace with listener
         if (coordinatesTooltip != null) {
             coordinatesTooltip.clearCoordinates();
         }
@@ -170,7 +172,7 @@ public class MapComponent extends javax.swing.JComponent
     public void offsetVisibleArea(double dx, double dy) {
         topLeft.x += dx;
         topLeft.y += dy;
-        this.repaint();
+        repaint();
     }
 
     /**
@@ -212,7 +214,7 @@ public class MapComponent extends javax.swing.JComponent
      * @param zoomFactor The new zoom factor.
      */
     public void zoom(double zoomFactor) {
-        setScaleFactor(scale * zoomFactor);
+        setScaleFactorAndKeepMapCenterPoint(getScaleFactor() * zoomFactor);
     }
 
     /**
@@ -223,15 +225,12 @@ public class MapComponent extends javax.swing.JComponent
      * @param pt The new center of the visible area in world coordinates.
      */
     public void zoomOnPoint(double zoomFactor, Point2D.Double pt) {
-        this.scale *= zoomFactor;
-        final double dx = (pt.x - this.topLeft.x) / zoomFactor;
-        final double dy = (pt.y - this.topLeft.y) / zoomFactor;
-        this.topLeft.x = pt.x - dx;
-        this.topLeft.y = pt.y - dy;
-        if (coordinatesTooltip != null) {
-            coordinatesTooltip.clearCoordinates();
-        }
-        this.repaint();
+        double dx = (pt.x - topLeft.x) / zoomFactor;
+        double dy = (pt.y - topLeft.y) / zoomFactor;
+        topLeft.x = pt.x - dx;
+        topLeft.y = pt.y - dy;
+        setScaleAndInformScaleChangedListeners(getScaleFactor() * zoomFactor);
+        repaint();
     }
 
     /**
@@ -246,15 +245,15 @@ public class MapComponent extends javax.swing.JComponent
         }
 
         centerOnPoint(rect.getCenterX(), rect.getCenterY());
-        final double horScale = getVisibleWidth() / rect.getWidth() * scale;
-        final double verScale = getVisibleHeight() / rect.getHeight() * scale;
-        final double newScale = Math.min(horScale, verScale);
-        this.setScaleFactor(newScale);
+        double horScale = getVisibleWidth() / rect.getWidth() * getScaleFactor();
+        double verScale = getVisibleHeight() / rect.getHeight() * getScaleFactor();
+        double newScale = Math.min(horScale, verScale);
+        setScaleFactorAndKeepMapCenterPoint(newScale);
     }
 
     /**
-     * Changes the scale factor and the center of the currently visible are so
-     * that all GeoObjects contained in the map become visible.
+     * Changes the scale factor and the center of the currently visible area
+     * such that all map features become visible.
      */
     public void showAll() {
         // a white border on each side of the map data expressed in percentage
@@ -269,14 +268,14 @@ public class MapComponent extends javax.swing.JComponent
             return;
         }
         if (geoBounds.getWidth() == 0 || geoBounds.getHeight() == 0) {
-            this.scale = MIN_SCALE;
+            setScaleAndInformScaleChangedListeners(MIN_SCALE);
             geoBounds.setFrame(geoBounds.getMinX() - 1, geoBounds.getMinY() - 1, 2, 2);
         } else {
-            final Dimension dim = getSize();
-            final double horScale = dim.getWidth() / geoBounds.getWidth();
-            final double verScale = dim.getHeight() / geoBounds.getHeight();
-            final double borderScale = 1 / (1 + 2 * BORDER_PERCENTAGE / 100);
-            this.scale = Math.min(horScale, verScale) * borderScale;
+            Dimension dim = getSize();
+            double horScale = dim.getWidth() / geoBounds.getWidth();
+            double verScale = dim.getHeight() / geoBounds.getHeight();
+            double borderScale = 1 / (1 + 2 * BORDER_PERCENTAGE / 100);
+            setScaleAndInformScaleChangedListeners(Math.min(horScale, verScale) * borderScale);
         }
         centerOnPoint(geoBounds.getCenterX(), geoBounds.getCenterY());
     }
@@ -287,28 +286,38 @@ public class MapComponent extends javax.swing.JComponent
      * @return The current scale factor.
      */
     public double getScaleFactor() {
-        return this.scale;
+        return scale;
     }
 
     /**
-     * Changes the scale factor used to display the map.
+     * Changes the scale factor used to display the map. Makes sure the location
+     * displayed at the center of the map does not change.
      *
      * @param scale The new scale factor.
      */
-    public void setScaleFactor(double scale) {
-        final Rectangle2D.Double visibleRect = getVisibleArea();
-        final double cx = visibleRect.getCenterX();
-        final double cy = visibleRect.getCenterY();
+    public void setScaleFactorAndKeepMapCenterPoint(double scale) {
+        // adjust topLeft to avoid changing the map center
+        Rectangle2D.Double visibleRect = getVisibleArea();
+        double cx = visibleRect.getCenterX();
+        double cy = visibleRect.getCenterY();
         double dx = cx - topLeft.getX();
         double dy = cy - topLeft.getY();
-        dx *= this.scale / scale;
-        dy *= this.scale / scale;
+        dx *= getScaleFactor() / scale;
+        dy *= getScaleFactor() / scale;
         topLeft.setLocation(cx - dx, cy - dy);
+
+        setScaleAndInformScaleChangedListeners(scale);
+        repaint();
+    }
+
+    private void setScaleAndInformScaleChangedListeners(double scale) {
         this.scale = scale;
+        // TODO inform listeners about scale change
+
+        // TODO replace with listener
         if (coordinatesTooltip != null) {
             coordinatesTooltip.clearCoordinates();
         }
-        repaint();
     }
 
     /**
@@ -327,8 +336,8 @@ public class MapComponent extends javax.swing.JComponent
             return true;
         }
 
-        final Rectangle2D geoBounds = geoObject.getBounds2D();
-        final Rectangle2D.Double visArea = getVisibleArea();
+        Rectangle2D geoBounds = geoObject.getBounds2D();
+        Rectangle2D.Double visArea = getVisibleArea();
 
         // make sure null objects are not passed here!
         if (geoBounds != null && visArea != null) {
@@ -351,15 +360,15 @@ public class MapComponent extends javax.swing.JComponent
             return true;
         }
 
-        final Rectangle2D geoBounds = geoSet.getBounds2D();
+        Rectangle2D geoBounds = geoSet.getBounds2D();
         if (geoBounds == null) {
             return true;
         }
-        final Rectangle2D.Double visArea = getVisibleArea();
+        Rectangle2D visArea = getVisibleArea();
         if (visArea == null) {
             return true;
         }
-        return (visArea.contains(geoBounds));
+        return visArea.contains(geoBounds);
     }
 
     /**
@@ -369,9 +378,9 @@ public class MapComponent extends javax.swing.JComponent
      * @return The currently visible area in world coordinates.
      */
     public Rectangle2D.Double getVisibleArea() {
-        final Dimension dim = getSize();
-        final Point pt = new Point(dim.width, dim.height);
-        final Point2D.Double bottomRight = userToWorldSpace(pt);
+        Dimension dim = getSize();
+        Point pt = new Point(dim.width, dim.height);
+        Point2D.Double bottomRight = userToWorldSpace(pt);
         Rectangle2D.Double visibleRect = new Rectangle2D.Double();
         visibleRect.setFrame(topLeft.getX(), bottomRight.getY(),
                 bottomRight.getX() - topLeft.getX(),
@@ -387,7 +396,7 @@ public class MapComponent extends javax.swing.JComponent
      */
     public double getVisibleWidth() {
         Dimension dim = getSize();
-        return dim.getWidth() / scale;
+        return dim.getWidth() / getScaleFactor();
     }
 
     /**
@@ -398,7 +407,7 @@ public class MapComponent extends javax.swing.JComponent
      */
     public double getVisibleHeight() {
         Dimension dim = getSize();
-        return dim.getHeight() / scale;
+        return dim.getHeight() / getScaleFactor();
     }
 
     /**
@@ -406,6 +415,7 @@ public class MapComponent extends javax.swing.JComponent
      *
      * @return The preferred size.
      */
+    @Override
     public Dimension getPreferredSize() {
         Dimension dimension = new Dimension(100, 100);
         if (geoSet == null) {
@@ -415,8 +425,8 @@ public class MapComponent extends javax.swing.JComponent
         if (geoBounds == null) {
             return dimension;
         }
-        dimension.width = (int) Math.ceil(geoBounds.getWidth() * scale);
-        dimension.height = (int) Math.ceil(geoBounds.getHeight() * scale);
+        dimension.width = (int) Math.ceil(geoBounds.getWidth() * getScaleFactor());
+        dimension.height = (int) Math.ceil(geoBounds.getHeight() * getScaleFactor());
         return dimension;
     }
 
@@ -425,6 +435,7 @@ public class MapComponent extends javax.swing.JComponent
      *
      * @return The minimum size.
      */
+    @Override
     public Dimension getMinimumSize() {
         return new Dimension(100, 100);
     }
@@ -435,7 +446,7 @@ public class MapComponent extends javax.swing.JComponent
      * @return The GeoMap that is used. Can be null!
      */
     public GeoSet getGeoSet() {
-        return this.geoSet;
+        return geoSet;
     }
 
     /**
@@ -446,8 +457,8 @@ public class MapComponent extends javax.swing.JComponent
      * @return The convert point in world coordinates.
      */
     public final Point2D.Double userToWorldSpace(Point pt) {
-        final double x = pt.getX() / scale + topLeft.getX();
-        final double y = -pt.getY() / scale + topLeft.getY();
+        double x = pt.getX() / getScaleFactor() + topLeft.getX();
+        double y = -pt.getY() / getScaleFactor() + topLeft.getY();
         return new Point2D.Double(x, y);
     }
 
@@ -459,8 +470,8 @@ public class MapComponent extends javax.swing.JComponent
      * stored in pt.
      */
     protected final void worldToUserSpace(Point2D.Double pt) {
-        final double x = (pt.getX() - topLeft.getX()) * scale;
-        final double y = (topLeft.getY() - pt.getY()) * scale;
+        double x = (pt.getX() - topLeft.getX()) * getScaleFactor();
+        double y = (topLeft.getY() - pt.getY()) * getScaleFactor();
         pt.setLocation(x, y);
     }
 
@@ -517,7 +528,7 @@ public class MapComponent extends javax.swing.JComponent
          * x_ = (x-west)*scale;
          * y_ = (north-y)*scale = (y-north)*(-scale);
          */
-        g2d.scale(scale, -scale);
+        g2d.scale(getScaleFactor(), -getScaleFactor());
         g2d.translate(-topLeft.getX(), -topLeft.getY());
 
         // set default appearance of vector elements
@@ -525,7 +536,7 @@ public class MapComponent extends javax.swing.JComponent
         g2d.setColor(Color.black);
 
         // draw the map tree
-        geoSet.draw(g2d, this.scale, drawSelectionState);
+        geoSet.draw(g2d, getScaleFactor(), drawSelectionState);
     }
 
     /**
@@ -541,11 +552,11 @@ public class MapComponent extends javax.swing.JComponent
 
     /**
      * Helper method that calls the current MapTool to give it a chance to draw
-     * some background drawing. Returns true if the map doesn not need to be
+     * some background drawing. Returns true if the map does not need to be
      * drawn over the background.
      *
      * @param g2d The destination to draw to.
-     * @return Returns true if the map doesn not need to be drawn over the
+     * @return Returns true if the map does not need to be drawn over the
      * background.
      */
     private boolean paintToolBackground(Graphics2D g2d) {
@@ -567,8 +578,9 @@ public class MapComponent extends javax.swing.JComponent
     private void paintToolForeground(Graphics2D g2d) {
         MapTool mapTool = getMapTool();
         if (mapTool != null) {
-            g2d.translate(-topLeft.getX() * scale, topLeft.getY() * scale);
-            g2d.scale(scale, -scale);
+            double s = getScaleFactor();
+            g2d.translate(-topLeft.getX() * s, topLeft.getY() * s);
+            g2d.scale(s, -s);
             mapTool.draw(g2d);
         }
     }
@@ -606,8 +618,7 @@ public class MapComponent extends javax.swing.JComponent
             doubleBuffer = (BufferedImage) createImage(currentWidth, currentHeight);
         }
 
-        final boolean toolPaintedMap = paintToolBackground(g2d);
-
+        boolean toolPaintedMap = paintToolBackground(g2d);
         if (toolPaintedMap == false) {
             // draw the map into the doubleBuffer image
             Graphics2D doubleBufferGraphics2D;
@@ -635,10 +646,12 @@ public class MapComponent extends javax.swing.JComponent
      *
      * @return true if opaque.
      */
+    @Override
     public boolean isOpaque() {
         return true;
     }
 
+    @Override
     public boolean isOptimizedDrawingEnabled() {
         return true;
     }
@@ -648,8 +661,9 @@ public class MapComponent extends javax.swing.JComponent
      *
      * @param geoSet The Geoset that was changed.
      */
+    @Override
     public void geoSetChanged(GeoSet geoSet) {
-        this.repaint();
+        repaint();
     }
 
     /**
@@ -657,8 +671,9 @@ public class MapComponent extends javax.swing.JComponent
      *
      * @param geoSet The Geoset that was changed.
      */
+    @Override
     public void geoSetSelectionChanged(GeoSet geoSet) {
-        this.repaint();
+        repaint();
     }
 
     /**
@@ -680,11 +695,11 @@ public class MapComponent extends javax.swing.JComponent
     }
 
     public void removeMouseMotionListener(MapToolMouseMotionListener listener) {
-        this.mapEventHandler.removeMouseMotionListener(listener);
+        mapEventHandler.removeMouseMotionListener(listener);
     }
 
     public void addMouseMotionListener(MapToolMouseMotionListener listener) {
-        this.mapEventHandler.addMouseMotionListener(listener);
+        mapEventHandler.addMouseMotionListener(listener);
     }
 
     public Object getImageRenderingHint() {
