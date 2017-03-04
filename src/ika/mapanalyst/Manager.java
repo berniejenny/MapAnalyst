@@ -950,9 +950,16 @@ public final class Manager implements Serializable {
             osm.setMap(map);
         }
     }
+    
+    public void disposeOSM() {
+        OpenStreetMap osm = (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        if (osm != null) {
+            osm.dispose();
+        }
+    }
 
     public boolean isUsingOpenStreetMap() {
-        return this.newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false) != null;
+        return newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false) != null;
     }
 
     /**

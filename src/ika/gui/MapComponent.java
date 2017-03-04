@@ -13,6 +13,8 @@ import ika.geo.*;
 import ika.map.tools.*;
 import ika.proj.ProjectionsManager;
 import ika.utils.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 /**
  * An interactive JComponent for drawing working with map data.<br>
@@ -43,7 +45,7 @@ public class MapComponent extends javax.swing.JComponent
     /**
      * The MapEventHandler is responsible for treating all key and mouse events
      * for this MapComponent. The whole functionality of MapEventHandler could
-     * be integrated into MapComponent. By separting the two, the MapComponent
+     * be integrated into MapComponent. By separating the two, the MapComponent
      * is much easier to understand, program and extend.
      */
     private MapEventHandler mapEventHandler = null;
@@ -75,6 +77,11 @@ public class MapComponent extends javax.swing.JComponent
             = new CoordinateFormatter("###,##0.00", "###,##0", 1);
 
     private CoordinatesTooltip coordinatesTooltip;
+
+    /**
+     * listeners for scale change events
+     */
+    private final PropertyChangeSupport scaleChangePropertyChangeSupport = new PropertyChangeSupport(this);
 
     /**
      * Creates a new instance of MapComponent
@@ -215,6 +222,7 @@ public class MapComponent extends javax.swing.JComponent
      */
     public void zoom(double zoomFactor) {
         setScaleFactorAndKeepMapCenterPoint(getScaleFactor() * zoomFactor);
+        repaint();
     }
 
     /**
@@ -229,7 +237,7 @@ public class MapComponent extends javax.swing.JComponent
         double dy = (pt.y - topLeft.y) / zoomFactor;
         topLeft.x = pt.x - dx;
         topLeft.y = pt.y - dy;
-        setScaleAndInformScaleChangedListeners(getScaleFactor() * zoomFactor);
+        setScaleAndInformScaleChangeListeners(getScaleFactor() * zoomFactor);
         repaint();
     }
 
@@ -249,6 +257,7 @@ public class MapComponent extends javax.swing.JComponent
         double verScale = getVisibleHeight() / rect.getHeight() * getScaleFactor();
         double newScale = Math.min(horScale, verScale);
         setScaleFactorAndKeepMapCenterPoint(newScale);
+        repaint();
     }
 
     /**
@@ -268,14 +277,14 @@ public class MapComponent extends javax.swing.JComponent
             return;
         }
         if (geoBounds.getWidth() == 0 || geoBounds.getHeight() == 0) {
-            setScaleAndInformScaleChangedListeners(MIN_SCALE);
+            setScaleAndInformScaleChangeListeners(MIN_SCALE);
             geoBounds.setFrame(geoBounds.getMinX() - 1, geoBounds.getMinY() - 1, 2, 2);
         } else {
             Dimension dim = getSize();
             double horScale = dim.getWidth() / geoBounds.getWidth();
             double verScale = dim.getHeight() / geoBounds.getHeight();
             double borderScale = 1 / (1 + 2 * BORDER_PERCENTAGE / 100);
-            setScaleAndInformScaleChangedListeners(Math.min(horScale, verScale) * borderScale);
+            setScaleAndInformScaleChangeListeners(Math.min(horScale, verScale) * borderScale);
         }
         centerOnPoint(geoBounds.getCenterX(), geoBounds.getCenterY());
     }
@@ -306,14 +315,14 @@ public class MapComponent extends javax.swing.JComponent
         dy *= getScaleFactor() / scale;
         topLeft.setLocation(cx - dx, cy - dy);
 
-        setScaleAndInformScaleChangedListeners(scale);
-        repaint();
+        setScaleAndInformScaleChangeListeners(scale);
     }
 
-    private void setScaleAndInformScaleChangedListeners(double scale) {
+    private void setScaleAndInformScaleChangeListeners(double scale) {
+        double oldScale = this.scale;
         this.scale = scale;
-        // TODO inform listeners about scale change
-
+        scaleChangePropertyChangeSupport.firePropertyChange("scale", oldScale, scale);
+        
         // TODO replace with listener
         if (coordinatesTooltip != null) {
             coordinatesTooltip.clearCoordinates();
@@ -729,5 +738,23 @@ public class MapComponent extends javax.swing.JComponent
      */
     public void setCoordinatesTooltip(CoordinatesTooltip coordinatesTooltip) {
         this.coordinatesTooltip = coordinatesTooltip;
+    }
+    
+    /**
+     * Add a listener for scale change events. A listener is only added once.
+     * @param listener listener to add
+     */
+    public void addScaleChangePropertyChangeListener(PropertyChangeListener listener) {
+        // try removing the listener to make sure it is only registered once
+        scaleChangePropertyChangeSupport.removePropertyChangeListener(listener);
+        scaleChangePropertyChangeSupport.addPropertyChangeListener("scale", listener);
+    }
+
+    /**
+     * Remove a listener for scale change events.
+     * @param listener listener to remove
+     */
+    public void removeScaleChangePropertyChangeListener(PropertyChangeListener listener) {
+        scaleChangePropertyChangeSupport.removePropertyChangeListener(listener);
     }
 }

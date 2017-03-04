@@ -52,7 +52,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      * The MapComponent for which this MapEventHandler receives and treats
      * events.
      */
-    private MapComponent mapComponent;
+    private final MapComponent mapComponent;
 
     /**
      * Keep track whether the user is currently dragging (i.e. move the mouse

@@ -7,7 +7,6 @@ import ika.proj.ProjectionsManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -15,6 +14,8 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import org.openstreetmap.gui.jmapviewer.MemoryTileCache;
 import org.openstreetmap.gui.jmapviewer.Tile;
@@ -46,10 +47,10 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     private static final int NBR_CACHED_IMAGES = 1000;
 
     /**
-     * OSM zoom levels vary between 0 (1 image for the whole globe) and 18
+     * OSM zoom levels vary between 0 (1 image for the whole globe) and 19
      * (large scale tiles).
      */
-    private static final int OSM_MAX_ZOOM = 18;
+    private static final int OSM_MAX_ZOOM = 19;
     private static final int OSM_MIN_ZOOM = 0;
 
     /**
@@ -121,6 +122,23 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      */
     private static final int TILE_SIZE = 256;
 
+    /**
+     * listener for scale change events to stop loading tiles when the OSM zoom
+     * level changes
+     */
+    PropertyChangeListener scaleChangeListener = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            double oldScale = (Double) evt.getOldValue();
+            double newScale = (Double) evt.getNewValue();
+            int oldZoom = zoomLevel(oldScale);
+            int newZoom = zoomLevel(newScale);
+            if (oldZoom != newZoom) {
+                tileController.cancelOutstandingJobs();
+            }
+        }
+    };
+
     public OpenStreetMap() {
         init();
     }
@@ -132,6 +150,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
 
     public final void setMap(MapComponent map) {
         this.map = map;
+        map.addScaleChangePropertyChangeListener(scaleChangeListener);
     }
 
     private void init() {
@@ -142,10 +161,18 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         tileController = new TileController(tileSource, cache, this);
     }
 
+    /**
+     * OSM map is being removed from MapComponent
+     */
+    public void dispose() {
+        tileController.cancelOutstandingJobs();
+        map.removeScaleChangePropertyChangeListener(scaleChangeListener);
+    }
+    
     private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
         // read this object
         stream.defaultReadObject();
-        
+
         // initialize transient TileController
         init();
     }
@@ -181,6 +208,11 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         g2d.drawImage(image, trans, null);
     }
 
+    private int zoomLevel(double mapScale) {
+        double boundsWidthPx = BOUNDS.getWidth() * mapScale;
+        return (int) Math.round(Math.log((boundsWidthPx / TILE_SIZE)) / Math.log(2.));
+    }
+
     @Override
     public void draw(Graphics2D g2d, double scale, boolean drawSelectionState) {
 
@@ -189,8 +221,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         }
 
         // compute OSM zoom level
-        double boundsWidthPx = BOUNDS.getWidth() * scale;
-        int zoom = (int) Math.round(log2(boundsWidthPx / TILE_SIZE));
+        int zoom = zoomLevel(scale);
         if (zoom > OSM_MAX_ZOOM) {
             zoom = OSM_MAX_ZOOM;
         } else if (zoom < OSM_MIN_ZOOM) {
@@ -234,8 +265,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
 
     private void drawGraticule(Graphics2D g2d, double scale) {
         // compute OSM zoom level
-        double boundsWidthPx = BOUNDS.getWidth() * scale;
-        int zoom = (int) Math.round(log2(boundsWidthPx / TILE_SIZE));
+        int zoom = zoomLevel(scale);
 
         Rectangle2D.Double visRect = map.getVisibleArea();
 
@@ -379,7 +409,4 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     public void move(double dx, double dy) {
     }
 
-    private double log2(double x) {
-        return Math.log(x) / Math.log(2.);
-    }
 }

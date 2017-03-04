@@ -126,8 +126,7 @@ public class MainWindow extends javax.swing.JFrame
             }
             MainWindow.updateAllMenusOfAllWindows();
 
-            this.resetManager(new Manager());
-            this.writeGUI();
+            resetManager(new Manager());
 
             CoordinateFormatter oldFormat, newFormat;
             oldFormat = new CoordinateFormatter("###,##0.0 cm", "###,##0.0", 100);
@@ -186,41 +185,26 @@ public class MainWindow extends javax.swing.JFrame
             });
 
             // maximise the size of this window. Fill the primary screen.
-            this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
 
             // default is the OpenStreetMap as reference map
             manager.setNewMap(new OpenStreetMap(newMapComponent));
 
-            // show everything in the two maps. On macOS wati for window zoom animation to finish.
-            int delay = Sys.isMacOSX() ? 1000 : 0;
-            javax.swing.Timer timer = new javax.swing.Timer(delay, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    showAllInNewMap();
-                    oldMapComponent.showAll();
-                }
-            });
-            timer.setRepeats(false);
-            timer.start();
-
-//            newMapComponent.addComponentListener(new ComponentAdapter() {
-//
-//                @Override
-//                public void componentResized(ComponentEvent e) {
-//                    showAllInNewMap();
-//                    newMapComponent.removeComponentListener(this);
-//                }
-//            });
-//
-//            // show everything in the old map
-//            oldMapComponent.addComponentListener(new ComponentAdapter() {
-//
-//                @Override
-//                public void componentResized(ComponentEvent e) {
-//                    oldMapComponent.showAll();
-//                    oldMapComponent.removeComponentListener(this);
-//                }
-//            });
+            // show everything in the two maps. On macOS wait for window zoom animation to finish.
+            {
+                int delay = Sys.isMacOSX() ? 1000 : 0;
+                javax.swing.Timer timer = new javax.swing.Timer(delay, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        showAllInNewMap();
+                        oldMapComponent.showAll();
+                    }
+                });
+                timer.setRepeats(false);
+                timer.start();
+            }
+            
+            
             String nl = System.getProperty("line.separator");
             this.transformationInfoTextArea.setText("Scale:\t-" + nl + "Rotation:\t-");
             this.undo.setUndoMenuItems(this.undoMenuItem, this.redoMenuItem);
@@ -247,6 +231,8 @@ public class MainWindow extends javax.swing.JFrame
                 }
             });
 
+            writeGUI();
+            
             // hide the invisible window that shows the menu bar when no other
             // window is visible
             MacWindowsManager.updateVisibilityOfEmptyWindow();
@@ -5940,7 +5926,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_showErrorInOldMapCheckBoxMenuItemStateChanged
 
     private void removeOSMMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeOSMMenuItemActionPerformed
-        this.manager.setNewMap(null);
+        // give OSM map a chance to clean up and unregister before removing it from the map
+        manager.disposeOSM();
+
+        manager.setNewMap(null);
 
         // the visualization have to be recalculated when switching from/to OSM
         clearTemporaryGUI();
@@ -5948,11 +5937,12 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // switch from spherical to Cartesian coordinates of selected point
         updateLinkGUI();
 
+        // hide OSM copyright
         osmCopyrightLabel.setVisible(false);
     }//GEN-LAST:event_removeOSMMenuItemActionPerformed
 
     private void addOSMMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addOSMMenuItemActionPerformed
-        this.manager.setNewMap(new OpenStreetMap(newMapComponent));
+        manager.setNewMap(new OpenStreetMap(newMapComponent));
 
         // the visualization have to be recalculated when switching from/to OSM
         clearTemporaryGUI();
@@ -5960,6 +5950,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // switch from Cartesian to spherical coordinates of selected point
         updateLinkGUI();
 
+        // show OSM copyright
         osmCopyrightLabel.setVisible(true);
     }//GEN-LAST:event_addOSMMenuItemActionPerformed
 
