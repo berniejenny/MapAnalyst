@@ -7,6 +7,7 @@ import ika.proj.ProjectionsManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -14,6 +15,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import org.openstreetmap.gui.jmapviewer.MemoryTileCache;
 import org.openstreetmap.gui.jmapviewer.Tile;
 import org.openstreetmap.gui.jmapviewer.TileController;
@@ -140,6 +142,14 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         tileController = new TileController(tileSource, cache, this);
     }
 
+    private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        // read this object
+        stream.defaultReadObject();
+        
+        // initialize transient TileController
+        init();
+    }
+
     @Override
     public void tileLoadingFinished(Tile tile, boolean success) {
         tile.setLoaded(success);
@@ -212,7 +222,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
             double y = BOUNDS.getMaxY() - tiley * tileDim;
             for (int tilex = firstCol; tilex < lastCol; tilex++) {
                 double x = BOUNDS.getMinX() + tilex * tileDim;
-                org.openstreetmap.gui.jmapviewer.Tile tile = tileController.getTile(tilex, tiley, zoom);
+                Tile tile = tileController.getTile(tilex, tiley, zoom);
                 if (tile != null) {
                     drawTile(tile.getImage(), g2d, x, y, tileDim, tileDim);
                 }
