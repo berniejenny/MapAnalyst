@@ -206,13 +206,13 @@ public class MainWindow extends javax.swing.JFrame
             
             
             String nl = System.getProperty("line.separator");
-            this.transformationInfoTextArea.setText("Scale:\t-" + nl + "Rotation:\t-");
-            this.undo.setUndoMenuItems(this.undoMenuItem, this.redoMenuItem);
-            this.addUndo(null);
+            transformationInfoTextArea.setText("Scale:\t-" + nl + "Rotation:\t-");
+            undo.setUndoMenuItems(this.undoMenuItem, this.redoMenuItem);
+            addUndo(null);
 
-            this.synchronizeWithPreferences();
+            synchronizeWithPreferences();
 
-            this.addWindowListener(new WindowAdapter() {
+            addWindowListener(new WindowAdapter() {
 
                 @Override
                 public void windowClosed(WindowEvent e) {
@@ -231,6 +231,7 @@ public class MainWindow extends javax.swing.JFrame
                 }
             });
 
+            // write all project settings to GUI
             writeGUI();
             
             // hide the invisible window that shows the menu bar when no other

@@ -11,6 +11,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  *
@@ -33,12 +35,20 @@ public class CoordinatesTooltip implements MouseListener, MouseMotionListener {
         this.manager = manager;
         mapComponent.addMouseMotionListener(this);
         mapComponent.addMouseListener(this);
+        
+        // listener for change map scale hides the tooltip
+        mapComponent.addScaleChangePropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                clearCoordinates();
+            }
+        });
     }
 
     /**
      * Clear the current coordinates. Should be called after the map zooms.
      */
-    public void clearCoordinates() {
+    private void clearCoordinates() {
         mousePositionPixel = null;
         mapComponent.repaint();
     }

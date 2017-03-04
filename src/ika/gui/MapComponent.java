@@ -161,11 +161,6 @@ public class MapComponent extends javax.swing.JComponent
         double dx = visibleRect.getCenterX() - topLeft.getX();
         double dy = visibleRect.getCenterY() - topLeft.getY();
         topLeft.setLocation(cx - dx, cy - dy);
-
-        // TODO replace with listener
-        if (coordinatesTooltip != null) {
-            coordinatesTooltip.clearCoordinates();
-        }
         repaint();
     }
 
@@ -322,11 +317,6 @@ public class MapComponent extends javax.swing.JComponent
         double oldScale = this.scale;
         this.scale = scale;
         scaleChangePropertyChangeSupport.firePropertyChange("scale", oldScale, scale);
-        
-        // TODO replace with listener
-        if (coordinatesTooltip != null) {
-            coordinatesTooltip.clearCoordinates();
-        }
     }
 
     /**
