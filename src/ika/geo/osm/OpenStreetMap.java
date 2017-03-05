@@ -168,7 +168,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         tileController.cancelOutstandingJobs();
         map.removeScaleChangePropertyChangeListener(scaleChangeListener);
     }
-    
+
     private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
         // read this object
         stream.defaultReadObject();
@@ -267,11 +267,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         // compute OSM zoom level
         int zoom = zoomLevel(scale);
 
-        Rectangle2D.Double visRect = map.getVisibleArea();
-
-        MercatorProjection mercator = ProjectionsManager.createWebMercatorProjection();
-
-        double dDeg;
+        // distance betweeen two graticule lines in degrees
+        final double dDeg;
         switch (zoom) {
             case 0:
                 dDeg = 90;
@@ -300,34 +297,17 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
             case 8:
                 dDeg = 1;
                 break;
+            case 9:
+                dDeg = 0.5;
+                break;
+            case 10:
+                dDeg = 0.2;
+                break;
+            case 11:
+                dDeg = 0.1;
+                break;
             default:
-                // find a spacing between meridians that results in one meridian per approximately 150 pixels
-                Point2D.Double xy1 = map.userToWorldSpace(new java.awt.Point(0, 0));
-                Point2D.Double xy2 = map.userToWorldSpace(new java.awt.Point(150, 0));
-                // inverse projection of horizontal distance to longitude
-                double dLonDeg = Math.toDegrees((xy2.x - xy1.x) / R);
-
-                final double[] bases = new double[]{5, 2, 1};
-                // scale the cell size such that it is > 1
-                double s = 1; // scale factor
-                double dLonDeg_s = dLonDeg;
-                while (dLonDeg_s < 1d) {
-                    dLonDeg_s *= 10d;
-                    s /= 10d;
-                }
-
-                // compute the number of digits of the integral part of the scaled value
-                double ndigits = (int) Math.floor(Math.log10(dLonDeg_s));
-
-                // find the index into bases for the first limit after dLongDeg
-                int baseID = 0;
-                for (int i = 0; i < bases.length; ++i) {
-                    if (dLonDeg_s >= bases[i]) {
-                        baseID = i;
-                        break;
-                    }
-                }
-                dDeg = bases[baseID] * Math.pow(10, ndigits) * s;
+                return;
         }
 
         g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
@@ -338,6 +318,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
                 RenderingHints.VALUE_ANTIALIAS_OFF);
 
         // find map extension in degrees
+        Rectangle2D.Double visRect = map.getVisibleArea();
+        MercatorProjection mercator = ProjectionsManager.createWebMercatorProjection();
         Point2D.Double lonLatBottomLeftDeg = new Point2D.Double();
         mercator.inverseTransform(new Point2D.Double(visRect.getMinX(), visRect.getMinY()), lonLatBottomLeftDeg);
         Point2D.Double lonLatTopRightDeg = new Point2D.Double();
