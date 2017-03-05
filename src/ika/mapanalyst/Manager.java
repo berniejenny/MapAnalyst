@@ -947,7 +947,7 @@ public final class Manager implements Serializable {
     public void initOSM(MapComponent map) {
         OpenStreetMap osm = getOpenStreetMap();
         if (osm != null) {
-            osm.setMap(map);
+            osm.setMapComponent(map);
         }
     }
 

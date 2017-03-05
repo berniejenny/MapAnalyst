@@ -2,10 +2,13 @@ package ika.geo.osm;
 
 import com.jhlabs.map.proj.MercatorProjection;
 import ika.geo.GeoObject;
+import ika.geo.GeoText;
 import ika.gui.MapComponent;
 import ika.proj.ProjectionsManager;
+import ika.utils.NumberFormatter;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
@@ -143,6 +146,11 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     private static final Color GRATICULE_COLOR = new Color(150, 155, 180, 180);
 
     /**
+     * width of major graticule line in anti-aliased pixels
+     */
+    private static final double MAJOR_LINE_WIDTH = 2.5;
+
+    /**
      * size of a map tile in pixels
      */
     private static final int TILE_SIZE = 256;
@@ -155,7 +163,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     /**
      * parent map component
      */
-    protected transient MapComponent map;
+    protected transient MapComponent mapComponent;
 
     /**
      * listener for scale change events to stop loading tiles when the OSM zoom
@@ -178,18 +186,20 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     private boolean showTropics = false;
     private boolean showPolarCircles = false;
 
+    private final Font font = new Font("SansSerif", Font.PLAIN, 11);
+
     public OpenStreetMap() {
         init();
     }
 
-    public OpenStreetMap(MapComponent map) {
+    public OpenStreetMap(MapComponent mapComponent) {
         init();
-        setMap(map);
+        setMapComponent(mapComponent);
     }
 
-    public final void setMap(MapComponent map) {
-        this.map = map;
-        map.addScaleChangePropertyChangeListener(scaleChangeListener);
+    public final void setMapComponent(MapComponent mapComponent) {
+        this.mapComponent = mapComponent;
+        mapComponent.addScaleChangePropertyChangeListener(scaleChangeListener);
     }
 
     private void init() {
@@ -205,7 +215,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      */
     public void dispose() {
         tileController.cancelOutstandingJobs();
-        map.removeScaleChangePropertyChangeListener(scaleChangeListener);
+        mapComponent.removeScaleChangePropertyChangeListener(scaleChangeListener);
     }
 
     private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
@@ -219,7 +229,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     @Override
     public void tileLoadingFinished(Tile tile, boolean success) {
         tile.setLoaded(success);
-        map.repaint();
+        mapComponent.repaint();
     }
 
     @Override
@@ -247,7 +257,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         g2d.drawImage(image, trans, null);
     }
 
-    private int zoomLevel(double mapScale) {
+    private static int zoomLevel(double mapScale) {
         double boundsWidthPx = BOUNDS.getWidth() * mapScale;
         int zoom = (int) Math.round(Math.log((boundsWidthPx / TILE_SIZE)) / Math.log(2.));
         return Math.max(0, zoom);
@@ -255,8 +265,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
 
     @Override
     public void draw(Graphics2D g2d, double scale, boolean drawSelectionState) {
-
-        if (map == null) {
+        if (mapComponent == null) {
             return;
         }
 
@@ -274,7 +283,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         double tileDim = BOUNDS.getWidth() / tilesH;
 
         // the first and last tiles visible in horizontal and vertical direction
-        Rectangle2D.Double visRect = map.getVisibleArea();
+        Rectangle2D.Double visRect = mapComponent.getVisibleArea();
         double visBottom = visRect.getMinY();
         double visLeft = visRect.getMinX();
         double visWidth = visRect.getWidth();
@@ -301,32 +310,54 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         }
 
         if (showGraticule) {
-            drawGraticule(g2d, scale);
-        }        
+            drawGraticule(g2d);
+        }
 
         // style for polar and tropic circles
         g2d.setColor(POLAR_TROPIC_COLOR);
         g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_OFF);
-        
+
         if (showPolarCircles) {
             g2d.draw(new Line2D.Double(MAX_X, POLAR_CIRCLE_Y, -MAX_X, POLAR_CIRCLE_Y));
             g2d.draw(new Line2D.Double(MAX_X, -POLAR_CIRCLE_Y, -MAX_X, -POLAR_CIRCLE_Y));
         }
-        
+
         if (showTropics) {
             g2d.draw(new Line2D.Double(MAX_X, TROPIC_CIRCLE_Y, -MAX_X, TROPIC_CIRCLE_Y));
             g2d.draw(new Line2D.Double(MAX_X, -TROPIC_CIRCLE_Y, -MAX_X, -TROPIC_CIRCLE_Y));
         }
-        
+
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
-    private void drawGraticule(Graphics2D g2d, double scale) {
-        // compute OSM zoom level
-        int zoom = zoomLevel(scale);
+    private void drawMeridianLabel(Graphics2D g2d, int longitude, double x, double y) {
+        String str = Integer.toString(Math.abs(longitude)) + "\u00B0";
+        if (longitude < 0) {
+            str += " W";
+        } else if (longitude > 0) {
+            str += " E";
+        }
+        GeoText geoText = new GeoText(str, x, y);
+        geoText.setCenterHor(true);
+        geoText.setCenterVer(false);
+        geoText.setDy(-font.getSize() - 2);
+        geoText.draw(g2d, mapComponent.getScaleFactor(), false);
+    }
+
+    private void drawParallelLabel(Graphics2D g2d, String str, double x, double y) {
+        GeoText geoText = new GeoText(str, x, y);
+        geoText.setCenterHor(false);
+        geoText.setCenterVer(true);
+        geoText.setDx(2);
+        geoText.draw(g2d, mapComponent.getScaleFactor(), false);
+    }
+
+    private void drawGraticule(Graphics2D g2d) {
+        // OSM zoom level
+        int zoom = zoomLevel(mapComponent.getScaleFactor());
         if (zoom >= MINOR_GRATICULE_SPACING.length) {
             return;
         }
@@ -341,7 +372,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
                 RenderingHints.VALUE_ANTIALIAS_OFF);
 
         // find map extension in degrees
-        Rectangle2D.Double visRect = map.getVisibleArea();
+        Rectangle2D.Double visRect = mapComponent.getVisibleArea();
         MercatorProjection mercator = ProjectionsManager.createWebMercatorProjection();
         Point2D.Double lonLatBottomLeftDeg = new Point2D.Double();
         mercator.inverseTransform(new Point2D.Double(visRect.getMinX(), visRect.getMinY()), lonLatBottomLeftDeg);
@@ -357,12 +388,23 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         }
         double lastLon = lonLatTopRightDeg.x - (lonLatTopRightDeg.x % graticuleSpacingDeg);
         int nbrMeridians = (int) Math.round((lastLon - firstLon) / graticuleSpacingDeg) + 1;
+        double yTop = Math.min(MAX_Y, visRect.getMaxY());
+        double yBottom = Math.max(-MAX_Y, visRect.getMinY());
         for (int i = 0; i < nbrMeridians; i++) {
             double lonDeg = firstLon + i * graticuleSpacingDeg;
             double meridianX = R * Math.toRadians(lonDeg);
-            Line2D meridian = new Line2D.Double(meridianX, -MAX_Y, meridianX, MAX_Y);
+            double lineEndTop = yTop;
+            boolean majorLine = isMajorGraticuleLine(lonDeg);
+            // shorten major line to create space for label
+            if (majorLine) {
+                lineEndTop -= (font.getSize() + 4) / mapComponent.getScaleFactor();
+            }
+            Line2D meridian = new Line2D.Double(meridianX, yBottom, meridianX, lineEndTop);
             graticuleStyle(g2d, lonDeg);
             g2d.draw(meridian);
+            if (majorLine) {
+                drawMeridianLabel(g2d, (int) lonDeg, meridianX, yTop);
+            }
         }
 
         // parallels
@@ -376,12 +418,35 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         }
         double lastLat = maxLat - (maxLat % graticuleSpacingDeg);
         int nbrParallels = (int) Math.round((lastLat - firstLat) / graticuleSpacingDeg) + 1;
+        double xLeft = Math.max(-MAX_X, visRect.getMinX());
+        double xRight = Math.min(MAX_X, visRect.getMaxX());
         for (int i = 0; i < nbrParallels; i++) {
             double latDeg = firstLat + i * graticuleSpacingDeg;
+            boolean majorLine = isMajorGraticuleLine(latDeg);
+            double lineStartLeft = xLeft;
+            // shorten major line to create space for label
+            String str = "";
+            if (majorLine) {
+                str = Integer.toString(Math.abs((int) latDeg)) + "\u00B0";
+                if (latDeg < 0) {
+                    str += " S";
+                } else if (latDeg > 0) {
+                    str += " N";
+                }
+                
+                // width of string in pixel
+                g2d.setFont(font);
+                int stringWidth = g2d.getFontMetrics().stringWidth(str);
+                
+                lineStartLeft += (stringWidth + 10) / mapComponent.getScaleFactor();
+            }
             double parallelY = yMercator(latDeg);
-            Line2D parallel = new Line2D.Double(MAX_X, parallelY, -MAX_X, parallelY);
+            Line2D parallel = new Line2D.Double(lineStartLeft, parallelY, xRight, parallelY);
             graticuleStyle(g2d, latDeg);
             g2d.draw(parallel);
+            if (majorLine) {
+                drawParallelLabel(g2d, str, xLeft, parallelY);
+            }
         }
     }
 
@@ -392,12 +457,12 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      * @return true if the line is to be highlighted
      */
     private boolean isMajorGraticuleLine(double deg) {
-        double scale = map.getScaleFactor();
+        double scale = mapComponent.getScaleFactor();
         int zoom = zoomLevel(scale);
         if (zoom < MAJOR_GRATICULE_SPACING.length) {
             // distance betweeen two graticule lines in degrees
             double majorGraticuleSpacing = MAJOR_GRATICULE_SPACING[zoom];
-            return Math.abs(deg % majorGraticuleSpacing) < 0.001;
+            return Math.abs(deg % majorGraticuleSpacing) < 0.01;
         } else {
             return false;
         }
@@ -411,8 +476,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      */
     private void graticuleStyle(Graphics2D g2d, double deg) {
         if (isMajorGraticuleLine(deg)) {
-            double scale = map.getScaleFactor();
-            float strokeWidth = (float) (2.5 / scale);
+            double scale = mapComponent.getScaleFactor();
+            float strokeWidth = (float) (MAJOR_LINE_WIDTH / scale);
             g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
