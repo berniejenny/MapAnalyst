@@ -4432,7 +4432,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_distortionGridSmoothnessSliderStateChanged
 
     private void infoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuItemActionPerformed
-        ika.gui.ProgramInfo.showInfo();
+        ika.gui.ProgramInfo.show(this);
     }//GEN-LAST:event_infoMenuItemActionPerformed
 
     private void unlinkedPointsColorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlinkedPointsColorMenuItemActionPerformed
