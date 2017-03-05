@@ -5,11 +5,19 @@
  */
 package ika.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import java.awt.geom.*;
-import ika.map.tools.*;
+import ika.map.tools.MapTool;
+import ika.map.tools.MapToolMouseMotionListener;
+import ika.map.tools.PanTool;
+import ika.map.tools.SelectionTool;
+import ika.map.tools.ZoomInTool;
+import ika.map.tools.ZoomOutTool;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Point2D;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * MapEventHandler - event listener for MapComponent. Receives key and mouse
@@ -19,7 +27,7 @@ import ika.map.tools.*;
  */
 public class MapEventHandler implements java.awt.event.MouseListener,
         java.awt.event.MouseMotionListener,
-        java.awt.KeyEventDispatcher {
+        java.awt.KeyEventDispatcher, MouseWheelListener {
 
     /**
      * Keep track whether the space key is pressed.
@@ -78,6 +86,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         this.mapComponent = mapComponent;
         mapComponent.addMouseListener(this);
         mapComponent.addMouseMotionListener(this);
+        mapComponent.addMouseWheelListener(this);
 
         KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         kfm.addKeyEventDispatcher(this);
@@ -94,7 +103,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     public void mousePressed(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
         dragging = false;
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseDown(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
     }
@@ -111,7 +120,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     public void mouseDragged(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
         final Point2D.Double point = mapComponent.userToWorldSpace(evt.getPoint());
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             if (dragging == false) {
                 mapTool.startDrag(point, evt);
             } else {
@@ -131,7 +140,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     @Override
     public void mouseReleased(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
-        if (this.mapTool != null && dragging == true) {
+        if (mapTool != null && dragging == true) {
             mapTool.endDrag(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
         dragging = false;
@@ -146,7 +155,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     @Override
     public void mouseClicked(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseClicked(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
         dragging = false;
@@ -251,8 +260,8 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     private void restoreTemporarilySuspendedMapTool() {
         if (temporarilySuspendedTool != null) {
             setMapTool(temporarilySuspendedTool, false);
-            this.mapTool.resume();
-            this.mapTool.setDefaultCursor();
+            mapTool.resume();
+            mapTool.setDefaultCursor();
         }
         temporarilySuspendedTool = null;
     }
@@ -264,9 +273,9 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      * @return A new MapTool (not the current yet) that can be activated.
      */
     private MapTool getNewMapTool(int keyCode) {
-        final boolean zoomOutCurrent = mapTool instanceof ZoomOutTool;
-        final boolean zoomInCurrent = mapTool instanceof ZoomInTool;
-        final boolean panCurrent = mapTool instanceof PanTool;
+        boolean zoomOutCurrent = mapTool instanceof ZoomOutTool;
+        boolean zoomInCurrent = mapTool instanceof ZoomInTool;
+        boolean panCurrent = mapTool instanceof PanTool;
 
         // pan tool with space key
         if (spaceKeyDown && !metaKeyDown && !altKeyDown && !panCurrent) {
@@ -362,10 +371,10 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         System.out.println("Is Action Key: " + keyEvent.isActionKey());
         System.out.println();
          */
-        final boolean keyPressed = keyEvent.getID() == KeyEvent.KEY_PRESSED;
-        final boolean keyReleased = keyEvent.getID() == KeyEvent.KEY_RELEASED;
-        final boolean panCurrent = mapTool instanceof PanTool;
-        final boolean panTemporarilySuspended = temporarilySuspendedTool instanceof PanTool;
+        boolean keyPressed = keyEvent.getID() == KeyEvent.KEY_PRESSED;
+        boolean keyReleased = keyEvent.getID() == KeyEvent.KEY_RELEASED;
+        boolean panCurrent = mapTool instanceof PanTool;
+        boolean panTemporarilySuspended = temporarilySuspendedTool instanceof PanTool;
 
         if (keyEvent.getKeyCode() == KeyEvent.VK_SPACE
                 || keyEvent.getKeyCode() == KeyEvent.VK_META
@@ -396,5 +405,18 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
         }
         return false;
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        int rotations = e.getWheelRotation();
+        Point2D.Double loc = mapComponent.userToWorldSpace(e.getPoint());
+        for (int i = 0; i < Math.abs(rotations); i++) {
+            if (rotations < 0) {
+                mapComponent.zoomIn(loc);
+            } else {
+                mapComponent.zoomOut(loc);
+            }
+        }
     }
 }
