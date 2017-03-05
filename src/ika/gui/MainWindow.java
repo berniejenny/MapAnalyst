@@ -203,8 +203,7 @@ public class MainWindow extends javax.swing.JFrame
                 timer.setRepeats(false);
                 timer.start();
             }
-            
-            
+
             String nl = System.getProperty("line.separator");
             transformationInfoTextArea.setText("Scale:\t-" + nl + "Rotation:\t-");
             undo.setUndoMenuItems(this.undoMenuItem, this.redoMenuItem);
@@ -233,7 +232,7 @@ public class MainWindow extends javax.swing.JFrame
 
             // write all project settings to GUI
             writeGUI();
-            
+
             // hide the invisible window that shows the menu bar when no other
             // window is visible
             MacWindowsManager.updateVisibilityOfEmptyWindow();
@@ -392,11 +391,19 @@ public class MainWindow extends javax.swing.JFrame
     }
 
     private void updateMapsMenu() {
-        boolean osm = manager.isUsingOpenStreetMap();
+        OpenStreetMap osm = manager.getOpenStreetMap();
+        boolean isUsingOSM = manager.isUsingOpenStreetMap();
         boolean hasNewPoints = manager.getNewPointsGeoSet().getNumberOfChildren() > 0;
-        addOSMMenuItem.setEnabled(!osm);
-        removeOSMMenuItem.setEnabled(osm);
-        correctOSMMisalignmentBugMenuItem.setEnabled(osm && hasNewPoints);
+        addOSMMenuItem.setEnabled(!isUsingOSM);
+        removeOSMMenuItem.setEnabled(isUsingOSM);
+        correctOSMMisalignmentBugMenuItem.setEnabled(isUsingOSM && hasNewPoints);
+        showOSMGraticuleCheckBoxMenuItem.setEnabled(isUsingOSM);
+        showOSMGraticuleCheckBoxMenuItem.setSelected(osm.isShowGraticule());
+        showOSMPolarCirclesCheckBoxMenuItem.setEnabled(isUsingOSM);
+        showOSMPolarCirclesCheckBoxMenuItem.setSelected(osm.isShowPolarCircles());
+        showOSMTropicsCheckBoxMenuItem.setEnabled(isUsingOSM);
+        showOSMTropicsCheckBoxMenuItem.setSelected(osm.isShowTropics());
+        
         removeNewRasterImageMenuItem.setEnabled(manager.getNewMap() != null);
         removeOldRasterImageMenuItem.setEnabled(manager.getOldMap() != null);
     }
@@ -721,6 +728,11 @@ public class MainWindow extends javax.swing.JFrame
         addOSMMenuItem = new javax.swing.JMenuItem();
         removeOSMMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator22 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JMenu osmMenu = new javax.swing.JMenu();
+        showOSMGraticuleCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        showOSMTropicsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        showOSMPolarCirclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator24 = new javax.swing.JPopupMenu.Separator();
         correctOSMMisalignmentBugMenuItem = new javax.swing.JMenuItem();
         analysisMenu = new javax.swing.JMenu();
         computeMenuItem = new javax.swing.JMenuItem();
@@ -2968,6 +2980,34 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
     mapsMenu.add(removeOSMMenuItem);
     mapsMenu.add(jSeparator22);
 
+    osmMenu.setText("OpenStreetMap");
+
+    showOSMGraticuleCheckBoxMenuItem.setSelected(true);
+    showOSMGraticuleCheckBoxMenuItem.setText("Show Longitude/Latitude");
+    showOSMGraticuleCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            showOSMGraticuleCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    osmMenu.add(showOSMGraticuleCheckBoxMenuItem);
+
+    showOSMTropicsCheckBoxMenuItem.setText("Show Tropics");
+    showOSMTropicsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            showOSMTropicsCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    osmMenu.add(showOSMTropicsCheckBoxMenuItem);
+
+    showOSMPolarCirclesCheckBoxMenuItem.setText("Show Polar Circles");
+    showOSMPolarCirclesCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            showOSMPolarCirclesCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    osmMenu.add(showOSMPolarCirclesCheckBoxMenuItem);
+    osmMenu.add(jSeparator24);
+
     correctOSMMisalignmentBugMenuItem.setText("Correct OpenStreetMap Misalignment…");
     correctOSMMisalignmentBugMenuItem.setEnabled(false);
     correctOSMMisalignmentBugMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2975,7 +3015,9 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
             correctOSMMisalignmentBugMenuItemActionPerformed(evt);
         }
     });
-    mapsMenu.add(correctOSMMisalignmentBugMenuItem);
+    osmMenu.add(correctOSMMisalignmentBugMenuItem);
+
+    mapsMenu.add(osmMenu);
 
     menuBar.add(mapsMenu);
 
@@ -3108,7 +3150,7 @@ computeMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     });
     analysisMenu.add(projectionMenuItem);
-    //analysisMenu.remove(projectionMenuItem);
+    analysisMenu.remove(projectionMenuItem);
 
     analysisMenu.add(projectionSeparator);
     analysisMenu.remove(projectionSeparator);
@@ -6109,6 +6151,30 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_correctOSMMisalignmentBugMenuItemActionPerformed
 
+    private void showOSMGraticuleCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showOSMGraticuleCheckBoxMenuItemActionPerformed
+        OpenStreetMap osm = manager.getOpenStreetMap();
+        if (osm != null) {
+            osm.setShowGraticule(showOSMGraticuleCheckBoxMenuItem.isSelected());
+            newMapComponent.repaint();
+        }
+    }//GEN-LAST:event_showOSMGraticuleCheckBoxMenuItemActionPerformed
+
+    private void showOSMTropicsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showOSMTropicsCheckBoxMenuItemActionPerformed
+        OpenStreetMap osm = manager.getOpenStreetMap();
+        if (osm != null) {
+            osm.setShowTropics(showOSMTropicsCheckBoxMenuItem.isSelected());
+            newMapComponent.repaint();
+        }
+    }//GEN-LAST:event_showOSMTropicsCheckBoxMenuItemActionPerformed
+
+    private void showOSMPolarCirclesCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showOSMPolarCirclesCheckBoxMenuItemActionPerformed
+        OpenStreetMap osm = manager.getOpenStreetMap();
+        if (osm != null) {
+            osm.setShowPolarCircles(showOSMPolarCirclesCheckBoxMenuItem.isSelected());
+            newMapComponent.repaint();
+        }
+    }//GEN-LAST:event_showOSMPolarCirclesCheckBoxMenuItemActionPerformed
+
     private void enableLinkingGUIForSelectedLink(Link link) {
         this.linkToggleButton.setEnabled(true);
         this.linkToggleButton.setSelected(true);
@@ -6564,6 +6630,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JCheckBoxMenuItem showErrorInNewMapCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showErrorInOldMapCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showNewCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem showOSMGraticuleCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem showOSMPolarCirclesCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem showOSMTropicsCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showOldCheckBoxMenuItem;
     private javax.swing.JMenuItem showPointListMenuItem;
     private javax.swing.JCheckBoxMenuItem showPointsCheckBoxMenuItem;

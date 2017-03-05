@@ -945,21 +945,31 @@ public final class Manager implements Serializable {
     }
 
     public void initOSM(MapComponent map) {
-        OpenStreetMap osm = (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        OpenStreetMap osm = getOpenStreetMap();
         if (osm != null) {
             osm.setMap(map);
         }
     }
-    
+
     public void disposeOSM() {
-        OpenStreetMap osm = (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        OpenStreetMap osm = getOpenStreetMap();
         if (osm != null) {
             osm.dispose();
         }
     }
 
     public boolean isUsingOpenStreetMap() {
-        return newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false) != null;
+        return getOpenStreetMap() != null;
+    }
+
+    /**
+     * Returns the OpenStreetMap of the new map, or null if the new map does not
+     * contain an OpenStreetMap.
+     *
+     * @return the OpenStreetMap or null
+     */
+    public OpenStreetMap getOpenStreetMap() {
+        return (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
     }
 
     /**

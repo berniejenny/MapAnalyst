@@ -36,11 +36,6 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     private static final long serialVersionUID = -6328405447473299261L;
 
     /**
-     * OpenStreetMap JMapViewer access point
-     */
-    private transient TileController tileController;
-
-    /**
      * Number of cached image tiles. Estimation of required memory:
      * NBR_CACHED_IMAGES * 256 * 256 * 4 [bytes] = 1000 * 256 * 256 * 4 = 250MB
      */
@@ -52,11 +47,6 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      */
     private static final int OSM_MAX_ZOOM = 19;
     private static final int OSM_MIN_ZOOM = 0;
-
-    /**
-     * parent map component
-     */
-    protected transient MapComponent map;
 
     /**
      * Maximum mapped latitude.
@@ -71,6 +61,41 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      * Radius of earth sphere
      */
     public static final double R = 6378137;
+
+    /**
+     * spacing between lines in graticule
+     */
+    private static final double[] MINOR_GRATICULE_SPACING = new double[]{
+        90, // zoom 0
+        45, // zoom 1
+        30, // zoom 2
+        15, // zoom 3
+        5, // zoom 4
+        5, // zoom 5
+        2, // zoom 6 
+        2, // zoom 7
+        1, // zoom 8
+        0.5,// zoom 9
+        0.25, // zoom 10
+        1. / 12.// zoom 11
+    // no graticule for zoom 12 and larger
+    };
+
+    private static final int[] MAJOR_GRATICULE_SPACING = new int[]{
+        0, // zoom 0
+        0, // zoom 1
+        0, // zoom 2
+        45, // zoom 3
+        30, // zoom 4
+        30, // zoom 5
+        10, // zoom 6 
+        10, // zoom 7
+        5, // zoom 8
+        1,// zoom 9
+        1, // zoom 10
+        1// zoom 11
+    // no graticule for zoom 12 and larger
+    };
 
     /**
      * Mercator y coordinate for latitude.
@@ -115,7 +140,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     /**
      * Color for drawing graticule
      */
-    private static final Color GRATICULE_COLOR = new Color(150, 155, 180);
+    private static final Color GRATICULE_COLOR = new Color(150, 155, 180, 180);
 
     /**
      * size of a map tile in pixels
@@ -123,10 +148,20 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     private static final int TILE_SIZE = 256;
 
     /**
+     * OpenStreetMap JMapViewer access point
+     */
+    private transient TileController tileController;
+
+    /**
+     * parent map component
+     */
+    protected transient MapComponent map;
+
+    /**
      * listener for scale change events to stop loading tiles when the OSM zoom
      * level changes
      */
-    PropertyChangeListener scaleChangeListener = new PropertyChangeListener() {
+    private final PropertyChangeListener scaleChangeListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             double oldScale = (Double) evt.getOldValue();
@@ -138,6 +173,10 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
             }
         }
     };
+
+    private boolean showGraticule = true;
+    private boolean showTropics = false;
+    private boolean showPolarCircles = false;
 
     public OpenStreetMap() {
         init();
@@ -210,7 +249,8 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
 
     private int zoomLevel(double mapScale) {
         double boundsWidthPx = BOUNDS.getWidth() * mapScale;
-        return (int) Math.round(Math.log((boundsWidthPx / TILE_SIZE)) / Math.log(2.));
+        int zoom = (int) Math.round(Math.log((boundsWidthPx / TILE_SIZE)) / Math.log(2.));
+        return Math.max(0, zoom);
     }
 
     @Override
@@ -260,57 +300,40 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
             }
         }
 
-        drawGraticule(g2d, scale);
+        if (showGraticule) {
+            drawGraticule(g2d, scale);
+        }        
+
+        // style for polar and tropic circles
+        g2d.setColor(POLAR_TROPIC_COLOR);
+        g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_OFF);
+        
+        if (showPolarCircles) {
+            g2d.draw(new Line2D.Double(MAX_X, POLAR_CIRCLE_Y, -MAX_X, POLAR_CIRCLE_Y));
+            g2d.draw(new Line2D.Double(MAX_X, -POLAR_CIRCLE_Y, -MAX_X, -POLAR_CIRCLE_Y));
+        }
+        
+        if (showTropics) {
+            g2d.draw(new Line2D.Double(MAX_X, TROPIC_CIRCLE_Y, -MAX_X, TROPIC_CIRCLE_Y));
+            g2d.draw(new Line2D.Double(MAX_X, -TROPIC_CIRCLE_Y, -MAX_X, -TROPIC_CIRCLE_Y));
+        }
+        
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
     private void drawGraticule(Graphics2D g2d, double scale) {
         // compute OSM zoom level
         int zoom = zoomLevel(scale);
-
-        // distance betweeen two graticule lines in degrees
-        final double dDeg;
-        switch (zoom) {
-            case 0:
-                dDeg = 90;
-                break;
-            case 1:
-                dDeg = 45;
-                break;
-            case 2:
-                dDeg = 30;
-                break;
-            case 3:
-                dDeg = 15;
-                break;
-            case 4:
-                dDeg = 10;
-                break;
-            case 5:
-                dDeg = 5;
-                break;
-            case 6:
-                dDeg = 2;
-                break;
-            case 7:
-                dDeg = 2;
-                break;
-            case 8:
-                dDeg = 1;
-                break;
-            case 9:
-                dDeg = 0.5;
-                break;
-            case 10:
-                dDeg = 0.2;
-                break;
-            case 11:
-                dDeg = 0.1;
-                break;
-            default:
-                return;
+        if (zoom >= MINOR_GRATICULE_SPACING.length) {
+            return;
         }
 
-        g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+        // distance betweeen two graticule lines in degrees
+        double graticuleSpacingDeg = MINOR_GRATICULE_SPACING[zoom];
+
         g2d.setColor(GRATICULE_COLOR);
         // without the KEY_STROKE_CONTROL rendering hint the meridian at 0 deg longitude is sometimes not drawn on OS X
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
@@ -328,16 +351,17 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         // meridians
         double firstLon = lonLatBottomLeftDeg.x;
         if (firstLon < 0) {
-            firstLon -= firstLon % dDeg;
+            firstLon -= firstLon % graticuleSpacingDeg;
         } else {
-            firstLon += dDeg - firstLon % dDeg;
+            firstLon += graticuleSpacingDeg - firstLon % graticuleSpacingDeg;
         }
-        double lastLon = lonLatTopRightDeg.x - (lonLatTopRightDeg.x % dDeg);
-        int nbrMeridians = (int) Math.round((lastLon - firstLon) / dDeg) + 1;
+        double lastLon = lonLatTopRightDeg.x - (lonLatTopRightDeg.x % graticuleSpacingDeg);
+        int nbrMeridians = (int) Math.round((lastLon - firstLon) / graticuleSpacingDeg) + 1;
         for (int i = 0; i < nbrMeridians; i++) {
-            double lonDeg = firstLon + i * dDeg;
+            double lonDeg = firstLon + i * graticuleSpacingDeg;
             double meridianX = R * Math.toRadians(lonDeg);
             Line2D meridian = new Line2D.Double(meridianX, -MAX_Y, meridianX, MAX_Y);
+            graticuleStyle(g2d, lonDeg);
             g2d.draw(meridian);
         }
 
@@ -346,29 +370,57 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         double maxLat = Math.min(lonLatTopRightDeg.y, mercator.getMaxLatitude());
         double firstLat = minLat;
         if (firstLat < 0d) {
-            firstLat -= firstLat % dDeg;
+            firstLat -= firstLat % graticuleSpacingDeg;
         } else {
-            firstLat += dDeg - firstLat % dDeg;
+            firstLat += graticuleSpacingDeg - firstLat % graticuleSpacingDeg;
         }
-        double lastLat = maxLat - (maxLat % dDeg);
-        int nbrParallels = (int) Math.round((lastLat - firstLat) / dDeg) + 1;
+        double lastLat = maxLat - (maxLat % graticuleSpacingDeg);
+        int nbrParallels = (int) Math.round((lastLat - firstLat) / graticuleSpacingDeg) + 1;
         for (int i = 0; i < nbrParallels; i++) {
-            double latDeg = firstLat + i * dDeg;
+            double latDeg = firstLat + i * graticuleSpacingDeg;
             double parallelY = yMercator(latDeg);
             Line2D parallel = new Line2D.Double(MAX_X, parallelY, -MAX_X, parallelY);
+            graticuleStyle(g2d, latDeg);
             g2d.draw(parallel);
         }
+    }
 
-        // polar circles
-        g2d.setColor(POLAR_TROPIC_COLOR);
-        g2d.draw(new Line2D.Double(MAX_X, POLAR_CIRCLE_Y, -MAX_X, POLAR_CIRCLE_Y));
-        g2d.draw(new Line2D.Double(MAX_X, -POLAR_CIRCLE_Y, -MAX_X, -POLAR_CIRCLE_Y));
-        // tropic circles
-        g2d.draw(new Line2D.Double(MAX_X, TROPIC_CIRCLE_Y, -MAX_X, TROPIC_CIRCLE_Y));
-        g2d.draw(new Line2D.Double(MAX_X, -TROPIC_CIRCLE_Y, -MAX_X, -TROPIC_CIRCLE_Y));
+    /**
+     * Returns whether a longitude or latitude line is a major line.
+     *
+     * @param deg the latitude or the longitude
+     * @return true if the line is to be highlighted
+     */
+    private boolean isMajorGraticuleLine(double deg) {
+        double scale = map.getScaleFactor();
+        int zoom = zoomLevel(scale);
+        if (zoom < MAJOR_GRATICULE_SPACING.length) {
+            // distance betweeen two graticule lines in degrees
+            double majorGraticuleSpacing = MAJOR_GRATICULE_SPACING[zoom];
+            return Math.abs(deg % majorGraticuleSpacing) < 0.001;
+        } else {
+            return false;
+        }
+    }
 
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+    /**
+     * Adjust line width for minor and major lines of the graticule
+     *
+     * @param g2d graphics destination
+     * @param deg the latitude or the longitude
+     */
+    private void graticuleStyle(Graphics2D g2d, double deg) {
+        if (isMajorGraticuleLine(deg)) {
+            double scale = map.getScaleFactor();
+            float strokeWidth = (float) (2.5 / scale);
+            g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+        } else {
+            g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_OFF);
+        }
     }
 
     @Override
@@ -389,6 +441,48 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
 
     @Override
     public void move(double dx, double dy) {
+    }
+
+    /**
+     * @return the showGraticule
+     */
+    public boolean isShowGraticule() {
+        return showGraticule;
+    }
+
+    /**
+     * @param showGraticule the showGraticule to set
+     */
+    public void setShowGraticule(boolean showGraticule) {
+        this.showGraticule = showGraticule;
+    }
+
+    /**
+     * @return the showTropics
+     */
+    public boolean isShowTropics() {
+        return showTropics;
+    }
+
+    /**
+     * @param showTropics the showTropics to set
+     */
+    public void setShowTropics(boolean showTropics) {
+        this.showTropics = showTropics;
+    }
+
+    /**
+     * @return the showPolarCircles
+     */
+    public boolean isShowPolarCircles() {
+        return showPolarCircles;
+    }
+
+    /**
+     * @param showPolarCircles the showPolarCircles to set
+     */
+    public void setShowPolarCircles(boolean showPolarCircles) {
+        this.showPolarCircles = showPolarCircles;
     }
 
 }
