@@ -152,3 +152,18 @@ Fixed bug in coordinate reference system for OpenStreetMap. The Earth sphere was
 When OpenStreetMap points from previous versions are imported into MapAnalyst version 1.3.24, they will be offset by a few kilometers. There is a new function available at Maps > Correct OpenStreetMap Misalignment to move offset points to their correct location. 
 
 Dashed lines are no longer available to draw distortion visualisations, as they tend to crash the Java Virtual Machine.
+
+1.3.25
+6 March 2017
+Zoom in and out maps with scroll wheel.
+Larger raster maps can now be displayed on the Windows operating system. 
+Faster and more stable loading and rendering of OpenStreetMap.
+OpenStreetMap now has optional graticule (lines of longitude and latitude), tropics and polar circles.
+Coordinates are now displayed in degrees, minutes and seconds for OpenStreetMap.
+Added tooltip with coordinates for mouse pointer.
+Updated launch4j to version 3.9 for Windows exe file.
+Improved readability and layout of various GUI elements.
+Save and export file dialogs now suggest file names and file extensions.
+On macOS maps are now zoomed to full extend when MapAnalyst launches.
+Now using JMapProjLib for projection related code.
+

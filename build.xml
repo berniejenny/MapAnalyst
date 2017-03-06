@@ -78,7 +78,7 @@
                           identifier="ika.mapanalyst"
                           mainclassname="${main.class}"
                           icon="mac/appicon.icns"
-                          shortversion="1.3.24"
+                          shortversion="1.3.25"
                           copyright="© Bernhard Jenny, 2005–2017"
                           applicationCategory="public.app-category.graphics-design">
             <classpath file="${dist.jar}" />
@@ -98,6 +98,7 @@
         <jar compress="true" destfile="${dist.jar}" update="true">
 
             <zipfileset src="./lib/jai_imageio.jar"/>
+            <zipfileset src="./dist/lib/JMapProjLib.jar"/>
             <manifest>
                 <attribute value="${main.class}" name="Main-Class"/>
             </manifest>
