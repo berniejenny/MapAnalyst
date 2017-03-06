@@ -1117,6 +1117,9 @@
               </SubComponents>
             </Menu>
             <MenuItem class="javax.swing.JSeparator" name="exitMenuSeparator">
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="if (Sys.isMacOSX()) {&#xa;    fileMenu.remove(exitMenuSeparator);&#xa;}"/>
+              </AuxValues>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="exitMenuItem">
               <Properties>
@@ -1125,6 +1128,9 @@
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exitMenuItemActionPerformed"/>
               </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="if (Sys.isMacOSX()) {&#xa;    fileMenu.remove(exitMenuItem);&#xa;}"/>
+              </AuxValues>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -1771,7 +1777,9 @@
         </Menu>
         <Menu class="javax.swing.JMenu" name="helpMenu">
           <Properties>
-            <Property name="text" type="java.lang.String" value="?"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Sys.isMacOSX() ? &quot;Help&quot; : &quot;?&quot;" type="code"/>
+            </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="infoMenuItem">

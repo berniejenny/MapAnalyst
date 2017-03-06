@@ -2701,6 +2701,9 @@ saveProjectMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     fileMenu.add(exportPointsMenu);
     fileMenu.add(exitMenuSeparator);
+    if (Sys.isMacOSX()) {
+        fileMenu.remove(exitMenuSeparator);
+    }
 
     exitMenuItem.setText("Exit");
     exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2709,6 +2712,9 @@ saveProjectMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     });
     fileMenu.add(exitMenuItem);
+    if (Sys.isMacOSX()) {
+        fileMenu.remove(exitMenuItem);
+    }
 
     menuBar.add(fileMenu);
 
@@ -3258,7 +3264,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     windowMenu.setText("Window");
     menuBar.add(windowMenu);
 
-    helpMenu.setText("?");
+    helpMenu.setText(Sys.isMacOSX() ? "Help" : "?");
 
     infoMenuItem.setText("Info");
     infoMenuItem.addActionListener(new java.awt.event.ActionListener() {
