@@ -1735,49 +1735,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JSeparator" name="jSeparator9">
             </MenuItem>
-            <Menu class="javax.swing.JMenu" name="imageRenderingMenu">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Raster Image Rendering Quality"/>
-              </Properties>
-              <SubComponents>
-                <MenuItem class="javax.swing.JCheckBoxMenuItem" name="imageRenderingHighQualityCheckBoxMenuItem">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="imageRenderingQualityButtonGroup"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="High (Slow)"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="imageRenderingHighQualityCheckBoxMenuItemActionPerformed"/>
-                  </Events>
-                </MenuItem>
-                <MenuItem class="javax.swing.JCheckBoxMenuItem" name="imageRenderingMediumQualityCheckBoxMenuItem">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="imageRenderingQualityButtonGroup"/>
-                    </Property>
-                    <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" value="Medium"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="imageRenderingMediumQualityCheckBoxMenuItemActionPerformed"/>
-                  </Events>
-                </MenuItem>
-                <MenuItem class="javax.swing.JCheckBoxMenuItem" name="imageRenderingLowQualityCheckBoxMenuItem">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="imageRenderingQualityButtonGroup"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="Low (Fast)"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="imageRenderingLowQualityCheckBoxMenuItemActionPerformed"/>
-                  </Events>
-                </MenuItem>
-              </SubComponents>
-            </Menu>
-            <MenuItem class="javax.swing.JSeparator" name="jSeparator14">
-            </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="showPointsCheckBoxMenuItem">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>

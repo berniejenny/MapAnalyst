@@ -66,11 +66,6 @@ public class MapComponent extends javax.swing.JComponent
     private final Point2D.Double topLeft = new Point2D.Double(0, 1000);
 
     /**
-     * Rendering settings for all raster images in this map.
-     */
-    private Object imageRenderingHint = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-
-    /**
      * A formatter that can be used to display coordinates of this map.
      */
     private CoordinateFormatter coordinateFormatter
@@ -518,7 +513,7 @@ public class MapComponent extends javax.swing.JComponent
                 RenderingHints.VALUE_RENDER_QUALITY);
         // enable bicubic interpolation of images
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                this.imageRenderingHint);
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                 RenderingHints.VALUE_STROKE_PURE);
 
@@ -699,20 +694,6 @@ public class MapComponent extends javax.swing.JComponent
 
     public void addMouseMotionListener(MapToolMouseMotionListener listener) {
         mapEventHandler.addMouseMotionListener(listener);
-    }
-
-    public Object getImageRenderingHint() {
-        return imageRenderingHint;
-    }
-
-    public void setImageRenderingHint(Object imageRenderingHint) {
-        if (imageRenderingHint != RenderingHints.VALUE_INTERPOLATION_BICUBIC
-                && imageRenderingHint != RenderingHints.VALUE_INTERPOLATION_BILINEAR
-                && imageRenderingHint != RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR) {
-            throw new IllegalArgumentException();
-        }
-
-        this.imageRenderingHint = imageRenderingHint;
     }
 
     public CoordinateFormatter getCoordinateFormatter() {

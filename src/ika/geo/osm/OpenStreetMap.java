@@ -277,7 +277,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         if (mapComponent == null) {
             return;
         }
-
+        
         // compute OSM zoom level
         int zoom = zoomLevel(scale);
         if (zoom > OSM_MAX_ZOOM) {

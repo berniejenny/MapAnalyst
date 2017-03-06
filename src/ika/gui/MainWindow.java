@@ -765,11 +765,6 @@ public class MainWindow extends javax.swing.JFrame
         showAllOldMenuItem = new javax.swing.JMenuItem();
         showAllNewMenuItem = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JSeparator();
-        imageRenderingMenu = new javax.swing.JMenu();
-        imageRenderingHighQualityCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        imageRenderingMediumQualityCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        imageRenderingLowQualityCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        jSeparator14 = new javax.swing.JSeparator();
         showPointsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showOldCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showNewCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -3231,39 +3226,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     viewMenu.add(showAllNewMenuItem);
     viewMenu.add(jSeparator9);
 
-    imageRenderingMenu.setText("Raster Image Rendering Quality");
-
-    imageRenderingQualityButtonGroup.add(imageRenderingHighQualityCheckBoxMenuItem);
-    imageRenderingHighQualityCheckBoxMenuItem.setText("High (Slow)");
-    imageRenderingHighQualityCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            imageRenderingHighQualityCheckBoxMenuItemActionPerformed(evt);
-        }
-    });
-    imageRenderingMenu.add(imageRenderingHighQualityCheckBoxMenuItem);
-
-    imageRenderingQualityButtonGroup.add(imageRenderingMediumQualityCheckBoxMenuItem);
-    imageRenderingMediumQualityCheckBoxMenuItem.setSelected(true);
-    imageRenderingMediumQualityCheckBoxMenuItem.setText("Medium");
-    imageRenderingMediumQualityCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            imageRenderingMediumQualityCheckBoxMenuItemActionPerformed(evt);
-        }
-    });
-    imageRenderingMenu.add(imageRenderingMediumQualityCheckBoxMenuItem);
-
-    imageRenderingQualityButtonGroup.add(imageRenderingLowQualityCheckBoxMenuItem);
-    imageRenderingLowQualityCheckBoxMenuItem.setText("Low (Fast)");
-    imageRenderingLowQualityCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            imageRenderingLowQualityCheckBoxMenuItemActionPerformed(evt);
-        }
-    });
-    imageRenderingMenu.add(imageRenderingLowQualityCheckBoxMenuItem);
-
-    viewMenu.add(imageRenderingMenu);
-    viewMenu.add(jSeparator14);
-
     showPointsCheckBoxMenuItem.setSelected(true);
     showPointsCheckBoxMenuItem.setText("Show Points");
     showPointsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -4340,9 +4302,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             w.setVisible(true);
             w.cleanDirty();
             MainWindow.updateAllMenusOfAllWindows();
-        } catch (Exception e) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "The file could not be opened.",
                     "File Error", JOptionPane.ERROR_MESSAGE, null);
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -4415,7 +4378,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         if (newFilePath == null) {
             return;
         }
-        this.openProject(newFilePath);
+        openProject(newFilePath);
     }//GEN-LAST:event_openProjectMenuItemActionPerformed
 
     private void placePointMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placePointMenuItemActionPerformed
@@ -4513,25 +4476,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
 
     }//GEN-LAST:event_findLinkMenuItemActionPerformed
-
-    private void setImageRenderingQuality(Object renderingHint) {
-        this.oldMapComponent.setImageRenderingHint(renderingHint);
-        this.newMapComponent.setImageRenderingHint(renderingHint);
-        this.oldMapComponent.repaint();
-        this.newMapComponent.repaint();
-    }
-
-    private void imageRenderingLowQualityCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_imageRenderingLowQualityCheckBoxMenuItemActionPerformed
-        setImageRenderingQuality(RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-    }//GEN-LAST:event_imageRenderingLowQualityCheckBoxMenuItemActionPerformed
-
-    private void imageRenderingMediumQualityCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_imageRenderingMediumQualityCheckBoxMenuItemActionPerformed
-        setImageRenderingQuality(RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    }//GEN-LAST:event_imageRenderingMediumQualityCheckBoxMenuItemActionPerformed
-
-    private void imageRenderingHighQualityCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_imageRenderingHighQualityCheckBoxMenuItemActionPerformed
-        setImageRenderingQuality(RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-    }//GEN-LAST:event_imageRenderingHighQualityCheckBoxMenuItemActionPerformed
 
     private void showReportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showReportMenuItemActionPerformed
         if (this.transformationReportWin == null) {
@@ -6493,10 +6437,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JTextField huberEstimatorKTextField;
     private javax.swing.JTextArea huberEstimatorMinMaxTextArea;
     private javax.swing.JPanel huberEstimatorParametersPanel;
-    private javax.swing.JCheckBoxMenuItem imageRenderingHighQualityCheckBoxMenuItem;
-    private javax.swing.JCheckBoxMenuItem imageRenderingLowQualityCheckBoxMenuItem;
-    private javax.swing.JCheckBoxMenuItem imageRenderingMediumQualityCheckBoxMenuItem;
-    private javax.swing.JMenu imageRenderingMenu;
     private javax.swing.ButtonGroup imageRenderingQualityButtonGroup;
     private javax.swing.JMenuItem importLinkedPointsMenuItem;
     private javax.swing.JMenuItem importNewMapMenuItem;
@@ -6533,7 +6473,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator11;
     private javax.swing.JSeparator jSeparator12;
     private javax.swing.JSeparator jSeparator13;
-    private javax.swing.JSeparator jSeparator14;
     private javax.swing.JSeparator jSeparator15;
     private javax.swing.JSeparator jSeparator16;
     private javax.swing.JSeparator jSeparator18;
