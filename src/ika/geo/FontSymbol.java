@@ -19,6 +19,8 @@ import java.awt.geom.*;
  * @author Bernhard Jenny, Institute of Cartography, ETH Zurich
  */
 public class FontSymbol extends Symbol {
+    
+    private static final long serialVersionUID = -6082612762777487949L;
 
     private Font font = new Font("SansSerif", Font.PLAIN, 12);
 

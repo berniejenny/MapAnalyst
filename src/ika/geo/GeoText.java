@@ -12,6 +12,8 @@ package ika.geo;
  */
 public class GeoText extends GeoObject {
 
+    private static final long serialVersionUID = 8231369188473660400L;
+            
     // position in world coordinates
     private double x = 0;
     private double y = 0;
