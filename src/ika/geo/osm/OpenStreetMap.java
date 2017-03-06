@@ -228,6 +228,10 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
     }
 
     private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        // showGraticule is a recent addition. Initialise it to true for projects 
+        // created when no graticule was available.
+        showGraticule = true;
+        
         // read this object
         stream.defaultReadObject();
 
