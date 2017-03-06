@@ -15,6 +15,7 @@ import ika.geoimport.*;
 import ika.mapanalyst.MapAnalyzer.MapAnalyzerException;
 import ika.transformation.robustestimator.*;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -861,10 +862,10 @@ public final class Manager implements Serializable {
         }
     }
 
-    public boolean placePointFromList(Component parentComponent) {
+    public boolean placePointFromList(Frame parent) {
         if (this.placeList == null || !placeList.isInitialized()) {
             this.placeList = new PlaceList();
-            placeList.askUserForFile();
+            placeList.askUserForFile(parent);
         }
 
         if (!placeList.isInitialized()) {
@@ -890,7 +891,7 @@ public final class Manager implements Serializable {
                 Object[] options = {"Add Point", "Cancel"};
                 javax.swing.Icon icon = ika.mapanalyst.ApplicationInfo.getApplicationIcon();
                 final int option = javax.swing.JOptionPane.showOptionDialog(
-                        parentComponent, msg, title,
+                        parent, msg, title,
                         javax.swing.JOptionPane.DEFAULT_OPTION,
                         javax.swing.JOptionPane.WARNING_MESSAGE,
                         icon, options, options[1]);

@@ -44,15 +44,15 @@ public class ImageExporter {
     private static void writeWorldFile(String worldFilePath, GeoImage geoImage)
     throws IOException{
         
-        PrintWriter writer = new PrintWriter(new BufferedWriter(
-                new FileWriter(worldFilePath)));
-        writer.println(geoImage.getPixelSizeX());
-        writer.println(0);
-        writer.println(0);
-        writer.println(-geoImage.getPixelSizeY());
-        writer.println(geoImage.getX());
-        writer.println(geoImage.getY());
-        writer.close();
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(
+                new FileWriter(worldFilePath)))) {
+            writer.println(geoImage.getPixelSizeX());
+            writer.println(0);
+            writer.println(0);
+            writer.println(-geoImage.getPixelSizeY());
+            writer.println(geoImage.getX());
+            writer.println(geoImage.getY());
+        }
     }
     
 }

@@ -117,7 +117,7 @@ public class GeoJSONExporter extends GeoSetExporter {
     }
 
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return "geojson";
     }
 

@@ -120,7 +120,7 @@ public class WMFExporter extends GeoSetExporter{
     }
 
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return "wmf";
     }
     

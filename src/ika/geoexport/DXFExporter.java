@@ -320,7 +320,7 @@ public class DXFExporter extends GeoSetExporter {
     }
 
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return "dxf";
     }
 }

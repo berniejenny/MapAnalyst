@@ -62,7 +62,7 @@ public class TextWindow {
     private JDialog dialog;
     private JTextArea textArea;
     
-    public TextWindow (java.awt.Frame ownerFrame, boolean modal, 
+    public TextWindow (final java.awt.Frame ownerFrame, boolean modal, 
             boolean initiallyVisible,
             String text, String title) {
 
@@ -83,7 +83,8 @@ public class TextWindow {
 
             public void actionPerformed(ActionEvent e) {
                 String msg = "Export Report";
-                String filePath = FileUtils.askFile(null, dialog, msg, false);
+                String fileName = "Export.txt";
+                String filePath = FileUtils.askFile(ownerFrame, msg, fileName, false, "txt");
                 if (filePath == null) {
                     return;
                 }

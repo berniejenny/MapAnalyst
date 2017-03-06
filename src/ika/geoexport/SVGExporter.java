@@ -379,7 +379,7 @@ public class SVGExporter extends GeoSetExporter {
     }
 
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return "svg";
     }
 }

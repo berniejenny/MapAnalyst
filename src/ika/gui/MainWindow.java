@@ -403,7 +403,7 @@ public class MainWindow extends javax.swing.JFrame
         showOSMPolarCirclesCheckBoxMenuItem.setSelected(osm.isShowPolarCircles());
         showOSMTropicsCheckBoxMenuItem.setEnabled(isUsingOSM);
         showOSMTropicsCheckBoxMenuItem.setSelected(osm.isShowTropics());
-        
+
         removeNewRasterImageMenuItem.setEnabled(manager.getNewMap() != null);
         removeOldRasterImageMenuItem.setEnabled(manager.getOldMap() != null);
     }
@@ -3815,7 +3815,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
         // ask the user for a file to export to
         String msg = "Export Points of " + (forOldMap ? "Old Map" : "New Map");
-        String exportFilePath = ika.utils.FileUtils.askFile(this, msg, false);
+        String fileName = forOldMap ? "Old map points" : "New map points";
+        // don't require a file extension. The extension will be set when the format is selected
+        String exportFilePath = ika.utils.FileUtils.askFile(this, msg, fileName, false, null);
         if (exportFilePath == null) {
             return; // user canceled
         }
@@ -3863,12 +3865,12 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
         final int nbrLinks = this.manager.getLinkManager().getNumberLinks();
         if (nbrLinks < 1) {
-            this.noLinkedPointsErrorMessage();
+            noLinkedPointsErrorMessage();
             return;
         }
 
-        String exportFilePath
-                = ika.utils.FileUtils.askFile(this, "Export Linked Points", false);
+        String fileName = "Linked points.txt";
+        String exportFilePath = FileUtils.askFile(this, "Export Linked Points", fileName, false, "txt");
         if (exportFilePath == null) {
             return; // user canceled
         }
@@ -3878,9 +3880,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             return; // user canceled
         }
         try {
-            this.manager.exportLinkedPointsToASCII(exportFilePath, oldMap, res == 0);
+            manager.exportLinkedPointsToASCII(exportFilePath, oldMap, res == 0);
         } catch (Exception e) {
-            this.pointExportError(e);
+            pointExportError(e);
         }
 
     }
@@ -3962,6 +3964,20 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             }
             return manager.getNewMap().getPixelSizeX();
         }
+    }
+
+    /**
+     * Creates a file name that can be used to export data.
+     *
+     * @param fileExtension
+     * @return
+     */
+    private String exportFileName(String fileExtension) {
+        String fileName = getTitle();
+        if (fileName == null || fileName.trim().length() == 0) {
+            fileName = "Export";
+        }
+        return FileUtils.forceFileNameExtension(fileName, fileExtension);
     }
 
     private void importPoints(boolean forOldMap) {
@@ -4136,12 +4152,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void export(String format, boolean oldMap) {
         try {
-            String msg = "Save " + format + " File";
-            String path = ika.utils.FileUtils.askFile(this, msg, false);
-            if (path == null) {
-                return; // user canceled
-            }
-
             String classPath = "ika.geoexport." + format + "Exporter";
             Class exporterClass = Class.forName(classPath);
 
@@ -4154,7 +4164,15 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             Object[] args = new Object[]{mapScale};
             GeoSetExporter exporter = (GeoSetExporter) constructor.newInstance(args);
             exporter.setPathFlatness(f);
-            this.manager.export(exporter, path, oldMap);
+
+            String msg = "Save " + format + " File";
+            String ext = exporter.getFileExtension();
+            String fileName = exportFileName(ext);
+            String path = ika.utils.FileUtils.askFile(this, msg, fileName, false, ext);
+            if (path == null) {
+                return; // user canceled
+            }
+            manager.export(exporter, path, oldMap);
 
         } catch (Exception e) {
             showExportError(e);
@@ -4177,7 +4195,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void exportToRasterImage(boolean oldMap, String format) {
         // ask the user for a file to store the image
-        String path = ika.utils.FileUtils.askFile(null, "Save Raster Image", false);
+        String fileName = exportFileName(format);
+        String path = FileUtils.askFile(this, "Save Raster Image", fileName, false, format);
         if (path == null) {
             return; // user canceled
         }
@@ -4291,7 +4310,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // successfully read new data. Create new window.
             final File file = new File(filePath);
-            String fileName = file.getName();
+            String fileName = FileUtils.cutFileExtension(file.getName());
             MainWindow w = new MainWindow(fileName, true);
             w.resetManager(newManager);
             w.filePath = filePath;
@@ -4333,8 +4352,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
                 case 2:
                     /* document has been edited and user wants to save it */
                     if (this.filePath == null || !new File(this.filePath).exists()) {
-                        this.filePath = FileUtils.askFile(this, "Save Project:", false);
-                        if (this.filePath == null) {
+                        String ext = ApplicationInfo.getDocumentExtension();
+                        String fileName = exportFileName(ext);
+                        filePath = FileUtils.askFile(this, "Save Project", fileName, false, ext);
+                        if (filePath == null) {
                             return false; // user canceled
                         }
                     }
@@ -4360,7 +4381,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private boolean saveProject(String path) {
         try {
-            byte[] serializedManager = this.manager.serializeManager();
+            byte[] serializedManager = manager.serializeManager();
             FileOutputStream fileStream = new FileOutputStream(path);
             fileStream.write(serializedManager);
         } catch (Exception e) {
@@ -4374,7 +4395,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }
 
     private void openProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openProjectMenuItemActionPerformed
-        String newFilePath = ika.utils.FileUtils.askFile(this, "Open Project:", true);
+        String newFilePath = FileUtils.askFile(this, "Open Project:", true);
         if (newFilePath == null) {
             return;
         }
@@ -4603,7 +4624,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_exportOldUngenerateMenuItemActionPerformed
 
     private void exportNewSVGMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportNewSVGMenuItemActionPerformed
-        String path = ika.utils.FileUtils.askFile(this, "Save SVG File", false);
+        String fileName = exportFileName("svg");
+        String path = FileUtils.askFile(this, "Save SVG File", fileName, false, "svg");
         if (path == null) {
             return; // user canceled
         }
@@ -5415,7 +5437,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             try {
                 // make sure there is an image importer for the file format
                 // before any pre-existing image is removed from the map.
-                String fileExt = ika.utils.FileUtils.getFileExtension(importFilePath);
+                String fileExt = FileUtils.getFileExtension(importFilePath);
                 if (!ika.utils.ImageUtils.canReadImageFile(fileExt)) {
                     throw new Exception("File format not supported.");
                 }
@@ -5520,8 +5542,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             return;
         }
 
-        String expPath = ika.utils.FileUtils.askFile(this,
-                "Export Linked Points and Vectors", false);
+        String fileName = exportFileName("txt");
+        String expPath = FileUtils.askFile(this,
+                "Export Linked Points and Vectors", fileName, false, "txt");
         if (expPath == null) {
             return; // user canceled
         }
@@ -5547,7 +5570,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // ask for file path if the document has never been saved or if its
         // path is invalid.
         if (this.filePath == null || !new java.io.File(this.filePath).exists()) {
-            this.filePath = FileUtils.askFile(this, "Save Project:", false);
+            this.filePath = FileUtils.askFile(this, "Save Project", false);
         }
 
         if (filePath == null) {
@@ -5566,8 +5589,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         if (this.filePath != null) {
             this.saveProject(this.filePath);
             this.cleanDirty();
-            String fileName = ika.utils.FileUtils.cutParentPathAndExtension(this.filePath);
-            this.setTitle(fileName + (Sys.isWindows() ? " - MapAnalyst" : ""));
+            String fileName = FileUtils.getFileNameWithoutExtension(filePath);
+            setTitle(fileName + (Sys.isWindows() ? " - MapAnalyst" : ""));
             MainWindow.updateAllMenusOfAllWindows();
         }
 }//GEN-LAST:event_saveProjectMenuItemActionPerformed
@@ -5575,17 +5598,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void saveProjectAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveProjectAsMenuItemActionPerformed
         // ask for file path
         // 'save as': don't store the path to the file in this.filePath
-        String path = FileUtils.askFile(this, "Save Copy of Project As:", false);
-
-        String extension = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
-        path = ika.utils.FileUtils.forceFileNameExtension(path, extension);
-        if (path == null) // path is not valid
-        {
-            return;
-        }
-
+        String ext = ApplicationInfo.getDocumentExtension();
+        String fileName = exportFileName(ext);
+        String path = FileUtils.askFile(this, "Save Copy of Project", fileName, false, ext);       
         if (path != null) {
-            this.saveProject(path);
+            saveProject(path);
         }
 }//GEN-LAST:event_saveProjectAsMenuItemActionPerformed
 
@@ -5871,7 +5888,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_longitudeSliderStateChanged
 
     private void exportToShape(int shapeType, boolean oldMap) {
-        String path = ika.utils.FileUtils.askFile(this, "Save ESRI Shape File", false);
+        String fileName = exportFileName("shp");
+        String path = FileUtils.askFile(this, "Save ESRI Shape File", fileName, false, "shp");
         if (path != null) {
             exportToShape(shapeType, oldMap, path);
         }

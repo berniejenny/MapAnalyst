@@ -7,6 +7,7 @@
 
 package ika.mapanalyst;
 
+import java.awt.Frame;
 import java.util.regex.*;
 import ternarysearchtree.*;
 import java.io.*;
@@ -100,9 +101,9 @@ public class PlaceList implements Serializable {
         return (String)selectedValue;
     }
     
-    public void askUserForFile() {
+    public void askUserForFile(Frame frame) {
         try {
-            String filePath = ika.utils.FileUtils.askFile(null,
+            String filePath = ika.utils.FileUtils.askFile(frame,
                     "ASCII Table with Name - X - Y (CSV)", true);
             if (filePath == null)
                 return; // user cancelled

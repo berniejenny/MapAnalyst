@@ -22,7 +22,7 @@ public class FontSymbol extends Symbol {
     
     private static final long serialVersionUID = -6082612762777487949L;
 
-    private Font font = new Font("SansSerif", Font.PLAIN, 12);
+    private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 
     private boolean scaleInvariant = true;
 

@@ -26,7 +26,7 @@ abstract public class GeoSetExporter {
 
     abstract protected void export(GeoSet geoSet, String filePath) throws IOException;
 
-    abstract protected String getFileExtension();
+    abstract public String getFileExtension();
 
     public void exportGeoSet(GeoSet geoSet, String filePath) throws IOException {
         filePath = FileUtils.forceFileNameExtension(filePath, getFileExtension());

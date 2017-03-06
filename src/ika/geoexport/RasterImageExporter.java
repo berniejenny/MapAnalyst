@@ -107,7 +107,7 @@ public class RasterImageExporter extends GeoSetExporter {
     }
 
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return this.format;
     }
 }
