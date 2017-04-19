@@ -398,11 +398,11 @@ public class MainWindow extends javax.swing.JFrame
         removeOSMMenuItem.setEnabled(isUsingOSM);
         correctOSMMisalignmentBugMenuItem.setEnabled(isUsingOSM && hasNewPoints);
         showOSMGraticuleCheckBoxMenuItem.setEnabled(isUsingOSM);
-        showOSMGraticuleCheckBoxMenuItem.setSelected(osm.isShowGraticule());
+        showOSMGraticuleCheckBoxMenuItem.setSelected(isUsingOSM && osm.isShowGraticule());
         showOSMPolarCirclesCheckBoxMenuItem.setEnabled(isUsingOSM);
-        showOSMPolarCirclesCheckBoxMenuItem.setSelected(osm.isShowPolarCircles());
+        showOSMPolarCirclesCheckBoxMenuItem.setSelected(isUsingOSM && osm.isShowPolarCircles());
         showOSMTropicsCheckBoxMenuItem.setEnabled(isUsingOSM);
-        showOSMTropicsCheckBoxMenuItem.setSelected(osm.isShowTropics());
+        showOSMTropicsCheckBoxMenuItem.setSelected(isUsingOSM && osm.isShowTropics());
 
         removeNewRasterImageMenuItem.setEnabled(manager.getNewMap() != null);
         removeOldRasterImageMenuItem.setEnabled(manager.getOldMap() != null);
@@ -2424,7 +2424,7 @@ public class MainWindow extends javax.swing.JFrame
         transformationInfoTextArea.setFocusable(false);
         transformationInfoTextArea.setMinimumSize(new java.awt.Dimension(200, 21));
         transformationInfoTextArea.setOpaque(false);
-        transformationInfoTextArea.setPreferredSize(new java.awt.Dimension(160, 136));
+        transformationInfoTextArea.setPreferredSize(new java.awt.Dimension(250, 136));
         transformationInfoPanel.add(transformationInfoTextArea, java.awt.BorderLayout.CENTER);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -4391,6 +4391,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             FileOutputStream fileStream = new FileOutputStream(path);
             fileStream.write(serializedManager);
         } catch (Exception e) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, e);
             JOptionPane.showMessageDialog(this, "An error occured. "
                     + "The file could not be saved.\n"
                     + "Please try saving the file to another location.",
@@ -5572,11 +5573,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 }//GEN-LAST:event_exportLinkedPointsInPixelsMenuItemActionPerformed
 
     private void saveProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveProjectMenuItemActionPerformed
-
         // ask for file path if the document has never been saved or if its
         // path is invalid.
-        if (this.filePath == null || !new java.io.File(this.filePath).exists()) {
-            this.filePath = FileUtils.askFile(this, "Save Project", false);
+        if (filePath == null || !new java.io.File(filePath).exists()) {
+            filePath = FileUtils.askFile(this, "Save Project", false);
         }
 
         if (filePath == null) {
@@ -5585,16 +5585,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // Don't move this to saveProject(). The path with the correct extension
         // has to be stored.
         String extension = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
-        this.filePath = ika.utils.FileUtils.forceFileNameExtension(this.filePath, extension);
-        if (this.filePath == null) // path is not valid
-        {
-            return;
-        }
-
-        // the user canceled if filePath is still null
-        if (this.filePath != null) {
-            this.saveProject(this.filePath);
-            this.cleanDirty();
+        filePath = ika.utils.FileUtils.forceFileNameExtension(filePath, extension);
+        // the user canceled if filePath is null
+        if (filePath != null) {
+            saveProject(filePath);
+            cleanDirty();
             String fileName = FileUtils.getFileNameWithoutExtension(filePath);
             setTitle(fileName + (Sys.isWindows() ? " - MapAnalyst" : ""));
             MainWindow.updateAllMenusOfAllWindows();
@@ -5606,7 +5601,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // 'save as': don't store the path to the file in this.filePath
         String ext = ApplicationInfo.getDocumentExtension();
         String fileName = exportFileName(ext);
-        String path = FileUtils.askFile(this, "Save Copy of Project", fileName, false, ext);       
+        String path = FileUtils.askFile(this, "Save Copy of Project", fileName, false, ext);
         if (path != null) {
             saveProject(path);
         }
