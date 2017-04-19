@@ -178,18 +178,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      * listener for scale change events to stop loading tiles when the OSM zoom
      * level changes
      */
-    private final PropertyChangeListener scaleChangeListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            double oldScale = (Double) evt.getOldValue();
-            double newScale = (Double) evt.getNewValue();
-            int oldZoom = zoomLevel(oldScale);
-            int newZoom = zoomLevel(newScale);
-            if (oldZoom != newZoom) {
-                tileController.cancelOutstandingJobs();
-            }
-        }
-    };
+    private transient PropertyChangeListener scaleChangeListener;
 
     private boolean showGraticule = true;
     private boolean showTropics = false;
@@ -217,6 +206,19 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         TileSource tileSource = new OsmTileSource.Mapnik();
         TileCache cache = new MemoryTileCache(NBR_CACHED_IMAGES);
         tileController = new TileController(tileSource, cache, this);
+
+        scaleChangeListener = new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                double oldScale = (Double) evt.getOldValue();
+                double newScale = (Double) evt.getNewValue();
+                int oldZoom = zoomLevel(oldScale);
+                int newZoom = zoomLevel(newScale);
+                if (oldZoom != newZoom) {
+                    tileController.cancelOutstandingJobs();
+                }
+            }
+        };
     }
 
     /**
@@ -231,7 +233,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         // showGraticule is a recent addition. Initialise it to true for projects 
         // created when no graticule was available.
         showGraticule = true;
-        
+
         // read this object
         stream.defaultReadObject();
 
@@ -281,7 +283,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         if (mapComponent == null) {
             return;
         }
-        
+
         // compute OSM zoom level
         int zoom = zoomLevel(scale);
         if (zoom > OSM_MAX_ZOOM) {
@@ -513,7 +515,7 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
             return false;
         }
     }
-    
+
     /**
      * setup stroke and rendering hints for major graticule lines
      *
