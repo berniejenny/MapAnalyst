@@ -157,8 +157,8 @@ Dashed lines are no longer available to draw distortion visualisations, as they 
 6 March 2017
 Zoom in and out maps with scroll wheel.
 Larger raster maps can now be displayed on the Windows operating system. 
-Faster and more stable loading and rendering of OpenStreetMap.
-OpenStreetMap now has optional graticule (lines of longitude and latitude), tropics and polar circles.
+Faster and more stable loading and rendering of OpenStreetMap thanks to [JMapViewer].
+OpenStreetMap now displays optional graticule (lines of longitude and latitude), tropics and polar circles.
 Coordinates are now displayed in degrees, minutes and seconds for OpenStreetMap.
 Added tooltip with coordinates for mouse pointer.
 Updated launch4j to version 3.9 for Windows exe file.
@@ -167,3 +167,7 @@ Save and export file dialogs now suggest file names and file extensions.
 On macOS maps are now zoomed to full extend when MapAnalyst launches.
 Now using JMapProjLib for projection related code.
 
+1.3.26
+20 April 2017
+Fixed “The file could not be saved” bug when saving a project file.
+Fixed enabled status of OpenStreetMap menu items.
