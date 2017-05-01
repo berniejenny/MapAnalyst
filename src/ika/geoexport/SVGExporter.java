@@ -364,20 +364,7 @@ public class SVGExporter extends GeoSetExporter {
         double w = geoSet.getBounds2D().getWidth();
         this.scale = svgWidth / w;
     }
-    
-    public static void main(String[] args){
-        try {
-            java.net.URI uri = new java.net.URI("file",
-                    "",
-                    "/Users/jenny/Desktop/underground map.jpg",
-                    null);
-            System.out.println(uri);
-            
-        }catch (Exception e){}
-        
-        
-    }
-
+   
     @Override
     public String getFileExtension() {
         return "svg";

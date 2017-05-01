@@ -206,7 +206,6 @@ public class Isolines extends MapAnalyzer {
 
             Contourer.toPaths(contours, rotationLinesGeoSet);
             this.rotationLinesGeoSet.setVectorSymbol(this.isorotationVectorSymbol);
-
             /*
             end = timer.nanoTime();
             System.out.println("Time needed: " + (end - start)/1000/1000);

@@ -171,3 +171,10 @@ Now using JMapProjLib for projection related code.
 20 April 2017
 Fixed “The file could not be saved” bug when saving a project file.
 Fixed enabled status of OpenStreetMap menu items.
+
+1.3.27
+1 May 2017
+Fixed wrong outlier colour for displacement circles.
+Fixed wrong scale display for mouse pointer position.
+Fixed computation of mean longitude for intermediate projection, which was wrong when points were on both sides of the antimeridian.
+Added info dialog about map size in “Maps > About the Maps…”.

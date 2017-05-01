@@ -59,7 +59,6 @@ public class Contourer {
         
         for (int i = 0; i < nbrIntervals; ++i) {
             float contourLevel = firstContourLevel + i * this.interval;
-            System.out.println(contourLevel);
             ArrayList<double[][]> levelContours = contour(contourLevel);
             if (levelContours.size() > 1) {
                 contours.add(levelContours);
