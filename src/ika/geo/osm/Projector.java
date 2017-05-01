@@ -121,7 +121,6 @@ public class Projector {
             out[i][0] = pt.x;
             out[i][1] = pt.y;
         }
-
     }
 
     /**

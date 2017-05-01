@@ -440,23 +440,14 @@ public class LinkManager implements GeoSetSelectionChangeListener,
     public String getReport(String separator, 
             boolean addHeader,
             GeoImage oldMap,
-            Transformation oldToNewTrans,
-            Projector projector) {
+            Transformation oldToNewTrans) {
         
         final int NUMBER_LENGTH = 20;
         final int NBR_DECIMALS = 6;
 
         final boolean oldPointsInPixels = oldMap != null;
 
-        // convert points in OpenStreetMap to local coordinate system
-        // for the computation of azimuths and vector lengths
-        double[][] localOSMPoints = null;
-        if (oldToNewTrans != null && projector != null) {
-            localOSMPoints = getLinkedPointsCopy()[1];
-            projector.OSM2Intermediate(localOSMPoints, localOSMPoints);
-        }
-
-        StringBuffer str = new StringBuffer(1028);
+        StringBuilder str = new StringBuilder(1028);
         String newline = System.getProperty("line.separator");
         if (separator == null)
             separator = ",\t";
@@ -532,14 +523,6 @@ public class LinkManager implements GeoSetSelectionChangeListener,
             str.append(separator);
             
             if (oldToNewTrans != null) {
-
-                // if OpenStreetMap is used, compute azimuth and vector lengths
-                // with coordinates in a local coordinate system.
-                if (localOSMPoints != null) {
-                    newX = localOSMPoints[i][0];
-                    newY = localOSMPoints[i][1];
-                }
-
                 GeoPoint transformedOldPt = oldToNewTrans.transform(oldPoint);
                 double dx = transformedOldPt.getX() - newX;
                 double dy = transformedOldPt.getY() - newY;
@@ -564,7 +547,7 @@ public class LinkManager implements GeoSetSelectionChangeListener,
      * @return An array with two elements. Each element is a two-dimensional
      * array of points.
      */
-    public double[][][] getLinkedPointsCopy() {
+    public double[][][] getLinkedPointsCopy(Projector projector) {
         double[][] oldPoints = new double[this.linksList.size()][2];
         double[][] newPoints = new double[this.linksList.size()][2];
         for(int i = 0; i < oldPoints.length; i++){
@@ -574,6 +557,10 @@ public class LinkManager implements GeoSetSelectionChangeListener,
             oldPoints[i][1] = link.getPtOld().getY();
             newPoints[i][0] = link.getPtNew().getX();
             newPoints[i][1] = link.getPtNew().getY();
+        }
+        
+        if (projector != null) {
+            projector.OSM2Intermediate(newPoints, newPoints);
         }
         return new double[][][]{oldPoints, newPoints};
     }
@@ -721,7 +708,7 @@ public class LinkManager implements GeoSetSelectionChangeListener,
 
     @Override
     public String toString() {
-        return this.getReport(null, true, null, null, null);
+        return this.getReport(null, true, null, null);
     }
     
     /**

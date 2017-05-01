@@ -5425,6 +5425,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             udpateTransformationInfoGUI();
 
         } catch (Throwable exc) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, exc);
+            
             String errMsg = exc.getMessage() == null ? "Unknown Error" : "Error: ";
 
             // display error message
@@ -5708,9 +5710,12 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         manager.setInitializedProjection(p);
     }
 
+    /**
+     * update projectionMeanDistanceLabel in projection dialog
+     */
     private void updateMeanDistanceLabel() {
         Projection p = manager.getProjection();
-        double[][][] oldNewPts = this.manager.getLinkManager().getLinkedPointsCopy();
+        double[][][] oldNewPts = this.manager.getLinkManager().getLinkedPointsCopy(null);
         double[][] oldPoints = oldNewPts[0];
         double[][] osmPoints = oldNewPts[1];
         Transformation t = manager.getTransformation();
@@ -5835,7 +5840,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             return;
         }
 
-        double[][][] oldNewPts = this.manager.getLinkManager().getLinkedPointsCopy();
+        double[][][] oldNewPts = this.manager.getLinkManager().getLinkedPointsCopy(null);
         double[][] oldPoints = oldNewPts[0];
         double[][] newPoints = oldNewPts[1];
         Transformation transformation = manager.getTransformation();

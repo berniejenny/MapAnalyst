@@ -21,6 +21,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
 
 public final class Manager implements Serializable {
 
@@ -142,19 +144,28 @@ public final class Manager implements Serializable {
         return new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY);
     }
 
-    private static double[][] transformPointsToCoordinateSystemsForAnalysis(
-            double[][] oldPoints, double[][] newPoints,
+    /**
+     * Initializes the transformation between the two maps, and transforms the
+     * points in the source map to the destination map.
+     *
+     * The transformation can be from the old map to the new map, or vice versa.
+     *
+     * @param oldPoints points in the old map
+     * @param newPoints points in the new map; optionally in OSM
+     * @param transformation this transformation will be initialized and used
+     * for transforming from the source to the destination map
+     * @param showErrorInOldMap if true, the new points are transformed to the
+     * old map. Vice versa if false.
+     * @return a two-dimensional array with the coordinates of the transformed
+     * source points.
+     */
+    private static double[][] transformPointsToDestinationMap(
+            double[][] oldPoints,
+            double[][] newPoints,
             Transformation transformation,
-            Projector projector,
             boolean showErrorInOldMap) {
 
-        final int nbrPts = oldPoints.length;
-
-        // if OSM is used, convert from Mercator projection to local projection
-        // and continue with projected points.
-        if (projector != null) {
-            projector.OSM2Intermediate(newPoints, newPoints);
-        }
+        assert (oldPoints.length == newPoints.length);
 
         // determine the destination points
         double[][] dstPoints;
@@ -169,15 +180,13 @@ public final class Manager implements Serializable {
         }
 
         // transform source points to the destination coordinate system
-        double[][] transformedSourcePoints = new double[nbrPts][2];
+        double[][] transformedSourcePoints = new double[dstPoints.length][2];
         for (int i = 0; i < dstPoints.length; i++) {
             transformedSourcePoints[i][0] = dstPoints[i][0];
             transformedSourcePoints[i][1] = dstPoints[i][1];
         }
         transformation.addResidualsToPoints(transformedSourcePoints);
-
         return transformedSourcePoints;
-
     }
 
     /**
@@ -192,10 +201,10 @@ public final class Manager implements Serializable {
             return null;
         }
 
-        double[][][] linkedPoints = getLinkManager().getLinkedPointsCopy();
+        double[][][] linkedPoints = getLinkManager().getLinkedPointsCopy(null);
         double[][] newPoints = linkedPoints[1];
 
-        // convert from OSM to geographical radian
+        // convert from OSM to spherical radians
         Projector.OSM2Geo(newPoints, newPoints);
 
         // compute mean latitude and longitude of all points in radian
@@ -203,7 +212,13 @@ public final class Manager implements Serializable {
         return Math.toDegrees(lon0lat0.getX());
     }
 
-    protected Projector buildProjector() {
+    /**
+     * Creates a new instance of Projector. Initializes the projector with a
+     * central longitude.
+     *
+     * @return a new Projector, or null if OSM is not used.
+     */
+    public Projector createProjector() {
         if (!isUsingOpenStreetMap()) {
             return null;
         }
@@ -229,29 +244,28 @@ public final class Manager implements Serializable {
             CoordinateFormatter newCoordinateFormatter,
             Component parentComponent) throws MapAnalyzerException {
 
-        this.clearGraphics();
-        Projector projector = buildProjector();
-        double[][][] pts = linkManager.getLinkedPointsCopy();
+        clearGraphics();
+        Projector projector = createProjector();
+        double[][][] pts = linkManager.getLinkedPointsCopy(projector);
         double[][] oldPoints = pts[0];
         double[][] newPoints = pts[1];
-        double[][] transformedSourcePoints = transformPointsToCoordinateSystemsForAnalysis(
+        double[][] transformedSourcePoints = transformPointsToDestinationMap(
                 oldPoints, newPoints,
                 transformation,
-                projector,
                 showErrorInOldMap);
         double[][] dstPoints = showErrorInOldMap ? oldPoints : newPoints;
 
-        if (this.showErrorInOldMap) {
-            this.getDistortionGrid().setMeshSizeScale(1.);
+        if (showErrorInOldMap) {
+            getDistortionGrid().setMeshSizeScale(1.);
         } else {
-            this.getDistortionGrid().setMeshSizeScale(transformation.getScale());
+            getDistortionGrid().setMeshSizeScale(transformation.getScale());
         }
 
         // initialize the multiquadratic interpolation
         MultiquadraticInterpolation multiQuadra;
         try {
             multiQuadra = new MultiquadraticInterpolation();
-            double exaggeration = this.getDistortionGrid().getExaggeration();
+            double exaggeration = getDistortionGrid().getExaggeration();
             multiQuadra.solveCoefficients(dstPoints, transformedSourcePoints,
                     exaggeration);
         } catch (Exception e) { // catch exception due to ill conditioned matrix.
@@ -261,13 +275,13 @@ public final class Manager implements Serializable {
                 String msg = "A system of linear equations cannot be solved. "
                         + "Some visualizations can therefore not be generated.";
                 String title = "Numerical Problem";
-                javax.swing.Icon icon = ika.mapanalyst.ApplicationInfo.getApplicationIcon();
-                javax.swing.JOptionPane.showMessageDialog(parentComponent, msg, title,
+                Icon icon = ika.mapanalyst.ApplicationInfo.getApplicationIcon();
+                JOptionPane.showMessageDialog(parentComponent, msg, title,
                         javax.swing.JOptionPane.ERROR_MESSAGE, icon);
             }
         }
 
-        double[][] newPointsHull = this.linkManager.getNewPointsHull();
+        double[][] newPointsHull = linkManager.getNewPointsHull();
 
         // convert convex hull around the points in the new reference map from
         // the OpenStreetMap (if used). This could actually turn the convex hull
@@ -282,10 +296,10 @@ public final class Manager implements Serializable {
         final VisualizationParameters params = new VisualizationParameters(
                 transformation,
                 oldPoints, newPoints,
-                this.linkManager.getOldPointsHull(),
+                linkManager.getOldPointsHull(),
                 newPointsHull,
                 transformedSourcePoints,
-                this.showErrorInOldMap,
+                showErrorInOldMap,
                 multiQuadra,
                 oldMapScale, newMapScale,
                 oldCoordinateFormatter, newCoordinateFormatter,
@@ -293,20 +307,18 @@ public final class Manager implements Serializable {
                 isUsingOpenStreetMap());
 
         for (int i = 0; i < NBR_ERR_DISP; i++) {
-            this.mapAnalyzer[i].setVisualizationParameters(params);
-            this.mapAnalyzer[i].analyzeMap();
+            mapAnalyzer[i].setVisualizationParameters(params);
+            mapAnalyzer[i].analyzeMap();
         }
 
     }
 
     private String getTransformationReport(Transformation transformation) {
-        double[][][] pts = linkManager.getLinkedPointsCopy();
-        transformPointsToCoordinateSystemsForAnalysis(
-                pts[0], pts[1],
+        double[][][] pts = linkManager.getLinkedPointsCopy(createProjector());
+        transformPointsToDestinationMap(pts[0], pts[1],
                 transformation,
-                buildProjector(),
                 showErrorInOldMap);
-        return transformation.getShortReport(this.showErrorInOldMap);
+        return transformation.getShortReport(showErrorInOldMap);
     }
 
     public String compareTransformations() {
@@ -696,23 +708,16 @@ public final class Manager implements Serializable {
         if (filePath == null) {
             return;        // initialize the transformation
         }
-        double[][][] linkedPoints = linkManager.getLinkedPointsCopy();
+        double[][][] linkedPoints = linkManager.getLinkedPointsCopy(createProjector());
         double[][] oldPoints = linkedPoints[0];
         double[][] newPoints = linkedPoints[1];
-
-        if (isUsingOpenStreetMap()) {
-            Projector projector = buildProjector();
-            double[][] projPts = new double[newPoints.length][2];
-            projector.OSM2Intermediate(newPoints, projPts);
-            newPoints = projPts;
-        }
 
         transformation.init(newPoints, oldPoints);
 
         String sep = toExcel ? "" : ",";
         boolean header = !toExcel;
         String report = getLinkManager().getReport(sep, header, null,
-                transformation, buildProjector());
+                transformation);
         if (report == null) {
             return;
         }
@@ -743,8 +748,7 @@ public final class Manager implements Serializable {
                 return;
             }
             String separator = toExcel ? "" : ",";
-            String report = getLinkManager().getReport(separator,
-                    false, oldMap, null, null);
+            String report = getLinkManager().getReport(separator, false, oldMap, null);
             if (report == null) {
                 return;
             }
