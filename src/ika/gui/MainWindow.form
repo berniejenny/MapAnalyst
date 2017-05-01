@@ -1392,6 +1392,16 @@
             <EventHandler event="menuSelected" listener="javax.swing.event.MenuListener" parameters="javax.swing.event.MenuEvent" handler="mapsMenuMenuSelected"/>
           </Events>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="mapSizeMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="About the Maps&#x2026;"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mapSizeMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator14">
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="removeOldRasterImageMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Remove Old Map Image"/>

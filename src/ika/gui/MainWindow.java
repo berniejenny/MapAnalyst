@@ -722,6 +722,8 @@ public class MainWindow extends javax.swing.JFrame
         jSeparator13 = new javax.swing.JSeparator();
         placePointMenuItem = new javax.swing.JMenuItem();
         mapsMenu = new javax.swing.JMenu();
+        mapSizeMenuItem = new javax.swing.JMenuItem();
+        jSeparator14 = new javax.swing.JPopupMenu.Separator();
         removeOldRasterImageMenuItem = new javax.swing.JMenuItem();
         removeNewRasterImageMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator17 = new javax.swing.JPopupMenu.Separator();
@@ -2942,6 +2944,15 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void menuCanceled(javax.swing.event.MenuEvent evt) {
         }
     });
+
+    mapSizeMenuItem.setText("About the Maps…");
+    mapSizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            mapSizeMenuItemActionPerformed(evt);
+        }
+    });
+    mapsMenu.add(mapSizeMenuItem);
+    mapsMenu.add(jSeparator14);
 
     removeOldRasterImageMenuItem.setText("Remove Old Map Image");
     removeOldRasterImageMenuItem.setEnabled(false);
@@ -6143,6 +6154,103 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_showOSMPolarCirclesCheckBoxMenuItemActionPerformed
 
+    private String getImageSizeInfo(GeoImage img) {
+         StringBuilder sb = new StringBuilder();
+         if (img != null) {
+             sb.append(img.getBufferedImage().getWidth());
+             sb.append(" \u00D7 ");
+             sb.append(img.getBufferedImage().getHeight());
+             sb.append (" pixels");
+         }
+         return sb.toString();
+    }
+    
+    private String getOldMapImageInfo() {
+        GeoImage img = manager.getOldMap();
+        if (img != null) {
+            StringBuilder sb = new StringBuilder();
+            Rectangle2D bounds = img.getBounds2D();
+            // size in cm
+            sb.append(String.format("%1$,.1f", bounds.getWidth() * 100));
+            sb.append(" cm \u00D7 ");
+            sb.append(String.format("%1$,.1f", bounds.getHeight() * 100));
+            sb.append(" cm (");
+            // size in inch
+            sb.append(String.format("%1$,.1f", bounds.getWidth() * 100 / 2.54));
+            sb.append(" \u00D7 ");
+            sb.append(String.format("%1$,.1f", bounds.getHeight() * 100 / 2.54));
+            sb.append(" inches)<br>");
+            
+            // image size in pixels
+            sb.append(getImageSizeInfo(img));
+            return sb.toString();
+        }
+        return null;
+    }
+
+    private String getNewMapImageInfo() {
+        GeoImage img = manager.getNewMap();
+        if (img != null) {
+            StringBuilder sb = new StringBuilder();
+            Rectangle2D bounds = img.getBounds2D();
+            // extent in reference coordinate system
+            sb.append(String.format("%1$,.1f", bounds.getWidth()));
+            sb.append(" m \u00D7 ");
+            sb.append(String.format("%1$,.1f", bounds.getHeight()));
+            sb.append(" m<br>");
+            
+            // image size in pixels
+            sb.append(getImageSizeInfo(img));
+            sb.append("<br>");
+            
+            // size of pixel
+            sb.append("Pixel size: ");
+            sb.append(img.getPixelSizeX());
+            sb.append(" m \u00D7 ");
+            sb.append(img.getPixelSizeY());
+            sb.append(" m");
+            
+            return sb.toString();
+        }
+        return null;
+    }
+
+    /**
+     * Display info dialog with size of map image
+     *
+     * @param oldMap for old or new map
+     */
+    private void aboutTheMaps() {
+        StringBuilder sb = new StringBuilder();
+        String oldMapInfo = getOldMapImageInfo();
+        String newMapInfo = getNewMapImageInfo();
+        sb.append("<html>");
+        if (oldMapInfo != null) {
+            sb.append("<b>Old Map</b><br>");
+            sb.append(oldMapInfo);
+        } else {
+            sb.append("There is currently no old map image loaded."
+                    + "<br>Please use File > Import Old Map Image to load an image.");
+        }
+        if (newMapInfo != null) {
+            sb.append("<br><br><b>New Map</b><br>");
+            sb.append(newMapInfo);
+        }
+        if (oldMapInfo != null || newMapInfo != null) {
+            sb.append("<br><br>");
+            sb.append("Correctly sized maps are required for accurate visualizations"
+                    + "<br>and the calculation of the scale of the old map.");
+        }
+        sb.append("</html>");
+        String dlgTitle = "About the Maps";
+        JOptionPane.showMessageDialog(this, sb.toString(),
+                dlgTitle, JOptionPane.PLAIN_MESSAGE, null);
+    }
+    
+    private void mapSizeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapSizeMenuItemActionPerformed
+        aboutTheMaps();
+    }//GEN-LAST:event_mapSizeMenuItemActionPerformed
+
     private void enableLinkingGUIForSelectedLink(Link link) {
         this.linkToggleButton.setEnabled(true);
         this.linkToggleButton.setSelected(true);
@@ -6497,6 +6605,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator11;
     private javax.swing.JSeparator jSeparator12;
     private javax.swing.JSeparator jSeparator13;
+    private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JSeparator jSeparator15;
     private javax.swing.JSeparator jSeparator16;
     private javax.swing.JSeparator jSeparator18;
@@ -6523,6 +6632,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JFormattedTextField longitudeFormattedTextField;
     private javax.swing.JSlider longitudeSlider;
     private ch.ethz.karto.gui.MapComponent mapComponent;
+    private javax.swing.JMenuItem mapSizeMenuItem;
     private javax.swing.JMenu mapsMenu;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JLabel nameLabel;
