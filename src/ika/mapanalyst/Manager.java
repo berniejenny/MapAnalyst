@@ -196,7 +196,6 @@ public final class Manager implements Serializable {
      * @return The mean longitude in degrees.
      */
     public Double meanLongitudeOfLinkedPointsInNewMap() {
-
         if (!isUsingOpenStreetMap()) {
             return null;
         }
@@ -207,9 +206,18 @@ public final class Manager implements Serializable {
         // convert from OSM to spherical radians
         Projector.OSM2Geo(newPoints, newPoints);
 
-        // compute mean latitude and longitude of all points in radian
-        Point2D lon0lat0 = Projector.meanPosition(newPoints);
-        return Math.toDegrees(lon0lat0.getX());
+        // compute mean longitude of all points: convert to Cartesian unit 
+        // vectors, compute mean vector, convert to longitude
+        double x = 0;
+        double y = 0;
+        for (int i = 0; i < newPoints.length; i++) {
+            double lon = newPoints[i][0];
+            x += Math.cos(lon);
+            y += Math.sin(lon);
+        }
+        x /= newPoints.length;
+        y /= newPoints.length;
+        return Math.toDegrees(Math.atan2(y, x));
     }
 
     /**

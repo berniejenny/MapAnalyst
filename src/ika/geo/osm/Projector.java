@@ -42,31 +42,6 @@ public class Projector {
     }
 
     /**
-     * Computes the mean horizontal and mean vertical coordinate of a set of
-     * points.
-     *
-     * @param pts an array of arrays with x and y coordinates.
-     * @return the mean position
-     */
-    public static Point2D meanPosition(double[][] pts) {
-
-        if (pts == null || pts.length == 0) {
-            return new Point2D.Double(0, 0);
-        }
-
-        double x = 0;
-        double y = 0;
-        for (int i = 0; i < pts.length; i++) {
-            x += pts[i][0];
-            y += pts[i][1];
-        }
-        x /= pts.length;
-        y /= pts.length;
-        return new Point2D.Double(x, y);
-
-    }
-
-    /**
      * Converts from an intermediate coordinate system to the OpenStreetMap
      * coordinate system. The intermediate coordinate system is used for
      * generating distortion visualizations.
