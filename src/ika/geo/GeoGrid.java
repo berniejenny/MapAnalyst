@@ -11,7 +11,7 @@ import java.awt.geom.*;
 
 /**
  *
- * @author jenny
+ * @author Bernhard Jenny
  */
 public class GeoGrid extends GeoObject {
     
@@ -127,7 +127,7 @@ public class GeoGrid extends GeoObject {
         h4 = col + 1 < this.cols ? this.getValue(col + 1, row) : Float.NaN;
         
         // start with the optimistic case: all values are valid
-        return this.bilinearInterpolation(h1, h2, h3, h4, relX, relY);
+        return GeoGrid.bilinearInterpolation(h1, h2, h3, h4, relX, relY);
     }
     
     /**
@@ -149,13 +149,14 @@ public class GeoGrid extends GeoObject {
     
     public float[] getMinMax(){
         float min = Float.MAX_VALUE;
-        float max = Float.MIN_VALUE;
+        float max = -Float.MAX_VALUE;
         for (int r = 0; r < rows; ++r) {
             for (int c = 0; c < cols; ++c) {
-                if (grid[r][c] < min)
-                    min = grid[r][c];
-                if (grid[r][c] > max)
-                    max = grid[r][c];
+                float v = grid[r][c];
+                if (v < min)
+                    min = v;
+                if (v > max)
+                    max = v;
             }
         }
         return new float[]{min, max};

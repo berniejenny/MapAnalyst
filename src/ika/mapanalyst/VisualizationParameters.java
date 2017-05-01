@@ -18,20 +18,20 @@ import ika.utils.CoordinateFormatter;
  */
 public final class VisualizationParameters {
     
-    private Transformation transformation;
-    private double[][] oldPoints;
-    private double[][] newPoints;
-    private double[][] oldPointsHull;
-    private double[][] newPointsHull;
-    private double[][] transformedSourcePoints;
-    private boolean analyzeOldMap;
-    private MultiquadraticInterpolation multiquadraticInterpolation;
-    private double oldMapScale;
-    private double newMapScale;
-    private CoordinateFormatter oldCoordinateFormatter;
-    private CoordinateFormatter newCoordinateFormatter;
-    private Projector projector;
-    private boolean OSM;
+    private final Transformation transformation;
+    private final double[][] oldPoints;
+    private final double[][] newPoints;
+    private final double[][] oldPointsHull;
+    private final double[][] newPointsHull;
+    private final double[][] transformedSourcePoints;
+    private final boolean analyzeOldMap;
+    private final MultiquadraticInterpolation multiquadraticInterpolation;
+    private final double oldMapScale;
+    private final double newMapScale;
+    private final CoordinateFormatter oldCoordinateFormatter;
+    private final CoordinateFormatter newCoordinateFormatter;
+    private final Projector projector;
+    private final boolean OSM;
     
     /** Creates a new instance of VisualizationParameters */
     public VisualizationParameters(Transformation transformation,
@@ -77,18 +77,14 @@ public final class VisualizationParameters {
         return oldPoints;
     }
     
-    protected void setNewPoints(double[][] newPoints) {
-        this.newPoints = newPoints;
-    }
-    
     /* Returns the points of the map that will NOT contain the generated graphics */
     protected double[][] getSrcPoints() {
-        return this.analyzeOldMap ? newPoints : oldPoints;
+        return analyzeOldMap ? newPoints : oldPoints;
     }
     
     /** Returns the points of the map that will contain the generated graphics */
     protected double[][] getDstPoints() {
-        return this.analyzeOldMap ? oldPoints : newPoints;
+        return analyzeOldMap ? oldPoints : newPoints;
     }
     
     protected Rectangle2D getSrcPointsExtension() {
@@ -108,7 +104,7 @@ public final class VisualizationParameters {
     }
     
     protected double[][] getSrcPointsHull() {
-        return this.analyzeOldMap ? newPointsHull : oldPointsHull;
+        return analyzeOldMap ? newPointsHull : oldPointsHull;
     }
     
     protected double[][] getDstPointsHull() {

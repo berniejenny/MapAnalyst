@@ -226,21 +226,22 @@ public abstract class GeoObject implements java.io.Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
+        
+    @Override
     public String toString() {
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         str.append (this.getClass());
         str.append ("\n");
-        str.append ("Name\t: " + this.name);
+        str.append("Name\t: ").append (name);
         
         str.append ("\n");
-        str.append ("Selectable\t: " + this.selectable);
+        str.append("Selectable\t: ").append (selectable);
         
         str.append ("\n");
-        str.append ("Selected\t: " + this.selected);
+        str.append("Selected\t: ").append (selected);
         
         str.append ("\n");
-        str.append ("Visible\t: " + this.visible);
+        str.append("Visible\t: ").append (visible);
         
         return str.toString();
     }

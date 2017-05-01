@@ -9,17 +9,18 @@ import java.text.DecimalFormat;
 
 /**
  * DistortionGrid.java
- * @author  Bernhard Jenny and Adrian Weber, Institute of Cartography ETH Zurich
+ *
+ * @author Bernhard Jenny and Adrian Weber, Institute of Cartography ETH Zurich
  */
 public class DistortionGrid extends MapAnalyzer implements Serializable {
 
     private static final long serialVersionUID = -5990761709834452077L;
     private double meshSize;
     /**
-     * meshSizeScale is 1, if the grid is transformed from the new reference
-     * map to the old map, i.e. the distorted grid is displayed in the old map.
+     * meshSizeScale is 1, if the grid is transformed from the new reference map
+     * to the old map, i.e. the distorted grid is displayed in the old map.
      * meshSizeScale is > 1 if the grid is transformed from the old map to the
-     * new reference map, i.e. the distorted grid is diplayed in the new 
+     * new reference map, i.e. the distorted grid is diplayed in the new
      * reference map.
      */
     private double meshSizeScale;
@@ -31,9 +32,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     private Unit meshUnit;
     private double smoothness;
     /**
-     * 0: no clipping
-     * 1: clip with convex hull
-     * 2: clip with custom polygon
+     * 0: no clipping 1: clip with convex hull 2: clip with custom polygon
      */
     private int clipWithHull;
     private double[][] oldClipPolygon;
@@ -60,7 +59,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
      */
     private double exaggeration;
     /**
-     * show a rotated and scaled, but not distorted grid. Added in MapAnalyst 1.3
+     * show a rotated and scaled, but not distorted grid. Added in MapAnalyst
+     * 1.3
      */
     private boolean showUndistorted;
     /**
@@ -196,6 +196,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         /**
          * computes a cell size for the distortion grid that would result in a
          * useful number of lines.
+         *
          * @param ext
          * @return
          */
@@ -263,6 +264,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
         /**
          * Computes the numbers of lines and the position of the grid.
+         *
          * @param ext A bounding box around the source points.
          */
         private void computeGridGeometry(Rectangle2D extension) {
@@ -334,7 +336,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         // make sure we have a reasonable number of lines in the grid.
         final Grid grid;
         if (isGeographicalGrid(params)) {
-            // convert to geographic coordinates in degrees
+            // create a lon/lat grid in the old map
+            // the source points are in OSM, convert them to spherical coordinates in degrees
             double[][] geographicSrcPts = params.getProjector().intermediate2geo(params.getSrcPoints());
 
             // generate graticule (grid of longitude / latitude lines)
@@ -455,15 +458,16 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     }
 
     /**
-     * Returns whether a graticule with longitude/latitude lines should be 
-     * generated.
-     * @return
+     * Returns whether a graticule with longitude/latitude lines should be
+     * generated. This is the case if the mesh units are degrees, the grid is
+     * displayed in the old map, and the OpenStreetMap is used as reference map.
+     *
+     * @return true if a lon/lat grid is to be created.
      */
     private boolean isGeographicalGrid(VisualizationParameters params) {
         return this.meshUnit == Unit.DEGREES
                 && params.isAnalyzeOldMap()
                 && params.isOSM();
-
     }
 
     /**
@@ -481,8 +485,9 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     }
 
     /**
-     * Returns a string that can be used in a dialog to inform the user that
-     * the grid has not a correct size, i.e. the number of lines is too small or too large.
+     * Returns a string that can be used in a dialog to inform the user that the
+     * grid has not a correct size, i.e. the number of lines is too small or too
+     * large.
      */
     private String getErrorMessageForIncorrectNumberOfGridLines(Grid grid,
             Rectangle2D srcPointsExtension) {
@@ -712,8 +717,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             double[][] mask,
             boolean gridInOldMap) {
 
-        final CoordinateFormatter coordinateFormatter =
-                params.isAnalyzeOldMap()
+        final CoordinateFormatter coordinateFormatter
+                = params.isAnalyzeOldMap()
                 ? params.getNewCoordinateFormatter()
                 : params.getOldCoordinateFormatter();
 
@@ -752,8 +757,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             double[][] mask,
             boolean gridInOldMap) {
 
-        final CoordinateFormatter coordinateFormatter =
-                params.isAnalyzeOldMap()
+        final CoordinateFormatter coordinateFormatter
+                = params.isAnalyzeOldMap()
                 ? params.getNewCoordinateFormatter()
                 : params.getOldCoordinateFormatter();
 

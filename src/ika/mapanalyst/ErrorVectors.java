@@ -102,12 +102,8 @@ public class ErrorVectors extends MapAnalyzer implements Serializable {
         // if OpenStreetMap is used and vectors are displayed in the OSM,
         // convert the vectors to OSM.
         if (!params.isAnalyzeOldMap() && params.isOSM()) {
-            double[][] pts = new double[transformedSourcePoints.length][2];
-            params.getProjector().intermediate2OSM(transformedSourcePoints, pts);
-            transformedSourcePoints = pts;
-            pts = new double[transformedSourcePoints.length][2];
-            params.getProjector().intermediate2OSM(destPoints, pts);
-            destPoints = pts;
+            params.getProjector().intermediate2OSM(transformedSourcePoints, transformedSourcePoints);
+            params.getProjector().intermediate2OSM(destPoints, destPoints);
         }
 
         // Build vectors.

@@ -50,8 +50,8 @@ public class Contourer {
         float lastContourLevel = (float)Math.floor(minMax[1]/interval)*interval;
         int nbrIntervals = (int)((lastContourLevel - firstContourLevel) / interval + 1);
         
-        if (this.treatDegreeJump) {
-            ArrayList<double[][]> levelContours = this.contour(0.f);
+        if (treatDegreeJump) {
+            ArrayList<double[][]> levelContours = contour(0.f);
             if (levelContours.size() > 1) {
                 contours.add(levelContours);
             }
@@ -59,7 +59,8 @@ public class Contourer {
         
         for (int i = 0; i < nbrIntervals; ++i) {
             float contourLevel = firstContourLevel + i * this.interval;
-            ArrayList<double[][]> levelContours = this.contour(contourLevel);
+            System.out.println(contourLevel);
+            ArrayList<double[][]> levelContours = contour(contourLevel);
             if (levelContours.size() > 1) {
                 contours.add(levelContours);
             }

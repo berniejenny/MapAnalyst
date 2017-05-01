@@ -451,15 +451,15 @@ public final class Manager implements Serializable {
 
     public void importNewRasterImage(String filePath, java.awt.Frame parentFrame,
             MapComponent mapComponent) {
-        this.newImageGeoSet.removeAllGeoObjects();
+        newImageGeoSet.removeAllGeoObjects();
         Manager.importRasterImage(this.newImageGeoSet, filePath, parentFrame,
                 mapComponent, true);
     }
 
     public void importOldRasterImage(String filePath, java.awt.Frame parentFrame,
             MapComponent mapComponent) {
-        this.oldImageGeoSet.removeAllGeoObjects();
-        Manager.importRasterImage(this.oldImageGeoSet, filePath, parentFrame,
+        oldImageGeoSet.removeAllGeoObjects();
+        Manager.importRasterImage(oldImageGeoSet, filePath, parentFrame,
                 mapComponent, false);
     }
 
