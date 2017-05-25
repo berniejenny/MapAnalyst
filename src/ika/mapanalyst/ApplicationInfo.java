@@ -25,7 +25,7 @@ public class ApplicationInfo {
      * @return The version of this application.
      */
     public static String getApplicationVersion() {
-        return "1.3.27";
+        return "1.3.28";
     }
     
     /**

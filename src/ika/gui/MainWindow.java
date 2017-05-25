@@ -3280,6 +3280,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     oldMapCoordinateDisplayUnitMenu.setText("Old Map Coordinate Display Unit");
 
     oldMapDisplayUnitButtonGroup.add(oldUnitCmCheckBoxMenuItem);
+    oldUnitCmCheckBoxMenuItem.setSelected(true);
     oldUnitCmCheckBoxMenuItem.setText("cm");
     oldUnitCmCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -6326,14 +6327,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_oldUnitPxCheckBoxMenuItemActionPerformed
 
     private void oldUnitMCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldUnitMCheckBoxMenuItemActionPerformed
-        String format;
+        String format = "###,##0.000";
         GeoImage img = manager.getOldMap();
-        if (img != null && img.getBounds2D() != null && img.getBounds2D().getWidth() < 10) {
-            // the image is not georeferenced, so display meters with three decimals
-            format = "###,##0.000";
-        } else {
+        if (img != null && img.getBounds2D() != null && img.getBounds2D().getWidth() > 10) {
             // the image is georeferenced, so display meters with one decimal
-            format = "###,##0.0"; // de
+            format = "###,##0.0";
         }
         oldMapdisplayUnit(format, "m", 1);
     }//GEN-LAST:event_oldUnitMCheckBoxMenuItemActionPerformed
