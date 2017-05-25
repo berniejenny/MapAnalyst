@@ -1526,7 +1526,6 @@ public class MainWindow extends javax.swing.JFrame
         topLeftPanel.add(navigationToolBar);
 
         coordinateInfoPanel.setFocusable(false);
-        coordinateInfoPanel.setPreferredSize(null);
         infoToolBar.add(coordinateInfoPanel);
 
         geoObjectInfoPanel.setFocusable(false);

@@ -390,7 +390,7 @@ public class ImageImporter extends Thread {
                     sb.append("generate a World file, and then reload the image with MapAnalyst.\n");
                     sb.append("Or enter the size of a pixel in meters and press OK.\n");
                     sb.append("Enter a pixel size of 1 if you are not interested in the scale\n");
-                    sb.append("or if you are directly comparing two maps or other graphics.");
+                    sb.append("or if you are comparing two non-spatial graphics.");
                     String pxString = JOptionPane.showInputDialog(mapComponent, sb.toString());
                     if (pxString == null) {
                         geoImage.setPixelSizeX(0);

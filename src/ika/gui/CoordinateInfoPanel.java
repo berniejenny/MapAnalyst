@@ -65,6 +65,7 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         add(xCoordLabel, gridBagConstraints);
 
@@ -75,6 +76,7 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         add(yCoordLabel, gridBagConstraints);
 
@@ -91,7 +93,7 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         distLabel.setFont(distLabel.getFont().deriveFont(distLabel.getFont().getSize()-2f));
         distLabel.setText("-");
         distLabel.setToolTipText("The last distance measured with the Measure Distance and Angle tool.");
-        distLabel.setPreferredSize(new java.awt.Dimension(80, 13));
+        distLabel.setPreferredSize(new java.awt.Dimension(120, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -110,7 +112,7 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         angleLabel.setFont(angleLabel.getFont().deriveFont(angleLabel.getFont().getSize()-2f));
         angleLabel.setText("-");
         angleLabel.setToolTipText("The last angle measured with the Measure Distance and Angle tool.");
-        angleLabel.setPreferredSize(new java.awt.Dimension(80, 13));
+        angleLabel.setPreferredSize(new java.awt.Dimension(120, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
