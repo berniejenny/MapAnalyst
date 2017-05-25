@@ -5,13 +5,9 @@
  */
 package ika.gui;
 
-import com.jhlabs.map.proj.Projection;
 import ika.map.tools.*;
 import ika.mapanalyst.Manager;
-import ika.proj.ProjectionsManager;
 import ika.utils.CoordinateFormatter;
-import ika.utils.NumberFormatter;
-import java.awt.geom.Point2D;
 import java.text.*;
 
 /**

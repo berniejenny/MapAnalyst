@@ -530,6 +530,7 @@ public class MainWindow extends javax.swing.JFrame
         projectionDescriptionTextArea = new javax.swing.JTextArea();
         mapComponent = new ch.ethz.karto.gui.MapComponent();
         centralLongitudeButtonGroup = new javax.swing.ButtonGroup();
+        oldMapDisplayUnitButtonGroup = new javax.swing.ButtonGroup();
         splitPane = new javax.swing.JSplitPane();
         oldMapPanel = new javax.swing.JPanel();
         oldMapLabelPanel = new javax.swing.JPanel();
@@ -770,6 +771,12 @@ public class MainWindow extends javax.swing.JFrame
         showPointsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showOldCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showNewCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator25 = new javax.swing.JPopupMenu.Separator();
+        oldMapCoordinateDisplayUnitMenu = new javax.swing.JMenu();
+        oldUnitCmCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        oldUnitMCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        oldUnitInchCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        oldUnitPxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         windowMenu = new javax.swing.JMenu();
         helpMenu = new javax.swing.JMenu();
         infoMenuItem = new javax.swing.JMenuItem();
@@ -3268,6 +3275,47 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     });
     viewMenu.add(showNewCheckBoxMenuItem);
+    viewMenu.add(jSeparator25);
+
+    oldMapCoordinateDisplayUnitMenu.setText("Old Map Coordinate Display Unit");
+
+    oldMapDisplayUnitButtonGroup.add(oldUnitCmCheckBoxMenuItem);
+    oldUnitCmCheckBoxMenuItem.setText("cm");
+    oldUnitCmCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            oldUnitCmCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    oldMapCoordinateDisplayUnitMenu.add(oldUnitCmCheckBoxMenuItem);
+
+    oldMapDisplayUnitButtonGroup.add(oldUnitMCheckBoxMenuItem);
+    oldUnitMCheckBoxMenuItem.setText("m");
+    oldUnitMCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            oldUnitMCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    oldMapCoordinateDisplayUnitMenu.add(oldUnitMCheckBoxMenuItem);
+
+    oldMapDisplayUnitButtonGroup.add(oldUnitInchCheckBoxMenuItem);
+    oldUnitInchCheckBoxMenuItem.setText("inch");
+    oldUnitInchCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            oldUnitInchCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    oldMapCoordinateDisplayUnitMenu.add(oldUnitInchCheckBoxMenuItem);
+
+    oldMapDisplayUnitButtonGroup.add(oldUnitPxCheckBoxMenuItem);
+    oldUnitPxCheckBoxMenuItem.setText("pixel");
+    oldUnitPxCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            oldUnitPxCheckBoxMenuItemActionPerformed(evt);
+        }
+    });
+    oldMapCoordinateDisplayUnitMenu.add(oldUnitPxCheckBoxMenuItem);
+
+    viewMenu.add(oldMapCoordinateDisplayUnitMenu);
 
     menuBar.add(viewMenu);
 
@@ -5436,7 +5484,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
         } catch (Throwable exc) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, exc);
-            
+
             String errMsg = exc.getMessage() == null ? "Unknown Error" : "Error: ";
 
             // display error message
@@ -6154,16 +6202,16 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_showOSMPolarCirclesCheckBoxMenuItemActionPerformed
 
     private String getImageSizeInfo(GeoImage img) {
-         StringBuilder sb = new StringBuilder();
-         if (img != null) {
-             sb.append(img.getBufferedImage().getWidth());
-             sb.append(" \u00D7 ");
-             sb.append(img.getBufferedImage().getHeight());
-             sb.append (" pixels");
-         }
-         return sb.toString();
+        StringBuilder sb = new StringBuilder();
+        if (img != null) {
+            sb.append(img.getBufferedImage().getWidth());
+            sb.append(" \u00D7 ");
+            sb.append(img.getBufferedImage().getHeight());
+            sb.append(" pixels");
+        }
+        return sb.toString();
     }
-    
+
     private String getOldMapImageInfo() {
         GeoImage img = manager.getOldMap();
         if (img != null) {
@@ -6179,7 +6227,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             sb.append(" \u00D7 ");
             sb.append(String.format("%1$,.1f", bounds.getHeight() * 100 / 2.54));
             sb.append(" inches)<br>");
-            
+
             // image size in pixels
             sb.append(getImageSizeInfo(img));
             return sb.toString();
@@ -6197,18 +6245,18 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             sb.append(" m \u00D7 ");
             sb.append(String.format("%1$,.1f", bounds.getHeight()));
             sb.append(" m<br>");
-            
+
             // image size in pixels
             sb.append(getImageSizeInfo(img));
             sb.append("<br>");
-            
+
             // size of pixel
             sb.append("Pixel size: ");
             sb.append(img.getPixelSizeX());
             sb.append(" m \u00D7 ");
             sb.append(img.getPixelSizeY());
             sb.append(" m");
-            
+
             return sb.toString();
         }
         return null;
@@ -6245,10 +6293,54 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         JOptionPane.showMessageDialog(this, sb.toString(),
                 dlgTitle, JOptionPane.PLAIN_MESSAGE, null);
     }
-    
+
     private void mapSizeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapSizeMenuItemActionPerformed
         aboutTheMaps();
     }//GEN-LAST:event_mapSizeMenuItemActionPerformed
+
+    /**
+     * Set display unit used by the CoordinateInfoPanel.
+     *
+     * @param format formatting string for CoordinateFormatter
+     * @param unit unit appended to value, such as "m" or "cm"
+     * @param scaleFactor values are divided by this scale factor. For example,
+     * for cm the scale factor is 100.
+     */
+    private void oldMapdisplayUnit(String format, String unit, double scaleFactor) {
+        CoordinateFormatter cf = new CoordinateFormatter(format + " " + unit, format, scaleFactor);
+        oldMapComponent.setCoordinateFormatter(cf);
+        coordinateInfoPanel.repaint();
+    }
+
+    private void oldUnitCmCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldUnitCmCheckBoxMenuItemActionPerformed
+        oldMapdisplayUnit("###,##0.0", "cm", 100);
+    }//GEN-LAST:event_oldUnitCmCheckBoxMenuItemActionPerformed
+
+    private void oldUnitPxCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldUnitPxCheckBoxMenuItemActionPerformed
+        GeoImage img = manager.getOldMap();
+        if (img != null && img.getBufferedImage() != null && img.getBounds2D() != null) {
+            int pixelWidth = img.getBufferedImage().getWidth();
+            double width = img.getBounds2D().getWidth();
+            oldMapdisplayUnit("###,##0", "px", pixelWidth / width);
+        }
+    }//GEN-LAST:event_oldUnitPxCheckBoxMenuItemActionPerformed
+
+    private void oldUnitMCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldUnitMCheckBoxMenuItemActionPerformed
+        String format;
+        GeoImage img = manager.getOldMap();
+        if (img != null && img.getBounds2D() != null && img.getBounds2D().getWidth() < 10) {
+            // the image is not georeferenced, so display meters with three decimals
+            format = "###,##0.000";
+        } else {
+            // the image is georeferenced, so display meters with one decimal
+            format = "###,##0.0"; // de
+        }
+        oldMapdisplayUnit(format, "m", 1);
+    }//GEN-LAST:event_oldUnitMCheckBoxMenuItemActionPerformed
+
+    private void oldUnitInchCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldUnitInchCheckBoxMenuItemActionPerformed
+        oldMapdisplayUnit("###,##0.0", "in", 100 / 2.54);
+    }//GEN-LAST:event_oldUnitInchCheckBoxMenuItemActionPerformed
 
     private void enableLinkingGUIForSelectedLink(Link link) {
         this.linkToggleButton.setEnabled(true);
@@ -6613,6 +6705,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator20;
     private javax.swing.JSeparator jSeparator21;
     private javax.swing.JSeparator jSeparator23;
+    private javax.swing.JPopupMenu.Separator jSeparator25;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
@@ -6643,10 +6736,16 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JPanel newMapPanel;
     private javax.swing.JMenuItem newProjectMenuItem;
     private ika.gui.MapComponent oldMapComponent;
+    private javax.swing.JMenu oldMapCoordinateDisplayUnitMenu;
     private javax.swing.JLabel oldMapCoordsTitleLabel;
+    private javax.swing.ButtonGroup oldMapDisplayUnitButtonGroup;
     private javax.swing.JLabel oldMapLabel;
     private javax.swing.JPanel oldMapLabelPanel;
     private javax.swing.JPanel oldMapPanel;
+    private javax.swing.JCheckBoxMenuItem oldUnitCmCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem oldUnitInchCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem oldUnitMCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem oldUnitPxCheckBoxMenuItem;
     private javax.swing.JMenuItem openProjectMenuItem;
     private javax.swing.JLabel osmCopyrightLabel;
     private javax.swing.JToggleButton panPointsToggleButton;
