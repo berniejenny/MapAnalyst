@@ -209,8 +209,10 @@ public class MainWindow extends javax.swing.JFrame
             undo.setUndoMenuItems(this.undoMenuItem, this.redoMenuItem);
             addUndo(null);
 
-            synchronizeWithPreferences();
-
+            // hide the GUI for a visualisation method by Mekenkamp that is not recommended
+            this.setMekenkampVisible(false);
+            this.udpateTransformationInfoGUI();
+        
             addWindowListener(new WindowAdapter() {
 
                 @Override
@@ -701,7 +703,6 @@ public class MainWindow extends javax.swing.JFrame
         pasteMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         preferencesSeparator = new javax.swing.JSeparator();
-        preferencesMenuItem = new javax.swing.JMenuItem();
         pointsMenu = new javax.swing.JMenu();
         selectPointsMenuItem = new javax.swing.JMenuItem();
         selectUnlinkedPointsMenuItem = new javax.swing.JMenuItem();
@@ -2792,14 +2793,6 @@ pasteMenuItem.addActionListener(new java.awt.event.ActionListener() {
     editMenu.add(deleteMenuItem);
     editMenu.add(preferencesSeparator);
 
-    preferencesMenuItem.setText("Preferences…");
-    preferencesMenuItem.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            preferencesMenuItemActionPerformed(evt);
-        }
-    });
-    editMenu.add(preferencesMenuItem);
-
     pointsMenu.setText("Points");
 
     selectPointsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A,
@@ -3347,10 +3340,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void errorVectorsFillCirclesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_errorVectorsFillCirclesCheckBoxActionPerformed
         readErrorVectorFromGUIAndRepaint();
     }//GEN-LAST:event_errorVectorsFillCirclesCheckBoxActionPerformed
-
-    private void preferencesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_preferencesMenuItemActionPerformed
-        PreferencesDialog.showPreferencesDialog();
-    }//GEN-LAST:event_preferencesMenuItemActionPerformed
 
     private void cutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cutMenuItemActionPerformed
         final LinkManager linkManager = this.manager.getLinkManager();
@@ -5413,17 +5402,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         osmCopyrightLabel.setVisible(manager.isUsingOpenStreetMap());
     }
 
-    public void synchronizeWithPreferences() {
-        // Retrieve the user preference node
-        String falseString = Boolean.toString(false);
-        String str = PreferencesDialog.getPreference(PreferencesDialog.SHOW_MEKENKAMP,
-                falseString);
-        final boolean showMekenkamp = Boolean.valueOf(str).booleanValue();
-        this.setMekenkampVisible(showMekenkamp);
-
-        this.udpateTransformationInfoGUI();
-    }
-
     public void udpateTransformationInfoGUI() {
         String str = "";
         String nl = System.getProperty("line.separator");
@@ -5435,12 +5413,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
 
         final boolean invert = this.manager.isShowInOldMap();
-
-        String pref = PreferencesDialog.getPreference(
-                PreferencesDialog.SHOW_ADVANCED_TRANSFORMATION_INFO,
-                Boolean.toString(false));
-        final boolean showAdvancedTrafoInfo = Boolean.valueOf(pref).booleanValue();
-
+        final boolean showAdvancedTrafoInfo = true;
         if (showAdvancedTrafoInfo) {
             str += transformation.getShortReport(invert);
             str += System.getProperty("line.separator") + transformation.getName();
@@ -6766,7 +6739,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JTable pointsTable;
     private javax.swing.JToolBar pointsToolBar;
     private javax.swing.JPanel positionPanel;
-    private javax.swing.JMenuItem preferencesMenuItem;
     private javax.swing.JSeparator preferencesSeparator;
     private javax.swing.JComboBox projectionComboBox;
     private javax.swing.JTextArea projectionDescriptionTextArea;

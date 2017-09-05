@@ -1212,14 +1212,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JSeparator" name="preferencesSeparator">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="preferencesMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Preferences&#x2026;"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="preferencesMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
             <Menu class="javax.swing.JMenu" name="pointsMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Points"/>
