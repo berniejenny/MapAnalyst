@@ -270,15 +270,15 @@ public final class Manager implements Serializable {
         }
 
         // initialize the multiquadric interpolation
-        MultiquadricInterpolation multiQuadra;
+        MultiquadricInterpolation multiquadricInterpol;
         try {
-            multiQuadra = new MultiquadricInterpolation();
+            multiquadricInterpol = new MultiquadricInterpolation();
             double exaggeration = getDistortionGrid().getExaggeration();
-            multiQuadra.solveCoefficients(dstPoints, transformedSourcePoints,
+            multiquadricInterpol.solveCoefficients(transformedSourcePoints, dstPoints,
                     exaggeration);
         } catch (Exception e) { // catch exception due to ill conditioned matrix.
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, e);
-            multiQuadra = null;
+            multiquadricInterpol = null;
             if (!GraphicsEnvironment.isHeadless()) {
                 String msg = "A system of linear equations cannot be solved. "
                         + "Some visualizations can therefore not be generated.";
@@ -308,7 +308,7 @@ public final class Manager implements Serializable {
                 newPointsHull,
                 transformedSourcePoints,
                 showErrorInOldMap,
-                multiQuadra,
+                multiquadricInterpol,
                 oldMapScale, newMapScale,
                 oldCoordinateFormatter, newCoordinateFormatter,
                 projector,

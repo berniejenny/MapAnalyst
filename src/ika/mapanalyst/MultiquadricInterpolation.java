@@ -8,6 +8,15 @@ import java.awt.geom.*;
 import ika.geo.*;
 
 /**
+ * Multiquadric transformation defined by two sets of points. The two sets of
+ * points need to be in a common coordinate system.
+ *
+ * The original version included in versions up to 1.3.28 (of 25 May 2017) of
+ * MapAnalyst contained a bug in the computation of the D matrix. This has been
+ * fixed with version 1.3.29 (of 5 September 2017). Distortion grids created
+ * with this new version might very slightly differ from distortion grids
+ * created with older versions. Thanks to Roel Nicolai for pointing out this
+ * bug!
  *
  * @author Bernhard Jenny, Institute of Cartography, ETH Zurich.
  */
@@ -17,7 +26,7 @@ public class MultiquadricInterpolation {
 
     private double[] bCoeffArray;
 
-    private double[][] destControlPoints;
+    private double[][] srcControlPoints;
 
     public MultiquadricInterpolation() {
     }
@@ -25,9 +34,9 @@ public class MultiquadricInterpolation {
     /**
      * Compute the coefficients for the multiquadric interpolation.
      *
-     * @param srcPoints The control point set of the start coordinate system
-     * system. This set needs to be transformed to the destination coordinate
-     * system before calling this method.
+     * @param srcPoints The control point set of the start coordinate system.
+     * This set needs to be transformed to the destination coordinate system
+     * before calling this method.
      * @param dstPoints The control points set of the destination coordinate
      * system.
      */
@@ -38,7 +47,8 @@ public class MultiquadricInterpolation {
             throw new IllegalArgumentException();
         }
 
-        this.destControlPoints = dstPoints;
+        this.srcControlPoints = srcPoints;
+
         int nbrPts = srcPoints.length;
 
         // differences between the two sets of points
@@ -57,8 +67,8 @@ public class MultiquadricInterpolation {
         // D is square and symmetric
         for (int i = 0; i < nbrPts; i++) {
             for (int j = i + 1; j < nbrPts; j++) {
-                final double dx = dstPoints[i][0] - dstPoints[j][0];
-                final double dy = dstPoints[i][1] - dstPoints[j][1];
+                final double dx = srcPoints[i][0] - srcPoints[j][0];
+                final double dy = srcPoints[i][1] - srcPoints[j][1];
                 D[i][j] = D[j][i] = Math.sqrt(dx * dx + dy * dy);
             }
         }
@@ -74,8 +84,8 @@ public class MultiquadricInterpolation {
         final double[][] a = mat_a.getArray();
         final double[][] b = mat_b.getArray();
         for (int i = 0; i < nbrPts; i++) {
-            this.aCoeffArray[i] = -a[i][0];
-            this.bCoeffArray[i] = -b[i][0];
+            this.aCoeffArray[i] = a[i][0];
+            this.bCoeffArray[i] = b[i][0];
         }
     }
 
@@ -98,8 +108,8 @@ public class MultiquadricInterpolation {
 
             // for each point: compute the distance to each control point
             for (int j = 0; j < this.aCoeffArray.length; j++) {
-                final double dx = points[i][0] - this.destControlPoints[j][0];
-                final double dy = points[i][1] - this.destControlPoints[j][1];
+                final double dx = points[i][0] - this.srcControlPoints[j][0];
+                final double dy = points[i][1] - this.srcControlPoints[j][1];
                 final double d = Math.sqrt(dx * dx + dy * dy);
 
                 corrX += this.aCoeffArray[j] * d;
@@ -127,8 +137,8 @@ public class MultiquadricInterpolation {
             for (int j = 0; j < this.aCoeffArray.length; j++) {
 
                 // compute the distance to each control point
-                final double dx = coords[i * 2] - this.destControlPoints[j][0];
-                final double dy = coords[i * 2 + 1] - this.destControlPoints[j][1];
+                final double dx = coords[i * 2] - this.srcControlPoints[j][0];
+                final double dy = coords[i * 2 + 1] - this.srcControlPoints[j][1];
                 final double d = Math.sqrt(dx * dx + dy * dy);
 
                 corrX += this.aCoeffArray[j] * d;
@@ -228,7 +238,7 @@ public class MultiquadricInterpolation {
     }
 
     /**
-     * output the coefficients of the mutltiquadradtc interpolation
+     * output the coefficients of the multiquadric interpolation
      */
     public void printCoefficients() {
         System.out.println("Coefficient a:");
