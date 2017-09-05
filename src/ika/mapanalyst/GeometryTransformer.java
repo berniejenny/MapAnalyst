@@ -45,8 +45,8 @@ public class GeometryTransformer extends MapAnalyzer implements java.io.Serializ
             return;
         
         final Transformation transformation = params.getTransformation();
-        final MultiquadraticInterpolation multiQuadra =
-                params.getMultiquadraticInterpolation();
+        final MultiquadricInterpolation multiQuadra =
+                params.getMultiquadricInterpolation();
         GeoSet transformedGeoSet= transformation.transform(sourceGeoSet);
         if (transformation == null
                 || multiQuadra == null

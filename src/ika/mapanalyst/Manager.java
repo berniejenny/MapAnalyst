@@ -269,10 +269,10 @@ public final class Manager implements Serializable {
             getDistortionGrid().setMeshSizeScale(transformation.getScale());
         }
 
-        // initialize the multiquadratic interpolation
-        MultiquadraticInterpolation multiQuadra;
+        // initialize the multiquadric interpolation
+        MultiquadricInterpolation multiQuadra;
         try {
-            multiQuadra = new MultiquadraticInterpolation();
+            multiQuadra = new MultiquadricInterpolation();
             double exaggeration = getDistortionGrid().getExaggeration();
             multiQuadra.solveCoefficients(dstPoints, transformedSourcePoints,
                     exaggeration);

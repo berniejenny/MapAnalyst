@@ -305,7 +305,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
     public void analyzeMap() throws MapAnalyzerException {
 
-        final MultiquadraticInterpolation multiQuad = params.getMultiquadraticInterpolation();
+        final MultiquadricInterpolation multiQuad = params.getMultiquadricInterpolation();
         if (multiQuad == null) {
             throw new MapAnalyzerException("Undefined Interpolation", this);
         }
@@ -441,7 +441,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                     params.isAnalyzeOldMap());
         }
 
-        // apply a multiquadratic interpolation to the grid
+        // apply a multiquadric interpolation to the grid
         multiQuad.transform(grid.grid);
 
         // Create GeoPaths from the distorted grid and add them

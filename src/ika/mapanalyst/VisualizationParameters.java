@@ -25,7 +25,7 @@ public final class VisualizationParameters {
     private final double[][] newPointsHull;
     private final double[][] transformedSourcePoints;
     private final boolean analyzeOldMap;
-    private final MultiquadraticInterpolation multiquadraticInterpolation;
+    private final MultiquadricInterpolation multiquadricInterpolation;
     private final double oldMapScale;
     private final double newMapScale;
     private final CoordinateFormatter oldCoordinateFormatter;
@@ -41,7 +41,7 @@ public final class VisualizationParameters {
             double[][] newPointsHull,
             double[][] transformedSourcePoints,
             boolean analyzeOldMap,
-            MultiquadraticInterpolation multiquadraticInterpolation,
+            MultiquadricInterpolation multiquadricInterpolation,
             double oldMapScale,
             double newMapScale,
             CoordinateFormatter oldCoordinateFormatter,
@@ -56,7 +56,7 @@ public final class VisualizationParameters {
         this.newPointsHull = newPointsHull;
         this.transformedSourcePoints = transformedSourcePoints;
         this.analyzeOldMap = analyzeOldMap;
-        this.multiquadraticInterpolation = multiquadraticInterpolation;
+        this.multiquadricInterpolation = multiquadricInterpolation;
         this.oldMapScale = oldMapScale;
         this.newMapScale = newMapScale;
         this.oldCoordinateFormatter = oldCoordinateFormatter;
@@ -119,8 +119,8 @@ public final class VisualizationParameters {
         return analyzeOldMap;
     }
     
-    protected MultiquadraticInterpolation getMultiquadraticInterpolation() {
-        return multiquadraticInterpolation;
+    protected MultiquadricInterpolation getMultiquadricInterpolation() {
+        return multiquadricInterpolation;
     }
     
     protected double getOldMapScale() {

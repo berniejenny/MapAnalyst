@@ -232,7 +232,7 @@ public class LinkManager implements GeoSetSelectionChangeListener,
         
         // Make sure no points with the same coordinates already exist in the list.
         // Having links with identical coordinates leads to numerical problems
-        // when computing the multiquadratic interpolation for the distortion grid.
+        // when computing the multiquadric interpolation for the distortion grid.
         // When exporting points to ASCII files, 6 digits after the decimal point are written.
         // Coordinates differing by less than 0.000001 are therefore considered as
         // being equal.
