@@ -26,8 +26,6 @@ public final class VisualizationParameters {
     private final double[][] transformedSourcePoints;
     private final boolean analyzeOldMap;
     private final MultiquadricInterpolation multiquadricInterpolation;
-    private final double oldMapScale;
-    private final double newMapScale;
     private final CoordinateFormatter oldCoordinateFormatter;
     private final CoordinateFormatter newCoordinateFormatter;
     private final Projector projector;
@@ -42,8 +40,6 @@ public final class VisualizationParameters {
             double[][] transformedSourcePoints,
             boolean analyzeOldMap,
             MultiquadricInterpolation multiquadricInterpolation,
-            double oldMapScale,
-            double newMapScale,
             CoordinateFormatter oldCoordinateFormatter,
             CoordinateFormatter newCoordinateFormatter,
             Projector projector,
@@ -57,8 +53,6 @@ public final class VisualizationParameters {
         this.transformedSourcePoints = transformedSourcePoints;
         this.analyzeOldMap = analyzeOldMap;
         this.multiquadricInterpolation = multiquadricInterpolation;
-        this.oldMapScale = oldMapScale;
-        this.newMapScale = newMapScale;
         this.oldCoordinateFormatter = oldCoordinateFormatter;
         this.newCoordinateFormatter = newCoordinateFormatter;
         this.projector = projector;
@@ -122,15 +116,7 @@ public final class VisualizationParameters {
     protected MultiquadricInterpolation getMultiquadricInterpolation() {
         return multiquadricInterpolation;
     }
-    
-    protected double getOldMapScale() {
-        return oldMapScale;
-    }
-    
-    protected double getNewMapScale() {
-        return newMapScale;
-    }
-    
+        
     protected CoordinateFormatter getOldCoordinateFormatter() {
         return oldCoordinateFormatter;
     }

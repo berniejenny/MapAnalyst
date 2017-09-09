@@ -247,8 +247,7 @@ public final class Manager implements Serializable {
     /**
      * Analyze the map and generate graphics visualizing the results.
      */
-    public void analyzeMap(double oldMapScale, double newMapScale,
-            CoordinateFormatter oldCoordinateFormatter,
+    public void analyzeMap(CoordinateFormatter oldCoordinateFormatter,
             CoordinateFormatter newCoordinateFormatter,
             Component parentComponent) throws MapAnalyzerException {
 
@@ -309,7 +308,6 @@ public final class Manager implements Serializable {
                 transformedSourcePoints,
                 showErrorInOldMap,
                 multiquadricInterpol,
-                oldMapScale, newMapScale,
                 oldCoordinateFormatter, newCoordinateFormatter,
                 projector,
                 isUsingOpenStreetMap());

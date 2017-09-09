@@ -65,7 +65,7 @@ public class MapAnalystHeadless {
         // init visualzations
         CoordinateFormatter cf = new CoordinateFormatter("###,##0.00", "###,##0", 1);
         manager.getDistortionGrid().setMeshSize(gridCellSize);
-        manager.analyzeMap(1, 1, cf, cf, null);
+        manager.analyzeMap(cf, cf, null);
         MapAnalyzer analyser = null;
         switch (visType) {
             case GRID:
