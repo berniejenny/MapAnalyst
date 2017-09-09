@@ -245,13 +245,17 @@ public final class Manager implements Serializable {
     }
 
     /**
-     * Analyze the map and generate graphics visualizing the results.
+     * Initializes VisualizationParameters used for computing distortion
+     * visualizations and image warping.
+     *
+     * @param oldCoordinateFormatter format of coordinate labels added to
+     * distortion grid of old map
+     * @param newCoordinateFormatter format of coordinate labels added to
+     * distortion grid of new map
+     * @return a parameter object
      */
-    public void analyzeMap(CoordinateFormatter oldCoordinateFormatter,
-            CoordinateFormatter newCoordinateFormatter,
-            Component parentComponent) throws MapAnalyzerException {
-
-        clearGraphics();
+    private VisualizationParameters visParams(CoordinateFormatter oldCoordinateFormatter,
+            CoordinateFormatter newCoordinateFormatter) {
         Projector projector = createProjector();
         double[][][] pts = linkManager.getLinkedPointsCopy(projector);
         double[][] oldPoints = pts[0];
@@ -283,8 +287,9 @@ public final class Manager implements Serializable {
                         + "Some visualizations can therefore not be generated.";
                 String title = "Numerical Problem";
                 Icon icon = ika.mapanalyst.ApplicationInfo.getApplicationIcon();
-                JOptionPane.showMessageDialog(parentComponent, msg, title,
+                JOptionPane.showMessageDialog(/*parentComponent*/null, msg, title,
                         javax.swing.JOptionPane.ERROR_MESSAGE, icon);
+                // TODO improve exception handling
             }
         }
 
@@ -311,7 +316,18 @@ public final class Manager implements Serializable {
                 oldCoordinateFormatter, newCoordinateFormatter,
                 projector,
                 isUsingOpenStreetMap());
+        return params;
+    }
 
+    /**
+     * Analyze the map and generate graphics visualizing the results.
+     */
+    public void analyzeMap(CoordinateFormatter oldCoordinateFormatter,
+            CoordinateFormatter newCoordinateFormatter,
+            Component parentComponent) throws MapAnalyzerException {
+
+        clearGraphics();
+        VisualizationParameters params = visParams(oldCoordinateFormatter, newCoordinateFormatter);
         for (int i = 0; i < NBR_ERR_DISP; i++) {
             mapAnalyzer[i].setVisualizationParameters(params);
             mapAnalyzer[i].analyzeMap();
