@@ -212,7 +212,7 @@ public class MainWindow extends javax.swing.JFrame
             // hide the GUI for a visualisation method by Mekenkamp that is not recommended
             this.setMekenkampVisible(false);
             this.udpateTransformationInfoGUI();
-        
+
             addWindowListener(new WindowAdapter() {
 
                 @Override
@@ -238,6 +238,25 @@ public class MainWindow extends javax.swing.JFrame
             // hide the invisible window that shows the menu bar when no other
             // window is visible
             MacWindowsManager.updateVisibilityOfEmptyWindow();
+
+            // add zoom-in and zoom-out actions for alternative keys
+            Action zoomInAction = new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    zoomInMenuItemActionPerformed(null);
+                }
+            };
+            Action zoomOutAction = new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    zoomOutMenuItemActionPerformed(null);
+                }
+            };
+            GUIUtil.zoomMenuCommands(zoomInAction, zoomOutAction, getRootPane());
+
+            // hide debug menu
+            menuBar.remove(debugMenu);
+            
         } finally {
             updatingGUI = false;
         }
@@ -781,6 +800,8 @@ public class MainWindow extends javax.swing.JFrame
         windowMenu = new javax.swing.JMenu();
         helpMenu = new javax.swing.JMenu();
         infoMenuItem = new javax.swing.JMenuItem();
+        debugMenu = new javax.swing.JMenu();
+        warpMenuItem = new javax.swing.JMenuItem();
 
         hampelEstimatorParametersPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -3328,6 +3349,18 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     menuBar.add(helpMenu);
 
+    debugMenu.setText("Debug");
+
+    warpMenuItem.setText("Warp Image");
+    warpMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            warpMenuItemActionPerformed(evt);
+        }
+    });
+    debugMenu.add(warpMenuItem);
+
+    menuBar.add(debugMenu);
+
     setJMenuBar(menuBar);
 
     pack();
@@ -4427,10 +4460,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         return true;
     }
 
-    static public void newProject() {
+    static public MainWindow newProject() {
         MainWindow w = new MainWindow("Untitled " + MainWindow.projectCounter++, true);
         w.setVisible(true);
         MainWindow.updateAllMenusOfAllWindows();
+        return w;
     }
 
     private boolean saveProject(String path) {
@@ -5447,8 +5481,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // compute the visualizations
             this.manager.analyzeMap(
-                    oldMapComponent.getScaleFactor(),
-                    newMapComponent.getScaleFactor(),
                     oldMapComponent.getCoordinateFormatter(),
                     newMapComponent.getCoordinateFormatter(),
                     this);
@@ -6313,6 +6345,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         oldMapdisplayUnit("###,##0.0", "in", 100 / 2.54);
     }//GEN-LAST:event_oldUnitInchCheckBoxMenuItemActionPerformed
 
+    private void warpMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_warpMenuItemActionPerformed
+        manager.warpMap();
+    }//GEN-LAST:event_warpMenuItemActionPerformed
+
     private void enableLinkingGUIForSelectedLink(Link link) {
         this.linkToggleButton.setEnabled(true);
         this.linkToggleButton.setSelected(true);
@@ -6538,6 +6574,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem correctOSMMisalignmentBugMenuItem;
     private javax.swing.JRadioButton customCentralLongitudeRadioButton;
     private javax.swing.JMenuItem cutMenuItem;
+    private javax.swing.JMenu debugMenu;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem deselectPointsMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
@@ -6801,6 +6838,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JPanel vEstimatorParametersPanel;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JTabbedPane visualizationTabbedPane;
+    private javax.swing.JMenuItem warpMenuItem;
     private javax.swing.JMenu windowMenu;
     private javax.swing.JLabel xLabel;
     private javax.swing.JLabel yLabel;
