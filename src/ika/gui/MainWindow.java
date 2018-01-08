@@ -717,19 +717,22 @@ public class MainWindow extends javax.swing.JFrame
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JSeparator();
+        javax.swing.JSeparator jSeparator3 = new javax.swing.JSeparator();
         cutMenuItem = new javax.swing.JMenuItem();
         copyMenuItem = new javax.swing.JMenuItem();
         pasteMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
-        preferencesSeparator = new javax.swing.JSeparator();
-        pointsMenu = new javax.swing.JMenu();
+        javax.swing.JSeparator separator = new javax.swing.JSeparator();
         selectPointsMenuItem = new javax.swing.JMenuItem();
         selectUnlinkedPointsMenuItem = new javax.swing.JMenuItem();
         deselectPointsMenuItem = new javax.swing.JMenuItem();
-        jSeparator7 = new javax.swing.JSeparator();
+        javax.swing.JPopupMenu.Separator jSeparator7 = new javax.swing.JPopupMenu.Separator();
+        findLinkMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator13 = new javax.swing.JPopupMenu.Separator();
+        placePointMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator10 = new javax.swing.JPopupMenu.Separator();
         showPointListMenuItem = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JSeparator();
+        javax.swing.JPopupMenu.Separator jSeparator1 = new javax.swing.JPopupMenu.Separator();
         linkedPointsColorMenuItem = new javax.swing.JMenuItem();
         unlinkedPointsColorMenuItem = new javax.swing.JMenuItem();
         pointSymbolMenu = new javax.swing.JMenu();
@@ -739,10 +742,6 @@ public class MainWindow extends javax.swing.JFrame
         pointSymbol4MenuItem = new javax.swing.JMenuItem();
         pointSymbol5MenuItem = new javax.swing.JMenuItem();
         pointSymbol6MenuItem = new javax.swing.JMenuItem();
-        jSeparator10 = new javax.swing.JSeparator();
-        findLinkMenuItem = new javax.swing.JMenuItem();
-        jSeparator13 = new javax.swing.JSeparator();
-        placePointMenuItem = new javax.swing.JMenuItem();
         mapsMenu = new javax.swing.JMenu();
         mapSizeMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
@@ -2813,9 +2812,7 @@ pasteMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     });
     editMenu.add(deleteMenuItem);
-    editMenu.add(preferencesSeparator);
-
-    pointsMenu.setText("Points");
+    editMenu.add(separator);
 
     selectPointsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A,
         java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2825,7 +2822,7 @@ selectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
         selectPointsMenuItemActionPerformed(evt);
     }
     });
-    pointsMenu.add(selectPointsMenuItem);
+    editMenu.add(selectPointsMenuItem);
 
     selectUnlinkedPointsMenuItem.setText("Select Unlinked Points");
     selectUnlinkedPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2833,7 +2830,7 @@ selectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             selectUnlinkedPointsMenuItemActionPerformed(evt);
         }
     });
-    pointsMenu.add(selectUnlinkedPointsMenuItem);
+    editMenu.add(selectUnlinkedPointsMenuItem);
 
     deselectPointsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D,
         java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2843,8 +2840,30 @@ deselectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
         deselectPointsMenuItemActionPerformed(evt);
     }
     });
-    pointsMenu.add(deselectPointsMenuItem);
-    pointsMenu.add(jSeparator7);
+    editMenu.add(deselectPointsMenuItem);
+    editMenu.add(jSeparator7);
+
+    findLinkMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+findLinkMenuItem.setText("Find Link…");
+findLinkMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        findLinkMenuItemActionPerformed(evt);
+    }
+    });
+    editMenu.add(findLinkMenuItem);
+    editMenu.add(jSeparator13);
+
+    placePointMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+placePointMenuItem.setText("Place Point From Coordinate List…");
+placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        placePointMenuItemActionPerformed(evt);
+    }
+    });
+    editMenu.add(placePointMenuItem);
+    editMenu.add(jSeparator10);
 
     showPointListMenuItem.setText("Show List of Linked Points");
     showPointListMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2852,8 +2871,8 @@ deselectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             showPointListMenuItemActionPerformed(evt);
         }
     });
-    pointsMenu.add(showPointListMenuItem);
-    pointsMenu.add(jSeparator1);
+    editMenu.add(showPointListMenuItem);
+    editMenu.add(jSeparator1);
 
     linkedPointsColorMenuItem.setText("Color Of Linked Points");
     linkedPointsColorMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2861,7 +2880,7 @@ deselectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             linkedPointsColorMenuItemActionPerformed(evt);
         }
     });
-    pointsMenu.add(linkedPointsColorMenuItem);
+    editMenu.add(linkedPointsColorMenuItem);
 
     unlinkedPointsColorMenuItem.setText("Color Of Unlinked Points");
     unlinkedPointsColorMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2869,7 +2888,7 @@ deselectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             unlinkedPointsColorMenuItemActionPerformed(evt);
         }
     });
-    pointsMenu.add(unlinkedPointsColorMenuItem);
+    editMenu.add(unlinkedPointsColorMenuItem);
 
     pointSymbolMenu.setText("Point Symbol");
 
@@ -2927,31 +2946,7 @@ deselectPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     pointSymbolMenu.add(pointSymbol6MenuItem);
 
-    pointsMenu.add(pointSymbolMenu);
-    pointsMenu.add(jSeparator10);
-
-    findLinkMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F,
-        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-findLinkMenuItem.setText("Find Link…");
-findLinkMenuItem.addActionListener(new java.awt.event.ActionListener() {
-    public void actionPerformed(java.awt.event.ActionEvent evt) {
-        findLinkMenuItemActionPerformed(evt);
-    }
-    });
-    pointsMenu.add(findLinkMenuItem);
-    pointsMenu.add(jSeparator13);
-
-    placePointMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P,
-        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-placePointMenuItem.setText("Place Point From Coordinate List…");
-placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
-    public void actionPerformed(java.awt.event.ActionEvent evt) {
-        placePointMenuItemActionPerformed(evt);
-    }
-    });
-    pointsMenu.add(placePointMenuItem);
-
-    editMenu.add(pointsMenu);
+    editMenu.add(pointSymbolMenu);
 
     menuBar.add(editMenu);
 
@@ -6704,11 +6699,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator10;
     private javax.swing.JSeparator jSeparator11;
     private javax.swing.JSeparator jSeparator12;
-    private javax.swing.JSeparator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JSeparator jSeparator15;
     private javax.swing.JSeparator jSeparator16;
@@ -6719,11 +6711,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JSeparator jSeparator21;
     private javax.swing.JSeparator jSeparator23;
     private javax.swing.JPopupMenu.Separator jSeparator25;
-    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JSeparator jSeparator6;
-    private javax.swing.JSeparator jSeparator7;
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTabbedPane jTabbedPane1;
@@ -6777,11 +6767,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem pointSymbol6MenuItem;
     private javax.swing.JMenu pointSymbolMenu;
     private javax.swing.JPanel pointTablePanel;
-    private javax.swing.JMenu pointsMenu;
     private javax.swing.JTable pointsTable;
     private javax.swing.JToolBar pointsToolBar;
     private javax.swing.JPanel positionPanel;
-    private javax.swing.JSeparator preferencesSeparator;
     private javax.swing.JComboBox projectionComboBox;
     private javax.swing.JTextArea projectionDescriptionTextArea;
     private javax.swing.JCheckBox projectionLiveUpdateCheckBox;
