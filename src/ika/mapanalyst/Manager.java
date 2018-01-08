@@ -300,14 +300,17 @@ public final class Manager implements Serializable {
         }
 
         double[][] newPointsHull = linkManager.getNewPointsHull();
-
         // convert convex hull around the points in the new reference map from
         // the OpenStreetMap (if used). This could actually turn the convex hull
         // into a concave hull due to the change of projection. The hull, however
         // is only used for clipping graphics, and this change therefore does not
         // matter much.
         if (isUsingOpenStreetMap()) {
-            projector.OSM2Intermediate(newPointsHull, newPointsHull);
+            // getNewPointsHull returns a reference, so we need to create a copy,
+            // as OSM2Intermediate will change coordinates
+            double[][] newPointsHullIntermediate = new double[newPointsHull.length][2];
+            projector.OSM2Intermediate(newPointsHull, newPointsHullIntermediate);
+            newPointsHull = newPointsHullIntermediate;
         }
 
         // compute the graphics by calling each MapAnalyzer
