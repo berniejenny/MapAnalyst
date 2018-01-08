@@ -19,11 +19,11 @@ public class LinkManager implements GeoSetSelectionChangeListener,
     /**
      * A list with all links.
      */
-    private Vector linksList;
+    private final Vector linksList;
     
-    private GeoSet oldPointsGeoSet;
+    private final GeoSet oldPointsGeoSet;
     
-    private GeoSet newPointsGeoSet;
+    private final GeoSet newPointsGeoSet;
     
     private PointSymbol unlinkedPointSymbol;
     

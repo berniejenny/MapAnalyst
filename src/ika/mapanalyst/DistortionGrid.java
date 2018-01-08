@@ -51,9 +51,9 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
      */
     private int labelSequence;
     /**
-     * color and stroke width of distortiong grid
+     * color and stroke width of distortion grid
      */
-    private VectorSymbol vectorSymbol;
+    private final VectorSymbol vectorSymbol;
     /**
      * exaggeration factor for the grid. Added in MapAnalyst 1.3
      */
