@@ -12,10 +12,13 @@ import ika.utils.ErrorDialog;
 import ika.utils.TextWindow;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
- * @author jenny
+ * Main entry point for MapAnalyst.
+ * 
+ * @author Bernie Jenny, Faculty of Information Technology, Monash University
  */
 public class Main {
 
@@ -31,18 +34,19 @@ public class Main {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
         }
 
-        // use the standard look and feel
         try {
+            // use the standard look and feel            
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        // set icon for JOptionPane dialogs. This is done automatically on Mac 10.5.
+        
+        // set icon for JOptionPane dialogs. This is done automatically on Mac 10.5 and later
         Main.setOptionPaneIcons("logo48x48.gif");
 
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     if (ika.utils.Sys.isMacOSX()) {

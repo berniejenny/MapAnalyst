@@ -1,5 +1,6 @@
 package ika.mapanalyst;
 
+import au.monash.fit.mapanalyst.warp.ImageWarper;
 import com.jhlabs.map.Ellipsoid;
 import com.jhlabs.map.proj.Projection;
 import com.jhlabs.map.proj.TCEAProjection;
@@ -248,13 +249,18 @@ public final class Manager implements Serializable {
      * Initializes VisualizationParameters used for computing distortion
      * visualizations and image warping.
      *
+     * @param visInOldMap true if the error visualizations are computed in the
+     * old map, false otherwise. This is identical to this.showErrorInOldMap for
+     * visualizations, but is always true warping the old map image to the
+     * reference map.
      * @param oldCoordinateFormatter format of coordinate labels added to
      * distortion grid of old map
      * @param newCoordinateFormatter format of coordinate labels added to
      * distortion grid of new map
      * @return a parameter object
      */
-    private VisualizationParameters visParams(CoordinateFormatter oldCoordinateFormatter,
+    private VisualizationParameters visParams(boolean visInOldMap,
+            CoordinateFormatter oldCoordinateFormatter,
             CoordinateFormatter newCoordinateFormatter) {
         Projector projector = createProjector();
         double[][][] pts = linkManager.getLinkedPointsCopy(projector);
@@ -263,10 +269,10 @@ public final class Manager implements Serializable {
         double[][] transformedSourcePoints = transformPointsToDestinationMap(
                 oldPoints, newPoints,
                 transformation,
-                showErrorInOldMap);
-        double[][] dstPoints = showErrorInOldMap ? oldPoints : newPoints;
+                visInOldMap);
+        double[][] dstPoints = visInOldMap ? oldPoints : newPoints;
 
-        if (showErrorInOldMap) {
+        if (visInOldMap) {
             getDistortionGrid().setMeshSizeScale(1.);
         } else {
             getDistortionGrid().setMeshSizeScale(transformation.getScale());
@@ -311,7 +317,7 @@ public final class Manager implements Serializable {
                 linkManager.getOldPointsHull(),
                 newPointsHull,
                 transformedSourcePoints,
-                showErrorInOldMap,
+                visInOldMap,
                 multiquadricInterpol,
                 oldCoordinateFormatter, newCoordinateFormatter,
                 projector,
@@ -327,12 +333,24 @@ public final class Manager implements Serializable {
             Component parentComponent) throws MapAnalyzerException {
 
         clearGraphics();
-        VisualizationParameters params = visParams(oldCoordinateFormatter, newCoordinateFormatter);
+        VisualizationParameters params = visParams(showErrorInOldMap, 
+                oldCoordinateFormatter, newCoordinateFormatter);
         for (int i = 0; i < NBR_ERR_DISP; i++) {
             mapAnalyzer[i].setVisualizationParameters(params);
             mapAnalyzer[i].analyzeMap();
         }
+    }
 
+    public void warpMap() {
+        VisualizationParameters params = visParams(true, null, null);
+        
+        ImageWarper imageWarper = new ImageWarper(
+                params.getTransformation(),
+                params.getMultiquadricInterpolation(),
+                getOldMap(),
+                params.getSrcPoints());
+        GeoImage warpedGeoImage = imageWarper.warp();
+        setNewMap(warpedGeoImage);
     }
 
     private String getTransformationReport(Transformation transformation) {

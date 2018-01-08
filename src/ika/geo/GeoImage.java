@@ -306,4 +306,111 @@ public class GeoImage extends GeoObject implements Serializable {
     public String getFilePath() {
         return this.filePath;
     }
+    
+     /**
+     * Bilinear interpolation.
+     * See http://www.geovista.psu.edu/sites/geocomp99/Gc99/082/gc_082.htm
+     * "What's the point? Interpolation and extrapolation with a regular grid DEM"
+     */
+    public final int getBilinearInterpol(double x, double y) {
+        final int h1, h2, h3, h4;
+        final int rows = this.getBufferedImage().getHeight();
+        final int cols = this.getBufferedImage().getWidth();
+        final double left = x - this.x;
+        final double top = this.y - y;
+
+        // column and row of the top left corner
+        final int col = (int) (left / this.getPixelSizeX());
+        final int row = (int) (top / this.getPixelSizeY());
+        if (col < 0 || col >= cols || row < 0 || row >= rows) {
+            return 0;
+        }
+
+        // relative coordinates in the square formed by the four points, scaled to 0..1.
+        // The origin is in the lower left corner.
+        double relX = left / this.getPixelSizeX() - col;
+        double relY = 1. - (top / this.getPixelSizeY() - row);
+        if (relX < 0) {
+            relX = 0;
+        } else if (relX > 1) {
+            relX = 1;
+        }
+        if (relY < 0) {
+            relY = 0;
+        } else if (relY > 1) {
+            relY = 1;
+        }
+
+        if (row + 1 < rows) {
+            // value at bottom left corner
+            h1 = this.image.getRGB(col, row + 1);
+            // value at bottom right corner
+            h2 = col + 1 < cols ? this.image.getRGB(col + 1, row + 1) : 0;
+        } else {
+            h1 = 0;
+            h2 = 0;
+        }
+
+        // value at top left corner
+        h3 = this.image.getRGB(col, row);
+
+        // value at top right corner
+        h4 = col + 1 < cols ? this.image.getRGB(col + 1, row) : 0;
+
+        return GeoImage.bilinearInterpolation(h1, h2, h3, h4, relX, relY);
+    }
+
+    
+     /**
+     * compute a bilinear interpolation.
+     * @param c1 value bottom left
+     * @param c2 value bottom right
+     * @param c3 value top left
+     * @param c4 value top right
+     * @param relX relative horizontal coordinate (0 .. 1) counted from left to right
+     * @param relY relative vertical coordinate (0 .. 1) counted from bottom to top
+     * @return The interpolated value
+     */
+    private static int bilinearInterpolation(int c1, int c2, int c3, int c4,
+            double relX, double relY) {
+
+        double r1 = (0xff0000 & c1) >> 16;
+        double g1 = (0xff00 & c1) >> 8;
+        double b1 = 0xff & c1;
+
+        double r2 = (0xff0000 & c2) >> 16;
+        double g2 = (0xff00 & c2) >> 8;
+        double b2 = 0xff & c2;
+
+        double r3 = (0xff0000 & c3) >> 16;
+        double g3 = (0xff00 & c3) >> 8;
+        double b3 = 0xff & c3;
+
+        double r4 = (0xff0000 & c4) >> 16;
+        double g4 = (0xff00 & c4) >> 8;
+        double b4 = 0xff & c4;
+
+        int r = (int) (r1 + (r2 - r1) * relX + (r3 - r1) * relY + (r1 - r2 - r3 + r4) * relX * relY);
+        int g = (int) (g1 + (g2 - g1) * relX + (g3 - g1) * relY + (g1 - g2 - g3 + g4) * relX * relY);
+        int b = (int) (b1 + (b2 - b1) * relX + (b3 - b1) * relY + (b1 - b2 - b3 + b4) * relX * relY);
+        if (r > 255) {
+            r = 255;
+        } else if (r < 0) {
+            r = 0;
+        }
+
+        if (g > 255) {
+            g = 255;
+        } else if (g < 0) {
+            g = 0;
+        }
+
+        if (b > 255) {
+            b = 255;
+        } else if (b < 0) {
+            b = 0;
+        }
+
+        return (int) (r << 16 | g << 8 | b | 0xff000000);
+    }
 }
