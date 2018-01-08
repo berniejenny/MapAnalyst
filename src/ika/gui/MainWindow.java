@@ -3408,9 +3408,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_closeWindow
 
     private void closeProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeProjectMenuItemActionPerformed
-        if (this.closeProject() && Sys.isWindows()) {
-            System.exit(0);
-        }
+        closeProject();
 }//GEN-LAST:event_closeProjectMenuItemActionPerformed
 
     private void newProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProjectMenuItemActionPerformed
