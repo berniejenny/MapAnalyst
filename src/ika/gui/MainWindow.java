@@ -4400,6 +4400,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             String fileName = FileUtils.cutFileExtension(file.getName());
             MainWindow w = new MainWindow(fileName, true);
             w.resetManager(newManager);
+            w.addUndo("Open File");
             w.filePath = filePath;
             w.manager.initOSM(w.newMapComponent);
             w.showPoints();
