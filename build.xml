@@ -78,8 +78,8 @@
                           identifier="ika.mapanalyst"
                           mainclassname="${main.class}"
                           icon="mac/appicon.icns"
-                          shortversion="1.3.29"
-                          copyright="© Bernhard Jenny, 2005–2017"
+                          shortversion="1.3.30"
+                          copyright="© Bernhard Jenny, 2005–2018"
                           applicationCategory="public.app-category.graphics-design">
             <classpath file="${dist.jar}" />
             <option value="-Dapple.laf.useScreenMenuBar=true"/>

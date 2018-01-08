@@ -25,7 +25,7 @@ public class ApplicationInfo {
      * @return The version of this application.
      */
     public static String getApplicationVersion() {
-        return "1.3.29";
+        return "1.3.30";
     }
     
     /**
@@ -42,7 +42,7 @@ public class ApplicationInfo {
      */
     public static String getCopyright() {
         String info = "<html><center>";
-        info += "MapAnalyst is Copyright 2005-2017 by<br>" +
+        info += "MapAnalyst is Copyright 2005-2018 by<br>" +
                 "Bernhard Jenny, Monash University, Australia<br><br>";
         info += "This program is free software;<br>";
         info += "you can redistribute it and/or modify it <br>" +
@@ -54,8 +54,8 @@ public class ApplicationInfo {
     }
      
     /**
-     * Returns the homepage (a html web address) for this application.
-     * @return The homepage of this application.
+     * Returns the home page (a html web address) for this application.
+     * @return The home page of this application.
      */
     public static String getHomepage() {
         return "http://mapanalyst.org/";
