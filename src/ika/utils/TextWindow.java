@@ -84,7 +84,7 @@ public class TextWindow {
             public void actionPerformed(ActionEvent e) {
                 String msg = "Export Report";
                 String fileName = "Export.txt";
-                String filePath = FileUtils.askFile(ownerFrame, msg, fileName, false, "txt");
+                String filePath = FileUtils.askFile(ownerFrame, msg, fileName, false, "txt", null);
                 if (filePath == null) {
                     return;
                 }

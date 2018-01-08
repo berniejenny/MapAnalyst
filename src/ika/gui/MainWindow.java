@@ -38,6 +38,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -3642,8 +3643,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             DistortionGrid distortionGrid = this.manager.getDistortionGrid();
 
             boolean analyseOldMap = this.showErrorInOldMapCheckBoxMenuItem.isSelected();
-            GeoSet geoSet = null;
-            boolean hasCustomClipPoly = false;
+            final GeoSet geoSet;
+            final boolean hasCustomClipPoly;
             if (analyseOldMap) {
                 geoSet = transformer.getOldSourceGeoSet();
                 hasCustomClipPoly = distortionGrid.hasOldClipPolygon();
@@ -3764,7 +3765,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         report += this.manager.compareTransformations();
         String title = "Comparison of Transformations";
         new TextWindow(this, true, true, report, title);
-
     }//GEN-LAST:event_compareTransformationsMenuItemActionPerformed
 
     private void pointSymbolMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pointSymbolMenuItemActionPerformed
@@ -3904,7 +3904,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         String msg = "Export Points of " + (forOldMap ? "Old Map" : "New Map");
         String fileName = forOldMap ? "Old map points" : "New map points";
         // don't require a file extension. The extension will be set when the format is selected
-        String exportFilePath = ika.utils.FileUtils.askFile(this, msg, fileName, false, null);
+        String exportFilePath = ika.utils.FileUtils.askFile(this, msg, fileName, false, null, null);
         if (exportFilePath == null) {
             return; // user canceled
         }
@@ -3957,7 +3957,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
 
         String fileName = "Linked points.txt";
-        String exportFilePath = FileUtils.askFile(this, "Export Linked Points", fileName, false, "txt");
+        String exportFilePath = FileUtils.askFile(this, "Export Linked Points", fileName, false, "txt", null);
         if (exportFilePath == null) {
             return; // user canceled
         }
@@ -4255,7 +4255,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             String msg = "Save " + format + " File";
             String ext = exporter.getFileExtension();
             String fileName = exportFileName(ext);
-            String path = ika.utils.FileUtils.askFile(this, msg, fileName, false, ext);
+            String path = ika.utils.FileUtils.askFile(this, msg, fileName, false, ext, null);
             if (path == null) {
                 return; // user canceled
             }
@@ -4283,7 +4283,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void exportToRasterImage(boolean oldMap, String format) {
         // ask the user for a file to store the image
         String fileName = exportFileName(format);
-        String path = FileUtils.askFile(this, "Save Raster Image", fileName, false, format);
+        String path = FileUtils.askFile(this, "Save Raster Image", fileName, false, format, null);
         if (path == null) {
             return; // user canceled
         }
@@ -4441,7 +4441,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
                     if (this.filePath == null || !new File(this.filePath).exists()) {
                         String ext = ApplicationInfo.getDocumentExtension();
                         String fileName = exportFileName(ext);
-                        filePath = FileUtils.askFile(this, "Save Project", fileName, false, ext);
+                        filePath = FileUtils.askFile(this, "Save Project", fileName, false, ext, null);
                         if (filePath == null) {
                             return false; // user canceled
                         }
@@ -4484,7 +4484,9 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }
 
     private void openProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openProjectMenuItemActionPerformed
-        String newFilePath = FileUtils.askFile(this, "Open Project:", true);
+        String extension = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
+        String newFilePath = FileUtils.askFile(this, "Open Project", null, true, 
+                null, new FileNameExtensionFilter("MapAnalyst", extension));
         if (newFilePath == null) {
             return;
         }
@@ -4714,7 +4716,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void exportNewSVGMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportNewSVGMenuItemActionPerformed
         String fileName = exportFileName("svg");
-        String path = FileUtils.askFile(this, "Save SVG File", fileName, false, "svg");
+        String path = FileUtils.askFile(this, "Save SVG File", fileName, false, "svg", null);
         if (path == null) {
             return; // user canceled
         }
@@ -5505,7 +5507,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void importRasterImage(boolean importToOldMap) {
         String title = importToOldMap ? "Import Old Map" : "Import New Map";
-        String importFilePath = FileUtils.askFile(this, title, true);
+        String importFilePath = FileUtils.askFile(this, title, null, true, null, 
+                FileUtils.IMAGE_FILE_NAME_EXT_FILTER);
         if (importFilePath != null) {
             try {
                 // make sure there is an image importer for the file format
@@ -5595,7 +5598,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
         osmCopyrightLabel.setVisible(false);
         importRasterImage(false);
-
     }//GEN-LAST:event_importNewMapMenuItemActionPerformed
 
     private void copyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyMenuItemActionPerformed
@@ -5617,7 +5619,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
         String fileName = exportFileName("txt");
         String expPath = FileUtils.askFile(this,
-                "Export Linked Points and Vectors", fileName, false, "txt");
+                "Export Linked Points and Vectors", fileName, false, "txt", null);
         if (expPath == null) {
             return; // user canceled
         }
@@ -5641,8 +5643,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void saveProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveProjectMenuItemActionPerformed
         // ask for file path if the document has never been saved or if its
         // path is invalid.
+        String ext = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
         if (filePath == null || !new java.io.File(filePath).exists()) {
-            filePath = FileUtils.askFile(this, "Save Project", false);
+            filePath = FileUtils.askFile(this, "Save Project", 
+                    exportFileName(ext), false, ext, 
+                    new FileNameExtensionFilter("MapAnalyst", ext));
         }
 
         if (filePath == null) {
@@ -5650,8 +5655,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
         // Don't move this to saveProject(). The path with the correct extension
         // has to be stored.
-        String extension = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
-        filePath = ika.utils.FileUtils.forceFileNameExtension(filePath, extension);
+        filePath = ika.utils.FileUtils.forceFileNameExtension(filePath, ext);
         // the user canceled if filePath is null
         if (filePath != null) {
             saveProject(filePath);
@@ -5666,8 +5670,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // ask for file path
         // 'save as': don't store the path to the file in this.filePath
         String ext = ApplicationInfo.getDocumentExtension();
-        String fileName = exportFileName(ext);
-        String path = FileUtils.askFile(this, "Save Copy of Project", fileName, false, ext);
+        String path = FileUtils.askFile(this, "Save Copy of Project", 
+                    exportFileName(ext), false, ext, 
+                    new FileNameExtensionFilter("MapAnalyst", ext));
+        
         if (path != null) {
             saveProject(path);
         }
@@ -5959,7 +5965,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void exportToShape(int shapeType, boolean oldMap) {
         String fileName = exportFileName("shp");
-        String path = FileUtils.askFile(this, "Save ESRI Shape File", fileName, false, "shp");
+        String path = FileUtils.askFile(this, "Save ESRI Shape File", fileName, false, "shp", null);
         if (path != null) {
             exportToShape(shapeType, oldMap, path);
         }

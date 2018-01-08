@@ -10,8 +10,11 @@ import java.awt.*;
 import java.nio.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.prefs.Preferences;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * FileUtils - file related utility methods.
@@ -25,6 +28,31 @@ public class FileUtils {
     static {
         String osname = System.getProperty("os.name");
         IS_MAC_OSX = osname.toLowerCase().startsWith("mac os x");
+    }
+
+    /**
+     * A filter for image files.
+     */
+    public static final FileNameExtensionFilter IMAGE_FILE_NAME_EXT_FILTER;
+
+    static {
+        String[] extensions = ImageIO.getReaderFileSuffixes();
+        // some extensions are empty strings, which results in FileNameExtensionFilter throwing an error
+        int nbrExtensions = 0;
+        for (String extension : extensions) {
+            if (extension != null && extension.trim().isEmpty() == false) {
+                ++nbrExtensions;
+            }
+        }
+        String[] validExtensions = new String[nbrExtensions];
+        int i = 0;
+        for (String extension : extensions) {
+            if (extension != null && extension.trim().isEmpty() == false) {
+                validExtensions[i++] = extension;
+            }
+        }
+
+        IMAGE_FILE_NAME_EXT_FILTER = new FileNameExtensionFilter("Image files", validExtensions);
     }
 
     /**
@@ -317,14 +345,23 @@ public class FileUtils {
     }
 
     /**
-     * Ask the user for a file using the Swing JFileChooser.
+     * Ask the user for a file using the Swing JFileChooser. On macOS,
+     * JFileChooser is poorly implemented, and therefore the AWT FileDialog
+     * should be used on macOS.
      */
     private static String askSwingFile(java.awt.Frame frame, String message,
-            String defaultFile, boolean load) {
-        // use Swing FileChooser on other systems
-        JFileChooser fc = new JFileChooser();
-        fc.setDialogTitle(message);
+            String defaultFile, FileNameExtensionFilter filter, boolean load) {
 
+        // load the directory last visited from the preferences
+        String LAST_USED_DIRECTORY = "last_directory";
+        Preferences prefs = Preferences.userRoot().node(FileUtils.class.getName());
+        String lastDir = prefs.get(LAST_USED_DIRECTORY, new File(".").getAbsolutePath());
+
+        JFileChooser fc = new JFileChooser(lastDir);
+        if (filter != null) {
+            fc.setFileFilter(filter);
+        }
+        fc.setDialogTitle(message);
         File selFile;
         // set default file
         try {
@@ -333,7 +370,7 @@ public class FileUtils {
         } catch (Exception e) {
         }
 
-        int result = JFileChooser.ERROR_OPTION;
+        int result;
         do {
             if (load) {
                 // Show open dialog
@@ -352,6 +389,9 @@ public class FileUtils {
                 return null;
             }
 
+            // store directory in preferences
+            prefs.put(LAST_USED_DIRECTORY, selFile.getParent());
+
         } while (!load && !askOverwrite(selFile, fc));
 
         return selFile.getPath();
@@ -369,12 +409,14 @@ public class FileUtils {
         public String defaultFile;
         public boolean load;
         public String ext;
+        public FileNameExtensionFilter filter;
 
+        @Override
         public void run() {
             if (FileUtils.IS_MAC_OSX) {
                 filePath = FileUtils.askAWTFile(frame, message, defaultFile, load);
             } else {
-                filePath = FileUtils.askSwingFile(frame, message, defaultFile, load);
+                filePath = FileUtils.askSwingFile(frame, message, defaultFile, filter, load);
             }
 
             // append the required file extension if necessary
@@ -400,8 +442,8 @@ public class FileUtils {
     };
 
     /**
-     * Ask the user for a file to load or to write to. Uses the awt FileDialog
-     * on Mac and the JFileChooser on other platforms. Makes sure the dialog is
+     * Ask the user for a file to load or write to. Uses the AWT FileDialog on
+     * macOS and the JFileChooser on other platforms. Makes sure the dialog is
      * displayed in the event dispatch thread.
      *
      * @param frame A Frame for which to display the dialog. Cannot be null.
@@ -411,10 +453,13 @@ public class FileUtils {
      * Pass false if a new file for writing should be specified.
      * @param ext A file extension that is required when selecting a file name
      * for saving a file. Can be null.
+     * @param filter filter used on Windows by the file chooser to filter out
+     * files from the user's view.
      * @return A path to the file, including the file name.
      */
     public static String askFile(final java.awt.Frame frame, final String message,
-            final String defaultFile, final boolean load, final String ext) {
+            final String defaultFile, final boolean load, final String ext,
+            final FileNameExtensionFilter filter) {
 
         GUI gui = new GUI();
         gui.frame = frame;
@@ -422,6 +467,7 @@ public class FileUtils {
         gui.defaultFile = defaultFile;
         gui.load = load;
         gui.ext = ext;
+        gui.filter = filter;
 
         // make sure we run in the event dispatch thread.
         SwingThreadUtils.invokeAndWait(gui);
@@ -429,7 +475,7 @@ public class FileUtils {
     }
 
     /**
-     * Ask the user for a file to load or to write to. Makes sure the dialog is
+     * Ask the user for a file to load or write to. Makes sure the dialog is
      * displayed in the event dispatch thread.
      *
      * @param frame A Frame for which to display the dialog. Cannot be null.
@@ -439,7 +485,7 @@ public class FileUtils {
      * @return A path to the file, including the file name.
      */
     public static String askFile(java.awt.Frame frame, String message, boolean load) {
-        return FileUtils.askFile(frame, message, null, load, null);
+        return FileUtils.askFile(frame, message, null, load, null, null);
     }
 
     public static String askDirectory(java.awt.Frame frame,
@@ -500,37 +546,6 @@ public class FileUtils {
     public static CharSequence charSequenceFromFile(String filename)
             throws IOException {
         return FileUtils.charSequenceFromFile(filename, 0);
-    }
-
-    public static byte[] getBytesFromFile(File file) throws IOException {
-        InputStream is = new FileInputStream(file);
-
-        // Get the size of the file
-        long length = file.length();
-
-        if (length > Integer.MAX_VALUE) {
-            throw new IOException("The file is too large.");
-        }
-
-        // Create the byte array to hold the data
-        byte[] bytes = new byte[(int) length];
-
-        // Read in the bytes
-        int offset = 0;
-        int numRead = 0;
-        while (offset < bytes.length
-                && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
-            offset += numRead;
-        }
-
-        // Ensure all the bytes have been read in
-        if (offset < bytes.length) {
-            throw new IOException("Could not completely read file " + file.getName() + ".");
-        }
-
-        // Close the input stream and return bytes
-        is.close();
-        return bytes;
     }
 
     public static File createTempDirectory() throws IOException {
