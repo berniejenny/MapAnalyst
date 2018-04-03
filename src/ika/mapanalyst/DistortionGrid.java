@@ -303,6 +303,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         }
     }
 
+    @Override
     public void analyzeMap() throws MapAnalyzerException {
 
         final MultiquadricInterpolation multiQuad = params.getMultiquadricInterpolation();
