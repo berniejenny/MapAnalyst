@@ -6,6 +6,8 @@
 
 package ika.mapanalyst;
 
+import java.text.DateFormat;
+
 /**
  * Information about this application.
  * @author Bernhard Jenny, Institute of Cartography, ETH Zurich.
@@ -74,6 +76,7 @@ public class ApplicationInfo {
      * @return The string containing time and date.
      */
     public static String getCurrentTimeAndDate() {
-        return java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
+        return java.text.DateFormat.getDateTimeInstance(
+                DateFormat.LONG, DateFormat.LONG).format(new java.util.Date());
     }
 }

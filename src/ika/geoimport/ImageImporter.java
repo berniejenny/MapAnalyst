@@ -69,6 +69,7 @@ public class ImageImporter extends Thread {
             // create the GeoImage
             this.geoImage = new GeoImage(img, filePath);
             this.geoImage.setSelectable(false);
+            this.geoImage.setName(filePath);
             
             // search and read an associated world file containing georeferencing
             // information. If there is a World file we are done.

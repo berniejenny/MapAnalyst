@@ -211,8 +211,8 @@ public class MainWindow extends javax.swing.JFrame
             addUndo(null);
 
             // hide the GUI for a visualisation method by Mekenkamp that is not recommended
-            this.setMekenkampVisible(false);
-            this.udpateTransformationInfoGUI();
+            setMekenkampVisible(false);
+            udpateTransformationInfoGUI();
 
             addWindowListener(new WindowAdapter() {
 
@@ -257,7 +257,7 @@ public class MainWindow extends javax.swing.JFrame
 
             // hide debug menu
             menuBar.remove(debugMenu);
-            
+
         } finally {
             updatingGUI = false;
         }
@@ -380,6 +380,7 @@ public class MainWindow extends javax.swing.JFrame
     protected static void updateAllMenusOfAllWindows() {
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 Enumeration e = windows.elements();
                 while (e.hasMoreElements()) {
@@ -454,6 +455,7 @@ public class MainWindow extends javax.swing.JFrame
             menuItem.setName(Integer.toString(i));
             menuItem.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
                     JMenuItem menuItem = (JMenuItem) evt.getSource();
                     try {
@@ -3695,10 +3697,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             byte[] points = this.manager.getLinkManager().serializePoints(false);
             this.undo.add(name, points);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, e);
         }
     }
 
+    @Override
     public void mapToolActionPerformed(
             MapTool mapTool,
             MapComponent mapComponent,
@@ -3718,7 +3721,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             // it's likely redoing changed the points, so show them.
             this.showPoints();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, e);
         }
     }//GEN-LAST:event_redoMenuItemActionPerformed
 
@@ -3733,31 +3736,68 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             // it's likely undoing changed the points, so show them.
             this.showPoints();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, e);
         }
     }//GEN-LAST:event_undoMenuItemActionPerformed
 
     private void compareTransformationsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compareTransformationsMenuItemActionPerformed
         if (!this.manager.getLinkManager().hasEnoughLinkedPointsForComputation()) {
-            this.notEnoughLinkedPointsErrorMessage();
+            notEnoughLinkedPointsErrorMessage();
             return;
         }
         String nl = System.getProperty("line.separator");
-        String report = "Comparison of Transformations" + nl
-                + "-----------------------------" + nl + nl
-                + ika.mapanalyst.ApplicationInfo.getApplicationName()
-                + " Version "
-                + ika.mapanalyst.ApplicationInfo.getApplicationVersion()
-                + System.getProperty("line.separator")
-                + ika.mapanalyst.ApplicationInfo.getCurrentTimeAndDate()
-                + nl + nl
-                + "Computation with "
-                + this.manager.getLinkManager().getNumberLinks()
-                + " linked points." + nl + nl;
+        StringBuilder sb = new StringBuilder();
 
-        report += this.manager.compareTransformations();
+        // title
+        sb.append("Comparison of Transformations").append(nl);
+        sb.append("-----------------------------").append(nl).append(nl);
+
+        // application name and version
+        sb.append(ika.mapanalyst.ApplicationInfo.getApplicationName());
+        sb.append(" version ");
+        sb.append(ika.mapanalyst.ApplicationInfo.getApplicationVersion()).append(".").append(nl);
+
+        // date
+        sb.append("Computation date: ");
+        sb.append(ika.mapanalyst.ApplicationInfo.getCurrentTimeAndDate()).append(".");
+        sb.append(nl).append(nl);
+
+        // project file name
+        sb.append("Project file: ");
+        sb.append(filePath == null ? "undefined" : filePath);
+        sb.append(nl);
+
+        // old map image: path is stored in name field
+        String oldMapName = null;
+        if (manager.getOldMap() != null) {
+            oldMapName = manager.getOldMap().getName();
+        }
+        if (oldMapName != null) {
+            sb.append("Old map image: ").append(oldMapName).append(nl);
+        }
+
+        // new map image: path is stored in name field
+        if (manager.isUsingOpenStreetMap()) {
+            sb.append("New map: OpenStreetMap").append(nl);
+        } else if (manager.getNewMap() != null) {
+            String newMapName = manager.getNewMap().getName();
+            if (newMapName != null) {
+                sb.append("New map image: ").append(newMapName).append(nl);
+            }
+        }
+
+        // points used
+        sb.append(nl);
+        sb.append("Computation with ");
+        sb.append(this.manager.getLinkManager().getNumberLinks());
+        sb.append(" linked points.").append(nl).append(nl);
+
+        // comparison of transformations
+        sb.append(manager.compareTransformations());
         String title = "Comparison of Transformations";
-        new TextWindow(this, true, true, report, title);
+
+        // show text in new window
+        new TextWindow(this, true, true, sb.toString(), title);
     }//GEN-LAST:event_compareTransformationsMenuItemActionPerformed
 
     private void pointSymbolMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pointSymbolMenuItemActionPerformed
@@ -4193,7 +4233,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             return;
         }
 
-        GeoSet geoSet = null;
+        GeoSet geoSet;
         // try importing with Ungenerate importer
         try {
             geoSet = ika.geoimport.UngenerateImporter.read(file);
@@ -4310,7 +4350,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             String msg = "An error occured while exporting to a raster image.";
             String title = "Raster Image Export Error";
             ErrorDialog.showErrorDialog(msg, title, exc, this);
-            return;
         }
     }
 
@@ -4479,7 +4518,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void openProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openProjectMenuItemActionPerformed
         String extension = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
-        String newFilePath = FileUtils.askFile(this, "Open Project", null, true, 
+        String newFilePath = FileUtils.askFile(this, "Open Project", null, true,
                 null, new FileNameExtensionFilter("MapAnalyst", extension));
         if (newFilePath == null) {
             return;
@@ -4600,7 +4639,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // update GUI
             this.enableLinkingGUIForUnlinkedPoints(link.getPtOld(), link.getPtNew());
-            link = null;
             this.addUndo("Unlink Points");
         } else {
             // get the selected point in the old map and see if it has a name.
@@ -4681,7 +4719,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
                 + "At least " + minNbrLinks + " pairs of linked points "
                 + "are needed.\n"
                 + "Please set corresponding points in the old and the new map\n"
-                + "and link them using the \"Link Points\" button.";
+                + "and link them using the \"Link\" button.";
         String title = "Not Enough Linked Points";
         javax.swing.JOptionPane.showMessageDialog(this, msg, title,
                 javax.swing.JOptionPane.ERROR_MESSAGE, null);
@@ -4877,7 +4915,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         errorVectors.setOutliersColor(outliersColor);
 
         // sets the scale of the error vectors. Default is the scale = 1
-        double scale = 1;
+        double scale;
         try {
             scale = errorVectorsScaleNumberField.getNumber();
         } catch (Exception e) { // use 1 if user entered invalid number
@@ -5111,13 +5149,13 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // exaggeration
             double v = distGrid.getExaggeration();
-            this.distortionGridExaggerationFormattedTextField.setValue(new Double(v));
+            this.distortionGridExaggerationFormattedTextField.setValue(v);
 
             // offsets
             double dx = distGrid.getOffsetX();
-            this.distortionGridOffsetXFormattedTextField.setValue(new Double(dx));
+            this.distortionGridOffsetXFormattedTextField.setValue(dx);
             double dy = distGrid.getOffsetY();
-            this.distortionGridOffsetYFormattedTextField.setValue(new Double(dy));
+            this.distortionGridOffsetYFormattedTextField.setValue(dy);
 
             // show undistorted grid
             this.distortionGridShowUndistortedCheckBox.setSelected(distGrid.isShowUndistorted());
@@ -5501,7 +5539,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void importRasterImage(boolean importToOldMap) {
         String title = importToOldMap ? "Import Old Map" : "Import New Map";
-        String importFilePath = FileUtils.askFile(this, title, null, true, null, 
+        String importFilePath = FileUtils.askFile(this, title, null, true, null,
                 FileUtils.IMAGE_FILE_NAME_EXT_FILTER);
         if (importFilePath != null) {
             try {
@@ -5639,8 +5677,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // path is invalid.
         String ext = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
         if (filePath == null || !new java.io.File(filePath).exists()) {
-            filePath = FileUtils.askFile(this, "Save Project", 
-                    exportFileName(ext), false, ext, 
+            filePath = FileUtils.askFile(this, "Save Project",
+                    exportFileName(ext), false, ext,
                     new FileNameExtensionFilter("MapAnalyst", ext));
         }
 
@@ -5664,10 +5702,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         // ask for file path
         // 'save as': don't store the path to the file in this.filePath
         String ext = ApplicationInfo.getDocumentExtension();
-        String path = FileUtils.askFile(this, "Save Copy of Project", 
-                    exportFileName(ext), false, ext, 
-                    new FileNameExtensionFilter("MapAnalyst", ext));
-        
+        String path = FileUtils.askFile(this, "Save Copy of Project",
+                exportFileName(ext), false, ext,
+                new FileNameExtensionFilter("MapAnalyst", ext));
+
         if (path != null) {
             saveProject(path);
         }
