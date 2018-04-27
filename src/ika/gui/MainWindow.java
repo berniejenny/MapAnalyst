@@ -8,6 +8,7 @@ package ika.gui;
 import ch.ethz.karto.gui.LineProjector;
 import ch.ethz.karto.gui.MapLine;
 import ch.ethz.karto.gui.UngenerateImporter;
+import com.fizzysoft.sdu.RecentDocumentsManager;
 import com.jhlabs.map.Ellipsoid;
 import com.jhlabs.map.proj.ConicProjection;
 import com.jhlabs.map.proj.CylindricalEqualAreaProjection;
@@ -36,6 +37,7 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -108,6 +110,8 @@ public class MainWindow extends javax.swing.JFrame
     // latitude of true scale for the
     private Double latTrueScaleDeg = new Double(0);
 
+    private RecentDocumentsManager rdm;
+
     /**
      * Creates new form MainWindow
      */
@@ -119,6 +123,7 @@ public class MainWindow extends javax.swing.JFrame
             this.updatingGUI = true;
 
             // build the GUI
+            initRecentDocumentsMenu();
             initComponents();
 
             // add window to list.
@@ -261,6 +266,43 @@ public class MainWindow extends javax.swing.JFrame
         } finally {
             updatingGUI = false;
         }
+    }
+
+    private void initRecentDocumentsMenu() {
+        final String APPNAME = "MapAnalyst";
+        rdm = new RecentDocumentsManager() {
+
+            private Preferences getPreferences() {
+                return Preferences.userNodeForPackage(MainWindow.class);
+            }
+
+            @Override
+            protected byte[] readRecentDocs() {
+                return getPreferences().getByteArray("RecentDocuments" + APPNAME, null);
+            }
+
+            @Override
+            protected void writeRecentDocs(byte[] data) {
+                getPreferences().putByteArray("RecentDocuments" + APPNAME, data);
+            }
+
+            @Override
+            protected void openFile(File file, ActionEvent event) {
+                if (file != null) {
+                    try {
+                        openProject(file.getCanonicalPath());
+                    } catch (IOException ex) {
+                        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+            @Override
+            protected Icon getFileIcon(File file) {
+                return null;
+            }
+        };
+        rdm.setMaxRecentDocuments(25);
     }
 
     private void showAllInNewMap() {
@@ -678,6 +720,7 @@ public class MainWindow extends javax.swing.JFrame
         fileMenu = new javax.swing.JMenu();
         newProjectMenuItem = new javax.swing.JMenuItem();
         openProjectMenuItem = new javax.swing.JMenuItem();
+        openRecentMenu = rdm.createOpenRecentMenu();
         jSeparator5 = new javax.swing.JSeparator();
         closeProjectMenuItem = new javax.swing.JMenuItem();
         saveProjectMenuItem = new javax.swing.JMenuItem();
@@ -2490,6 +2533,9 @@ openProjectMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }
     });
     fileMenu.add(openProjectMenuItem);
+
+    openRecentMenu.setText("Open Recent Project");
+    fileMenu.add(openRecentMenu);
     fileMenu.add(jSeparator5);
 
     closeProjectMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W,
@@ -4417,15 +4463,15 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 }//GEN-LAST:event_showMapCheckBoxMenuItemActionPerformed
 
     public void openProject(String filePath) {
+        ObjectInputStream objectStream = null;
         try {
             // read data from project file
             FileInputStream fileStream = new FileInputStream(filePath);
             BufferedInputStream bufferedStream = new BufferedInputStream(fileStream);
             java.util.zip.GZIPInputStream zip
                     = new java.util.zip.GZIPInputStream(bufferedStream);
-            ObjectInputStream objectStream = new ObjectInputStream(zip);
+            objectStream = new ObjectInputStream(zip);
             Manager newManager = (Manager) objectStream.readObject();
-            objectStream.close();
 
             // successfully read new data. Create new window.
             final File file = new File(filePath);
@@ -4445,6 +4491,14 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             JOptionPane.showMessageDialog(this, "The file could not be opened.",
                     "File Error", JOptionPane.ERROR_MESSAGE, null);
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (objectStream != null) {
+                try {
+                    objectStream.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 
@@ -4520,10 +4574,11 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         String extension = ika.mapanalyst.ApplicationInfo.getDocumentExtension();
         String newFilePath = FileUtils.askFile(this, "Open Project", null, true,
                 null, new FileNameExtensionFilter("MapAnalyst", extension));
-        if (newFilePath == null) {
-            return;
+        if (newFilePath != null) {
+            openProject(newFilePath);
+            // add document to Open Recent menu
+            rdm.addDocument(new File(newFilePath), null);
         }
-        openProject(newFilePath);
     }//GEN-LAST:event_openProjectMenuItemActionPerformed
 
     private void placePointMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_placePointMenuItemActionPerformed
@@ -6788,6 +6843,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JCheckBoxMenuItem oldUnitMCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem oldUnitPxCheckBoxMenuItem;
     private javax.swing.JMenuItem openProjectMenuItem;
+    private javax.swing.JMenu openRecentMenu;
     private javax.swing.JLabel osmCopyrightLabel;
     private javax.swing.JToggleButton panPointsToggleButton;
     private javax.swing.JMenuItem pasteMenuItem;
