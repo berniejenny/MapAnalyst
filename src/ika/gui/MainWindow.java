@@ -4486,6 +4486,10 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             w.writeGUI();
             w.setVisible(true);
             w.cleanDirty();
+            
+            // add document to the File > Open Recent Project menu
+            rdm.addDocument(new File(filePath), null);
+            
             MainWindow.updateAllMenusOfAllWindows();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "The file could not be opened.",
@@ -4576,8 +4580,6 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
                 null, new FileNameExtensionFilter("MapAnalyst", extension));
         if (newFilePath != null) {
             openProject(newFilePath);
-            // add document to Open Recent menu
-            rdm.addDocument(new File(newFilePath), null);
         }
     }//GEN-LAST:event_openProjectMenuItemActionPerformed
 
