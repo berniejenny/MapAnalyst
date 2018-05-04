@@ -131,7 +131,7 @@ public class VectorSymbol extends Symbol implements java.io.Serializable {
         return this.strokeWidth;
     }
     
-    public final float getScaledStrokeWidth(double scale) {
+    public float getScaledStrokeWidth(double scale) {
         return scaleInvariant ? (float)(strokeWidth / scale) : strokeWidth;
     }
     
@@ -163,7 +163,7 @@ public class VectorSymbol extends Symbol implements java.io.Serializable {
         return dashLength;
     }
     
-    public final float getScaledDashLength(double scale) {
+    public float getScaledDashLength(double scale) {
         return scaleInvariant ? (float)(dashLength / scale) : dashLength;
     }
     
@@ -198,7 +198,7 @@ public class VectorSymbol extends Symbol implements java.io.Serializable {
      * length when this symbol is scale invariant.
      * @return A Stroke that can be used to draw into Graphics2d.
      */
-    public final Stroke getStroke(double scale) {
+    public Stroke getStroke(double scale) {
         final float scaledStrokeWidth = this.getScaledStrokeWidth(scale);
         BasicStroke stroke;
         if (dashLength <= 0) {
@@ -218,27 +218,28 @@ public class VectorSymbol extends Symbol implements java.io.Serializable {
         return stroke;
     }
     
-    public final void applyFillSymbol(Graphics2D g2d) {
+    public void applyFillSymbol(Graphics2D g2d) {
         g2d.setColor(this.fillColor);
     }
     
-    public final void applyStrokeSymbol(Graphics2D g2d, double scale) {
+    public void applyStrokeSymbol(Graphics2D g2d, double scale) {
         g2d.setColor(this.strokeColor);
         g2d.setStroke(this.getStroke(scale));
     }
     
+    @Override
     public String toString() {
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         
-        str.append("Fill: " + this.filled + " color: " + this.fillColor);
+        str.append("Fill: ").append(filled).append(" color: ").append(fillColor);
         str.append("\n");
         
-        str.append("Stroke: " + this.stroked + " color: " + this.strokeColor);
-        str.append(" width: " + this.strokeWidth);
-        str.append(" dash length: " + this.dashLength);
+        str.append("Stroke: ").append(stroked).append(" color: ").append(strokeColor);
+        str.append(" width: ").append(strokeWidth);
+        str.append(" dash length: ").append(dashLength);
         str.append("\n");
         
-        str.append("Scale invariant: " + this.scaleInvariant);
+        str.append("Scale invariant: ").append(scaleInvariant);
         
         return str.toString();
     }

@@ -3,7 +3,6 @@
  *
  * Created on March 27, 2005, 2:05 PM
  */
-
 package ika.utils;
 
 /**
@@ -11,7 +10,7 @@ package ika.utils;
  * implementation by N. Devillard in C,<br>
  * port to Java by B. Jenny.<br>
  * This code is in public domain.<br>
- * 
+ *
  * Reference:<br>
  * Author: Wirth, Niklaus<br>
  * Title: Algorithms + data structures = programs<br>
@@ -20,73 +19,81 @@ package ika.utils;
  * Series: Prentice-Hall Series in Automatic Computation<br>
  */
 public class Median {
-    
+
     /**
      * Find the kth smallest element in the array<br>
      * Notice: use median() to get the median.<br>
-     * Important: The passed array will be altered. The order of its
-     * elements will change!<br>
+     * Important: The passed array will be altered. The order of its elements
+     * will change!<br>
+     *
      * @param a Array of elements. The order of the elements will be changed!
      * @param k rank k, starting with 0, up to a.length-1
      * @return kth element in array a
      */
     public static double kth_smallest(double[] a, int k) {
         final int n = a.length;
-        int i,j,l,m;
+        int i, j, l, m;
         double x;
-        l=0;
-        m = n-1;
-        while (l<m) {
-            x=a[k];
-            i=l;
-            j=m;
+        l = 0;
+        m = n - 1;
+        while (l < m) {
+            x = a[k];
+            i = l;
+            j = m;
             do {
-                while (a[i]<x)
+                while (a[i] < x) {
                     i++;
-                while (x<a[j])
+                }
+                while (x < a[j]) {
                     j--;
-                if (i<=j) {
+                }
+                if (i <= j) {
                     // ELEM_SWAP(a[i],a[j]);
                     final double temp = a[i];
-                    a[i]=a[j];
-                    a[j]=temp;
-                    
+                    a[i] = a[j];
+                    a[j] = temp;
+
                     i++;
                     j--;
                 }
-            } while (i<=j);
-            if (j<k) l=i;
-            if (k<i) m=j;
+            } while (i <= j);
+            if (j < k) {
+                l = i;
+            }
+            if (k < i) {
+                m = j;
+            }
         }
         return a[k];
     }
-    
+
     /**
      * Find the median of an array.<br>
      * Important: The passed array will be altered if preserveOrder is false.
      * The order of its elements will change!<br>
+     *
      * @param a The array of values
-     * @param preserveOrder If true, the order of the values in a is guaranteed 
+     * @param preserveOrder If true, the order of the values in a is guaranteed
      * to remain the same. Passing true for preserveOrder forces median() to
      * allocate a copy of a, and thus slows it down.
      * @return The median value of a.
      */
     public static double median(double[] a, boolean preserveOrder) {
-        final int  n = a.length;
-        double [] a_copy;
+        final int n = a.length;
+        double[] a_copy;
         if (preserveOrder) {
             /*
             a_copy = new double [n];
             for (int i = 0; i < n; i++)
                 a_copy[i] = a[i];
-               */
-            a_copy = (double[])(a.clone());
-             }
-        else
+             */
+            a_copy = (double[]) (a.clone());
+        } else {
             a_copy = a;
-        return Median.kth_smallest(a_copy, (n%2==0) ? n/2-1 : n/2);
+        }
+        return Median.kth_smallest(a_copy, (n % 2 == 0) ? n / 2 - 1 : n / 2);
     }
-    
+
     /**
      * A few tests.
      */

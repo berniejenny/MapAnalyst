@@ -149,7 +149,7 @@ public class ImageImporter extends Thread {
             GeoSet destinationGeoSet,
             ika.gui.ImageReaderProgressDialog progressDialog){
         
-        if (filePath == null || destinationGeoSet == null || progressDialog == null)
+        if (filePath == null || destinationGeoSet == null)
             throw new IllegalArgumentException();
         
         // make sure there is an image importer for the file format.

@@ -5,6 +5,11 @@ import java.awt.geom.*;
 import ika.geo.*;
 import ika.geo.osm.OpenStreetMap;
 import ika.utils.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 
 /**
@@ -15,12 +20,16 @@ import java.text.DecimalFormat;
 public class DistortionGrid extends MapAnalyzer implements Serializable {
 
     private static final long serialVersionUID = -5990761709834452077L;
+
+    /**
+     * size of a grid mesh in coordinates of the reference map
+     */
     private double meshSize;
     /**
      * meshSizeScale is 1, if the grid is transformed from the new reference map
      * to the old map, i.e. the distorted grid is displayed in the old map.
      * meshSizeScale is > 1 if the grid is transformed from the old map to the
-     * new reference map, i.e. the distorted grid is diplayed in the new
+     * new reference map, i.e. the distorted grid is displayed in the new
      * reference map.
      */
     private double meshSizeScale;
@@ -138,7 +147,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         this.showUndistorted = showUndistorted;
     }
 
-    private class Grid {
+    private final class Grid {
 
         public double[][] grid;
         public double[] horizontalLabels;
@@ -233,10 +242,16 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                 }
                 ext.setRect(minX, minY, maxX - minX, maxY - minY);
             }
-            final double[] bases = new double[]{7.5, 5, 2.5, 1.5, 1};
+
             double cellSize = Math.min(ext.getWidth(), ext.getHeight()) / DEF_NODES;
             if (cellSize <= 0d) {
                 return -1;
+            }
+
+            if (params.isOSM() && !params.isAnalyzeOldMap() && meshUnit == Unit.METERS) {
+                // grid in OSM map and mesh dimension specified in meters.
+                // convert from degrees to meters
+                cellSize = cellSize / 180 * Math.PI * OpenStreetMap.R;
             }
 
             // scale the cell size such that it is > 1
@@ -251,6 +266,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             double ndigits = (int) Math.floor(Math.log10(cellSize_s));
 
             // find the index into bases for the first limit after cellSize
+            final double[] bases = new double[]{7.5, 5, 2.5, 1.5, 1};
             int baseID = 0;
             for (int i = 0; i < bases.length; ++i) {
                 if (cellSize_s >= bases[i]) {
@@ -387,14 +403,14 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             params.getProjector().geo2Intermediate(grid.grid, grid.grid);
         } else {
             // grid in meters
-            final double scaledMeshSize = this.getScaledMeshSize();
+            final double scaledMeshSize = getScaledMeshSize();
             grid = new Grid(params.getSrcPointsExtension(), scaledMeshSize);
         }
 
         // get the convex hulls around the two point sets
         double[][] srcHull;
         double[][] dstHull;
-        switch (this.clipWithHull) {
+        switch (clipWithHull) {
             case 1: //1: clip with convex hull
                 dstHull = params.getDstPointsHull();
                 srcHull = params.getSrcPointsHull();
@@ -402,10 +418,10 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             case 2: // 2: clip with custom polygon
                 if (params.isAnalyzeOldMap()) {
                     srcHull = null;
-                    dstHull = this.oldClipPolygon;
+                    dstHull = oldClipPolygon;
                 } else {
                     srcHull = null;
-                    dstHull = this.newClipPolygon;
+                    dstHull = newClipPolygon;
                 }
                 break;
             default: // 0: no clipping
@@ -413,17 +429,32 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                 dstHull = null;
         }
 
+        // reference distance for uncertainty visualisation
+        // use upper quartile of distances to closest neighbors of points in the destination map
+        double uncertaintyRefDistance = quantileDistanceToClosestPoint(params.getDstPoints(), 0.75);
+        // the uncertainty reference distance is at least as long as the size of a grid mesh
+        double s = getScaledMeshSize();
+        if (params.isAnalyzeOldMap()) {
+            s /= params.getTransformationScale();
+        }
+        uncertaintyRefDistance = Math.max(uncertaintyRefDistance, s);
+
         // Create GeoPaths from the undistorted grid
         // add the undistorted grid to the source map
-        this.createVerticalLinesFromGrid(
-                grid,
-                sourceGeoSet, srcHull,
-                !params.isAnalyzeOldMap());
-        this.createHorizontalLinesFromGrid(
+        createVerticalLinesFromGrid(
                 grid,
                 sourceGeoSet,
                 srcHull,
-                !params.isAnalyzeOldMap());
+                !params.isAnalyzeOldMap(),
+                false,
+                uncertaintyRefDistance);
+        createHorizontalLinesFromGrid(
+                grid,
+                sourceGeoSet,
+                srcHull,
+                !params.isAnalyzeOldMap(),
+                false,
+                uncertaintyRefDistance);
 
         // apply an affine transformation to the grid
         params.getTransformation().transform(grid.grid);
@@ -431,31 +462,104 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         // Create GeoPaths from the undistorted transformed grid and add them 
         // to the destination map if required.
         if (showUndistorted) {
-            this.createVerticalLinesFromGrid(
+            createVerticalLinesFromGrid(
                     grid,
                     destGeoSet,
                     dstHull,
-                    params.isAnalyzeOldMap());
-            this.createHorizontalLinesFromGrid(
+                    params.isAnalyzeOldMap(),
+                    true,
+                    uncertaintyRefDistance);
+            createHorizontalLinesFromGrid(
                     grid, destGeoSet,
                     dstHull,
-                    params.isAnalyzeOldMap());
+                    params.isAnalyzeOldMap(),
+                    true,
+                    uncertaintyRefDistance);
         }
 
         // apply a multiquadric interpolation to the grid
         multiQuad.transform(grid.grid);
 
-        // Create GeoPaths from the distorted grid and add them
-        // to the destination map
-        this.createVerticalLinesFromGrid(
+        // Create GeoPaths from the distorted grid and add them to the destination map
+        createVerticalLinesFromGrid(
                 grid,
                 destGeoSet,
                 dstHull,
-                params.isAnalyzeOldMap());
-        this.createHorizontalLinesFromGrid(
+                params.isAnalyzeOldMap(),
+                true,
+                uncertaintyRefDistance);
+        createHorizontalLinesFromGrid(
                 grid, destGeoSet,
                 dstHull,
-                params.isAnalyzeOldMap());
+                params.isAnalyzeOldMap(),
+                true,
+                uncertaintyRefDistance);
+    }
+
+    /**
+     * For each passed point first computes the distance to the closest
+     * neighbor, and then computes the median of these distances.
+     *
+     * @param pts points
+     * @param quantile between 0 and 1
+     * @return the median distance to the closest neighbor for all points in the
+     * destination map.
+     */
+    private static double quantileDistanceToClosestPoint(double[][] pts, double quantile) {
+        // square distance to closest neighbor for each point
+        double[] shortestDistSquared = new double[pts.length];
+
+        // find square distance to closest neighbor for each point
+        for (int i = 0; i < pts.length; i++) {
+            shortestDistSquared[i] = Double.MAX_VALUE;
+            for (int j = 0; j < pts.length; j++) {
+                if (i == j) {
+                    continue;
+                }
+                double dx = pts[i][0] - pts[j][0];
+                double dy = pts[i][1] - pts[j][1];
+                double dsq = dx * dx + dy * dy;
+                shortestDistSquared[i] = Math.min(shortestDistSquared[i], dsq);
+            }
+        }
+
+        // median distance
+        int k = (int) (shortestDistSquared.length * quantile);
+        return Math.sqrt(Median.kth_smallest(shortestDistSquared, k));
+    }
+
+    /**
+     * Returns the distance to the closest point.
+     *
+     * @param pts points to search closest point
+     * @param xy position in destination map
+     * @return shortest distance
+     */
+    private static double distanceToClosestPoint(double[][] pts, double x, double y) {
+        double shortestDistSq = Double.MAX_VALUE;
+
+        // find square distance to each point
+        for (double[] pt : pts) {
+            double dx = pt[0] - x;
+            double dy = pt[1] - y;
+            double dsq = dx * dx + dy * dy;
+            shortestDistSq = Math.min(shortestDistSq, dsq);
+        }
+        return Math.sqrt(shortestDistSq);
+    }
+
+    /**
+     * Returns the distance to the closest point of two point sets.
+     *
+     * @param ptSet1 point set 1
+     * @param ptSet2 poitn set 2
+     * @param xy position in destination map
+     * @return shortest distance
+     */
+    private static double distanceToClosestPoint(double[][] ptSet1,
+            double[][] ptSet2, double x, double y) {
+        return Math.min(distanceToClosestPoint(ptSet1, x, y),
+                distanceToClosestPoint(ptSet2, x, y));
     }
 
     /**
@@ -472,8 +576,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     }
 
     /**
-     * Returns whether the number of hoirizontal and vertical cells in a grid
-     * are within reasonable bounds.
+     * Returns whether the number of horizontal and vertical cells in a grid are
+     * within reasonable bounds.
      */
     public boolean isNumberOfGridLinesCorrect(Rectangle2D srcPointsExtension) {
         final double scaledMeshSize = this.getScaledMeshSize();
@@ -494,7 +598,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             Rectangle2D srcPointsExtension) {
 
         double cellSize = grid.getSuggestedCellSize(srcPointsExtension);
-        String msg = "With the current mesh size, the new distortion"
+        String msg = "With the selected mesh size, the new distortion"
                 + "\ngrid would contain less than ";
         msg += MIN_NODES;
         msg += " or more than ";
@@ -528,6 +632,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         geoText.setCenterHor(labelVerticalLine);
         geoText.setCenterVer(!labelVerticalLine);
         geoText.setScaleInvariant(true);
+        geoText.setSelectable(false);
         geoSet.addGeoObject(geoText);
     }
 
@@ -586,7 +691,9 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             GeoSet geoSet,
             boolean useBezier,
             boolean gridInOldMap,
-            String pathName) {
+            boolean gridInDestinationMap,
+            String pathName,
+            double uncertaintyRefDistance) {
 
         // clip the polyline with the mask polygon
         java.util.Vector lines = ika.utils.GeometryUtils.clipPolylineWithPolygon(
@@ -602,7 +709,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                 continue;
             }
             double[][] line = (double[][]) lines.get(i);
-            this.addPath(line, geoSet, useBezier, gridInOldMap, pathName);
+            addGridLine(line, geoSet, useBezier, gridInOldMap,
+                    gridInDestinationMap, pathName, uncertaintyRefDistance);
         }
 
         // return the first and the last point of the clipped lines
@@ -614,11 +722,48 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         return extremaPoints;
     }
 
-    private void addPath(double[][] line,
+    private GeoPath gridLineToGeoPath(double[][] line, int firstPoint, int nbrPoints, boolean useBezier, String name) {
+        GeoPath geoPath = new GeoPath();
+        geoPath.setSelectable(false);
+        geoPath.setVectorSymbol(vectorSymbol);
+        geoPath.setName(name);
+
+        // only use Bezier splines if smoothness is larger then 0
+        if (useBezier && smoothness > 0) {
+            geoPath.smooth(this.smoothness, line, firstPoint, nbrPoints);
+        } else {
+            geoPath.straightLines(line, firstPoint, nbrPoints);
+        }
+
+        return geoPath;
+    }
+
+    /**
+     * Adds a line to the grid. The line may be split into segments to show
+     * uncertainty.
+     *
+     * @param line coordinates of the line
+     * @param geoSet destination
+     * @param useBezier smoothed lines
+     * @param gridInOldMap true if grid is for the old map
+     * @param gridInDestinationMap true if grid is for the destination map
+     * @param name name of line grid
+     * @param uncertaintyRefDistance if a grid vertex is further away from any
+     * control point than this distance, the vertex is considered uncertain and
+     * rendered semi-transparent. The distance is in the coordinate system of
+     * the map with the distorted grid. If zero, uncertainty is not visualized.
+     */
+    private void addGridLine(double[][] line,
             GeoSet geoSet,
             boolean useBezier,
             boolean gridInOldMap,
-            String name) {
+            boolean gridInDestinationMap,
+            String name,
+            double uncertaintyRefDistance) {
+
+        if (line.length < 2) {
+            return;
+        }
 
         if (params.isOSM() && !gridInOldMap) {
             double[][] projLine = new double[line.length][2];
@@ -626,20 +771,68 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             line = projLine;
         }
 
-        GeoPath geoPath = new GeoPath();
-        geoPath.setSelectable(false);
-        geoPath.setVectorSymbol(this.vectorSymbol);
-        geoPath.setName(name);
+        if (gridInDestinationMap || uncertaintyRefDistance == 0) {
+            Color c = vectorSymbol.getStrokeColor();
+            Color uncertainColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), 0.2f);
+            VectorSymbol uncertainVectorSymbol = vectorSymbol.copy();
+            uncertainVectorSymbol.setStrokeColor(uncertainColor);
 
-        // only use Bezier splines if smoothness is larger then 0
-        if (useBezier && smoothness > 0) {
-            geoPath.smooth(this.smoothness, line, 0, line.length);
+            double[][] dstPoints = params.getDstPoints();
+            double[][] srcPointsTrans = params.getTransformedSourcePoints();
+            int firstPoint = 0;
+            double d = distanceToClosestPoint(srcPointsTrans, dstPoints, line[firstPoint][0], line[firstPoint][1]);
+            boolean uncertain = d > uncertaintyRefDistance;
+            for (int i = 1; i < line.length; i++) {
+                d = distanceToClosestPoint(srcPointsTrans, dstPoints, line[i][0], line[i][1]);
+                boolean nextIsUncertain = d > uncertaintyRefDistance;
+                if (uncertain != nextIsUncertain || i == line.length - 1) {
+                    int nbrPts = i - firstPoint;
+                    if (!uncertain || i == line.length - 1) {
+                        ++nbrPts;
+                    }
+                    if (nbrPts >= 2) {
+                        GeoPath p = gridLineToGeoPath(line, firstPoint, nbrPts, useBezier, name);
+                        geoSet.addGeoObject(p);
+                        if (uncertain) {
+                            p.setVectorSymbol(uncertainVectorSymbol);
+                        }
+
+                        // start point of next line
+                        firstPoint = uncertain ? i - 1 : i;
+                    }
+                    uncertain = nextIsUncertain;
+                }
+            }
+
         } else {
-            geoPath.straightLines(line, 0, line.length);
+            GeoPath geoPath = new GeoPath();
+            geoPath.setSelectable(false);
+            geoPath.setVectorSymbol(this.vectorSymbol);
+            geoPath.setName(name);
+
+            // only use Bezier splines if smoothness is larger then 0
+            if (useBezier && smoothness > 0) {
+                geoPath.smooth(this.smoothness, line, 0, line.length);
+            } else {
+                geoPath.straightLines(line, 0, line.length);
+            }
+            geoSet.addGeoObject(geoPath);
         }
-        geoSet.addGeoObject(geoPath);
     }
 
+    /**
+     *
+     * @param line
+     * @param mask
+     * @param geoSet
+     * @param useBezier
+     * @param labelString
+     * @param pathName
+     * @param horizontalLabel
+     * @param gridInOldMap
+     * @param gridInDestinationMap true if grid is for the destination map
+     * @param uncertaintyRefDistance
+     */
     private void clipAndAddPath(double[][] line,
             double[][] mask,
             GeoSet geoSet,
@@ -647,25 +840,33 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             String labelString,
             String pathName,
             boolean horizontalLabel,
-            boolean gridInOldMap) {
+            boolean gridInOldMap,
+            boolean gridInDestinationMap,
+            double uncertaintyRefDistance) {
 
         // clip the line with the mask.
         if (mask != null) {
-            double[][] extremaPoints = clipLine(line, mask, geoSet, useBezier, gridInOldMap, pathName);
+            double[][] extremaPoints = clipLine(line, mask, geoSet, useBezier,
+                    gridInOldMap, gridInDestinationMap, pathName, uncertaintyRefDistance);
             if (labelString != null && extremaPoints != null) {
                 if (horizontalLabel) {
-                    addHorizontalLabel(extremaPoints[0], extremaPoints[1], labelString, geoSet, gridInOldMap);
+                    addHorizontalLabel(extremaPoints[0], extremaPoints[1],
+                            labelString, geoSet, gridInOldMap);
                 } else {
-                    addVerticalLabel(extremaPoints[0], extremaPoints[1], labelString, geoSet, gridInOldMap);
+                    addVerticalLabel(extremaPoints[0], extremaPoints[1],
+                            labelString, geoSet, gridInOldMap);
                 }
             }
         } else { // no mask: add the whole line
-            addPath(line, geoSet, useBezier, gridInOldMap, pathName);
+            addGridLine(line, geoSet, useBezier, gridInOldMap,
+                    gridInDestinationMap, pathName, uncertaintyRefDistance);
             if (labelString != null) {
                 if (horizontalLabel) {
-                    addHorizontalLabel(line[0], line[line.length - 1], labelString, geoSet, gridInOldMap);
+                    addHorizontalLabel(line[0], line[line.length - 1],
+                            labelString, geoSet, gridInOldMap);
                 } else {
-                    addVerticalLabel(line[0], line[line.length - 1], labelString, geoSet, gridInOldMap);
+                    addVerticalLabel(line[0], line[line.length - 1],
+                            labelString, geoSet, gridInOldMap);
                 }
             }
         }
@@ -716,7 +917,9 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     private void createVerticalLinesFromGrid(
             Grid grid, GeoSet geoSet,
             double[][] mask,
-            boolean gridInOldMap) {
+            boolean gridInOldMap,
+            boolean gridInDestinationMap,
+            double uncertaintyRefDistance) {
 
         final CoordinateFormatter coordinateFormatter
                 = params.isAnalyzeOldMap()
@@ -749,14 +952,17 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                 }
             }
 
-            clipAndAddPath(line, mask, geoSet, useBezier, labelStr, coordStr, false, gridInOldMap);
+            clipAndAddPath(line, mask, geoSet, useBezier, labelStr, coordStr, false,
+                    gridInOldMap, gridInDestinationMap, uncertaintyRefDistance);
         }
     }
 
     private void createHorizontalLinesFromGrid(
             Grid grid, GeoSet geoSet,
             double[][] mask,
-            boolean gridInOldMap) {
+            boolean gridInOldMap,
+            boolean gridInDestinationMap,
+            double uncertaintyRefDistance) {
 
         final CoordinateFormatter coordinateFormatter
                 = params.isAnalyzeOldMap()
@@ -786,7 +992,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                 }
             }
 
-            clipAndAddPath(line, mask, geoSet, useBezier, labelStr, coordStr, true, gridInOldMap);
+            clipAndAddPath(line, mask, geoSet, useBezier, labelStr, coordStr,
+                    true, gridInOldMap, gridInDestinationMap, uncertaintyRefDistance);
         }
     }
 

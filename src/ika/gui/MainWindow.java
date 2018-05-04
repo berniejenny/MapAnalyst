@@ -1880,8 +1880,8 @@ public class MainWindow extends javax.swing.JFrame
         errorVectorScalePanel.setLayout(new java.awt.GridBagLayout());
 
         errorVectorsOutliersCheckBox.setSelected(true);
-        errorVectorsOutliersCheckBox.setText("Mark Outliers (L > 3 Sigma)");
-        errorVectorsOutliersCheckBox.setToolTipText("Highlight vectors and circles that are bigger than 3 times the Standard Deviation (Sigma 0).");
+        errorVectorsOutliersCheckBox.setText("Mark Outliers (Length > 3 Sigma)");
+        errorVectorsOutliersCheckBox.setToolTipText("Highlight vectors and circles that are greater than 3 times the Standard Deviation (Sigma 0).");
         errorVectorsOutliersCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 errorVectorsOutliersCheckBoxActionPerformed(evt);
@@ -1944,6 +1944,7 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(10, 12, 4, 12);
         errorVectorsPanel.add(errorVectorScalePanel, gridBagConstraints);

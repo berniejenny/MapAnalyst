@@ -98,9 +98,9 @@ public class GeoImage extends GeoObject implements Serializable {
         ImageImporter importer = new ImageImporter();
         importer.setAskUserToGeoreferenceImage(false);
         GeoImage geoImage = importer.importGeoImageWithImageIOSync(filePath);
-        if (geoImage != null)
-            this.image = geoImage.getBufferedImage();
-        geoImage = null;
+        if (geoImage != null) {
+            image = geoImage.getBufferedImage();
+        }
     }
     
     public void resetGeoreference() {

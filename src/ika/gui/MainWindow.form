@@ -2720,7 +2720,7 @@
                           </AuxValues>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-                              <GridBagConstraints gridX="1" gridY="0" gridWidth="1" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="10" insetsLeft="12" insetsBottom="4" insetsRight="12" anchor="10" weightX="0.0" weightY="0.0"/>
+                              <GridBagConstraints gridX="1" gridY="0" gridWidth="3" gridHeight="1" fill="2" ipadX="0" ipadY="0" insetsTop="10" insetsLeft="12" insetsBottom="4" insetsRight="12" anchor="10" weightX="0.0" weightY="0.0"/>
                             </Constraint>
                           </Constraints>
 
@@ -2741,8 +2741,8 @@
                                 <Component class="javax.swing.JCheckBox" name="errorVectorsOutliersCheckBox">
                                   <Properties>
                                     <Property name="selected" type="boolean" value="true"/>
-                                    <Property name="text" type="java.lang.String" value="Mark Outliers (L &gt; 3 Sigma)"/>
-                                    <Property name="toolTipText" type="java.lang.String" value="Highlight vectors and circles that are bigger than 3 times the Standard Deviation (Sigma 0)."/>
+                                    <Property name="text" type="java.lang.String" value="Mark Outliers (Length &gt; 3 Sigma)"/>
+                                    <Property name="toolTipText" type="java.lang.String" value="Highlight vectors and circles that are greater than 3 times the Standard Deviation (Sigma 0)."/>
                                   </Properties>
                                   <Events>
                                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="errorVectorsOutliersCheckBoxActionPerformed"/>
