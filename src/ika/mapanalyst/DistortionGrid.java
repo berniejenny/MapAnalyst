@@ -39,7 +39,18 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         METERS, DEGREES
     }
     private Unit meshUnit;
+
+    // factor for Bezier curve interpolation
     private double smoothness;
+
+    // alpha value for rendering uncertain grid areas
+    private float uncertaintyAlpha;
+
+    // if a grid is not further away from the closest control point than the
+    // uncertaintyQuantile of all closest distances between control points, then 
+    // it is considered uncertain.
+    private double uncertaintyQuantile;
+
     /**
      * 0: no clipping 1: clip with convex hull 2: clip with custom polygon
      */
@@ -86,6 +97,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         this.meshUnit = Unit.METERS;
         this.meshSizeScale = 1.;
         this.smoothness = 1.;
+        this.uncertaintyAlpha = 0.25f;
+        this.uncertaintyQuantile = 0.75;
         this.clipWithHull = 0;
         this.oldClipPolygon = null;
         this.newClipPolygon = null;
@@ -103,6 +116,15 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+
+        // alpha for uncertainty and uncertaintyQuantile were added with 1.3.32
+        // minimum value for uncertaintyAlpha is 0.05, so if 0, an older file is opened
+        if (uncertaintyAlpha == 0f) {
+            uncertaintyAlpha = 0.25f;
+        }
+        if (uncertaintyQuantile == 0) {
+            uncertaintyQuantile = 0.75;
+        }
 
         // exaggeration was added with 1.3.?
         if (exaggeration == 0) {
@@ -431,7 +453,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
         // reference distance for uncertainty visualisation
         // use upper quartile of distances to closest neighbors of points in the destination map
-        double uncertaintyRefDistance = quantileDistanceToClosestPoint(params.getDstPoints(), 0.75);
+        double uncertaintyRefDistance = quantileDistanceToClosestPoint(params.getDstPoints(), uncertaintyQuantile);
+
         // the uncertainty reference distance is at least as long as the size of a grid mesh
         double s = getScaledMeshSize();
         if (params.isAnalyzeOldMap()) {
@@ -501,7 +524,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
      * neighbor, and then computes the median of these distances.
      *
      * @param pts points
-     * @param quantile between 0 and 1
+     * @param quantile quantile to compute, between 0 and 1
      * @return the median distance to the closest neighbor for all points in the
      * destination map.
      */
@@ -523,9 +546,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             }
         }
 
-        // median distance
-        int k = (int) (shortestDistSquared.length * quantile);
-        return Math.sqrt(Median.kth_smallest(shortestDistSquared, k));
+        return Math.sqrt(Median.quantile(shortestDistSquared, quantile));
     }
 
     /**
@@ -765,20 +786,28 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             return;
         }
 
+        // convert from intermediate coordinate system to OSM coordinate system
+        // if the distorted grid is in the new map and OSM is used.
+        double[][] lineToRender;
         if (params.isOSM() && !gridInOldMap) {
-            double[][] projLine = new double[line.length][2];
-            params.getProjector().intermediate2OSM(line, projLine);
-            line = projLine;
+            lineToRender = new double[line.length][2];
+            params.getProjector().intermediate2OSM(line, lineToRender);
+        } else {
+            lineToRender = line;
         }
 
-        if (gridInDestinationMap || uncertaintyRefDistance == 0) {
+        if (gridInDestinationMap && uncertaintyRefDistance > 0) {
             Color c = vectorSymbol.getStrokeColor();
-            Color uncertainColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), 0.2f);
+            int alpha = (int) (255f * uncertaintyAlpha);
+            Color uncertainColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
             VectorSymbol uncertainVectorSymbol = vectorSymbol.copy();
             uncertainVectorSymbol.setStrokeColor(uncertainColor);
 
+            // if the grid is for an OSM map, the dst and transformed src points are 
+            // in an intermediate coordinate system.
             double[][] dstPoints = params.getDstPoints();
             double[][] srcPointsTrans = params.getTransformedSourcePoints();
+
             int firstPoint = 0;
             double d = distanceToClosestPoint(srcPointsTrans, dstPoints, line[firstPoint][0], line[firstPoint][1]);
             boolean uncertain = d > uncertaintyRefDistance;
@@ -791,7 +820,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                         ++nbrPts;
                     }
                     if (nbrPts >= 2) {
-                        GeoPath p = gridLineToGeoPath(line, firstPoint, nbrPts, useBezier, name);
+                        GeoPath p = gridLineToGeoPath(lineToRender, firstPoint, nbrPts, useBezier, name);
                         geoSet.addGeoObject(p);
                         if (uncertain) {
                             p.setVectorSymbol(uncertainVectorSymbol);
@@ -1023,6 +1052,47 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
     public void setSmoothness(double smoothness) {
         this.smoothness = smoothness;
+    }
+
+    /**
+     * Alpha value for rendering uncertain values, between 0.05 and 1.
+     *
+     * @return the uncertaintyAlpha
+     */
+    public float getUncertaintyAlpha() {
+        return uncertaintyAlpha;
+    }
+
+    /**
+     * Alpha value for rendering uncertain areas
+     *
+     * @param uncertaintyAlpha alpha value, changed to 0.05 if smaller than this
+     * value to make sure the grid is always visible. Max value is 1f.
+     */
+    public void setUncertaintyAlpha(float uncertaintyAlpha) {
+        this.uncertaintyAlpha = Math.min(1f, Math.max(0.05f, uncertaintyAlpha));
+    }
+
+    /**
+     * Quantile to extract reference distance from all shortest distances
+     * between control points to determine whether a gird node is considered
+     * uncertain.
+     *
+     * @return the uncertaintyQuantile
+     */
+    public double getUncertaintyQuantile() {
+        return uncertaintyQuantile;
+    }
+
+    /**
+     * Quantile to extract reference distance from all shortest distances
+     * between control points to determine whether a gird node is considered
+     * uncertain.
+     *
+     * @param uncertaintyQuantile the quantile between 0.01 and 1
+     */
+    public void setUncertaintyQuantile(double uncertaintyQuantile) {
+        this.uncertaintyQuantile = Math.min(1f, Math.max(0.01f, uncertaintyQuantile));
     }
 
     public double getMeshSizeScale() {

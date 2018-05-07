@@ -93,6 +93,12 @@ public class Median {
         }
         return Median.kth_smallest(a_copy, (n % 2 == 0) ? n / 2 - 1 : n / 2);
     }
+    
+    public static double quantile(double[] a, double quantile) {
+        final int n = a.length;
+        int k = (int)Math.round((n - 1) * quantile);
+        return Median.kth_smallest(a, k);
+    }
 
     /**
      * A few tests.
