@@ -13,9 +13,9 @@ MapAnalyst comes as a NetBeans project. You can download the NetBeans IDE at htt
 
 Feel free to improve or extend MapAnalyst. Please let us know when you've made any changes, and e-mail us the improved source code or push your changes to GitHub.
 
-MapAnalyst is free software; you can distribute it and / or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation. MapAnalyst is Copyright 2005-2017 by Bernhard Jenny with contributions by Adrian Weber.
+MapAnalyst is free software; you can distribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation. MapAnalyst is Copyright 2005-2018 by Bernhard Jenny with contributions by Adrian Weber.
 
 Contact:
 Bernie Jenny
-Monash University, Clayton, Australia
+Monash University, Melbourne, Australia
 bernie.jenny@monash.edu
