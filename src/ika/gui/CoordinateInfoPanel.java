@@ -5,10 +5,14 @@
  */
 package ika.gui;
 
-import ika.map.tools.*;
+import com.jhlabs.map.MapMath;
+import ika.geo.osm.OpenStreetMap;
+import ika.geo.osm.Projector;
+import ika.map.tools.MapToolMouseMotionListener;
+import ika.map.tools.MeasureToolListener;
 import ika.mapanalyst.Manager;
 import ika.utils.CoordinateFormatter;
-import java.text.*;
+import java.text.DecimalFormat;
 
 /**
  *
@@ -121,44 +125,72 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         this.angleLabel.setText("-");
     }
 
+    /**
+     * Returns true if the passed map is showing the "new" reference map and is
+     * using OSM.
+     *
+     * @param mapComponent
+     * @return
+     */
+    private boolean mapUsesOSM(MapComponent mapComponent) {
+        boolean osm = "new".equals(mapComponent.getName())
+                && manager != null && manager.isUsingOpenStreetMap();
+        return osm;
+    }
+
+    /**
+     * The measure tool has been moved on the map. Update distance and angle.
+     *
+     * @param x1 drag start x
+     * @param y1 drag start y
+     * @param x2 drag end x
+     * @param y2 drag end y
+     * @param mapComponent map
+     */
     @Override
-    public void distanceChanged(double distance, double angle,
-            ika.gui.MapComponent mapComponent) {
+    public void updateMeasureTool(double x1, double y1, double x2, double y2,
+            MapComponent mapComponent) {
+
+        final double d, angleRad;
+
+        if (mapUsesOSM(mapComponent)) {
+            // convert to spherical coordinates
+            double[] startLonLat = Projector.OSM2Geo(x1, y1);
+            double[] endLonLat = Projector.OSM2Geo(x2, y2);
+
+            // compute great circle distance on sphere, assuming spherical Earth
+            d = MapMath.greatCircleDistance(startLonLat[0], startLonLat[1],
+                    endLonLat[0], endLonLat[1]) * OpenStreetMap.R;
+
+            angleRad = Double.NaN;
+        } else {
+            final double dx = x2 - x1;
+            final double dy = y2 - y1;
+            d = Math.sqrt(dx * dx + dy * dy);
+            angleRad = Math.atan2(dy, dx);
+        }
 
         // distance
         CoordinateFormatter coordFormatter = mapComponent.getCoordinateFormatter();
-        this.distLabel.setText(coordFormatter.format(distance));
+        this.distLabel.setText(coordFormatter.format(d));
 
         // angle
-        double azimuth = -Math.toDegrees(angle) + 90.;
+        double azimuth = -Math.toDegrees(angleRad) + 90.;
         if (azimuth < 0) {
             azimuth += 360;
         }
         String angleStr = angleFormatter.format(azimuth);
-        this.angleLabel.setText("<HTML>" + angleStr + "&#176</HTML>");
-    }
-
-    @Override
-    public void positionChanged(double x1, double y1, double x2, double y2, MapComponent mapComponent) {
-        final double dx = x2 - x1;
-        final double dy = y2 - y1;
-        final double d = Math.hypot(dx, dy);
-        final double angle = Math.atan2(dy, dx);
-
-        /*double[][] localOSMPoints = null;
-        if (true) {
-            localOSMPoints = linkManager.getLinkedPoints()[1];
-            OSMCoordinateConverter.fromOSM(localOSMPoints, localOSMPoints, null);
+        if (Double.isFinite(azimuth)) {
+            this.angleLabel.setText("<HTML>" + angleStr + "&#176</HTML>");
+        } else {
+            this.angleLabel.setText("Ð");
         }
-
-        System.out.println("distanceChanged");*/
     }
 
     private void updateCoordinates(java.awt.geom.Point2D.Double point,
             ika.gui.MapComponent mapComponent) {
         if (point != null) {
-            boolean osm = "new".equals(mapComponent.getName()) 
-                    && manager != null && manager.isUsingOpenStreetMap();
+            boolean osm = mapUsesOSM(mapComponent);
             String[] str = mapComponent.coordinatesStrings(point, osm);
             xCoordLabel.setText(str[0]);
             yCoordLabel.setText(str[1]);

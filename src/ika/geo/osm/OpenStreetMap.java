@@ -265,6 +265,9 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
      */
     protected void drawTile(BufferedImage image, Graphics2D g2d,
             double x, double y, double tileWidthWC, double tileHeightWC) {
+        if (image == null) {
+            image = Tile.ERROR_IMAGE;
+        }
         AffineTransform trans = new AffineTransform();
         trans.scale(1, -1);
         trans.translate(x, -y);

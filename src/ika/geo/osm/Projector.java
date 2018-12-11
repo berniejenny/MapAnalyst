@@ -101,8 +101,8 @@ public class Projector {
     /**
      * converts lon/lat in degrees to OSM
      *
-     * @param in
-     * @param out
+     * @param in geographic coordinates on sphere
+     * @param out xy Cartesian web Mercator coordinates.
      */
     public static void geo2OSM(double[][] in, double[][] out) {
 
@@ -119,8 +119,8 @@ public class Projector {
     /**
      * Transform from OSM Mercator to geographic coordinates in radians
      *
-     * @param in
-     * @param out
+     * @param in xy Cartesian web Mercator coordinates
+     * @param out geographic coordinates on sphere
      */
     public static void OSM2Geo(double[][] in, double[][] out) {
 
@@ -132,6 +132,19 @@ public class Projector {
             out[i][1] = pt.y;
         }
 
+    }
+
+    /**
+     * Transform from OSM Mercator to geographic coordinates in radians
+     *
+     * @param x Cartesian web Mercator coordinates
+     * @param y Cartesian web Mercator coordinates
+     * @return geographic lon/lat radians coordinates on sphere
+     */
+    public static double[] OSM2Geo(double x, double y) {
+        Point2D.Double lonLat = new Point2D.Double();
+        mercator.inverseTransformRadians(x, y, lonLat);
+        return new double[]{lonLat.x, lonLat.y};
     }
 
     public double[][] intermediate2geo(double[][] in) {

@@ -90,7 +90,7 @@ public class ProjectionsManager {
         MercatorProjection mercator = new MercatorProjection();
         mercator.setMaxLatitude(OpenStreetMap.MAX_LAT);
         mercator.setMinLatitude(OpenStreetMap.MIN_LAT);
-        Ellipsoid osmSphere = new Ellipsoid("osm", 6378137.0, 6378137.0, 0.0, "OSM Sphere");
+        Ellipsoid osmSphere = new Ellipsoid("osm", OpenStreetMap.R, OpenStreetMap.R, 0.0, "OSM Sphere");
         mercator.setEllipsoid(osmSphere);
         mercator.initialize();
         return mercator;

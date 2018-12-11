@@ -25,7 +25,7 @@ public abstract class MapTool {
      */
     protected MapComponent mapComponent;
     
-    private java.util.Vector mapToolActionListeners = new java.util.Vector();
+    private final java.util.Vector mapToolActionListeners = new java.util.Vector();
     
     protected GeoSet destinationGeoSet;
     
