@@ -1861,7 +1861,7 @@ public class MainWindow extends javax.swing.JFrame
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         distortionControlSizePanel.add(jLabel8, gridBagConstraints);
 
-        jLabel9.setText("Uncertain areas:");
+        jLabel9.setText("Uncertain Areas:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
@@ -5155,7 +5155,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
         double quantile = distortionGridUncertaintyQuantileSlider.getValue() / 100d;
         distGrid.setUncertaintyQuantile(quantile);
-        
+
         // clip with hull
         int clipWithHull = this.distortionGridExtensionComboBox.getSelectedIndex();
         distGrid.setClipWithHull(clipWithHull);
@@ -5265,8 +5265,8 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // quantile for uncertainty reference
             double quantile = distGrid.getUncertaintyQuantile();
-            distortionGridUncertaintyQuantileSlider.setValue((int)(quantile * 100));
-            
+            distortionGridUncertaintyQuantileSlider.setValue((int) (quantile * 100));
+
             // convex hull
             int clipWithHull = distGrid.getClipWithHull();
             this.distortionGridExtensionComboBox.setSelectedIndex(clipWithHull);
@@ -6411,10 +6411,60 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         return sb.toString();
     }
 
+    /**
+     * String to inform the user if the project file contains a reference to an
+     * image file and the file could not be loaded.
+     *
+     * @param img
+     * @return info string or an empty string if the GeoImage does not contain a
+     * path to an image file
+     */
+    private String couldNotFindImageInfo(GeoImage img) {
+        if (img == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        String imageFilePath = filePath(img);
+        if (imageFilePath.isEmpty() == false) {
+            sb.append("Could not find an image file here:");
+            sb.append("<br>");
+            sb.append(imageFilePath);
+            sb.append("<br>");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Returns a path to the image file of a GeoImage.
+     * @param img
+     * @return path or an empty string if no path exists or img is null.
+     */
+    private String filePath(GeoImage img) {
+        if (img == null) {
+            return "";
+        }
+        String imageFilePath = img.getFilePath();
+        if (imageFilePath != null && imageFilePath.trim().isEmpty() == false) {
+            return imageFilePath.trim();
+        }
+        return "";
+    }
+
+    /**
+     * Returns a short description of the old map image in HTML format.
+     *
+     * @return description
+     */
     private String getOldMapImageInfo() {
+        StringBuilder sb = new StringBuilder();
         GeoImage img = manager.getOldMap();
-        if (img != null) {
-            StringBuilder sb = new StringBuilder();
+
+        if (img != null
+                && img.getBufferedImage() != null
+                && img.getBounds2D() != null) {
+            sb.append(filePath(img));
+            sb.append("<br>");
+
             Rectangle2D bounds = img.getBounds2D();
             // size in cm
             sb.append(String.format("%1$,.1f", bounds.getWidth() * 100));
@@ -6429,15 +6479,36 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
             // image size in pixels
             sb.append(getImageSizeInfo(img));
-            return sb.toString();
+        } else {
+            sb.append("No old map image loaded.<br>");
+            String missingImageFileInfo = couldNotFindImageInfo(img);
+            if (missingImageFileInfo.isEmpty()) {
+                sb.append("Use File > Import Old Map Image to load an image.");
+            } else {
+                sb.append(missingImageFileInfo);
+            }
         }
-        return null;
+        return sb.toString();
     }
 
+    /**
+     * Returns a short description of the new map image in HTML format.
+     *
+     * @return description
+     */
     private String getNewMapImageInfo() {
+        if (manager.isUsingOpenStreetMap()) {
+            return "OpenStreetMap";
+        }
+
+        StringBuilder sb = new StringBuilder();
         GeoImage img = manager.getNewMap();
-        if (img != null) {
-            StringBuilder sb = new StringBuilder();
+        if (img != null 
+                && img.getBufferedImage() != null 
+                && img.getBounds2D() != null) {
+            sb.append(filePath(img));
+            sb.append("<br>");
+            
             Rectangle2D bounds = img.getBounds2D();
             // extent in reference coordinate system
             sb.append(String.format("%1$,.1f", bounds.getWidth()));
@@ -6455,14 +6526,20 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             sb.append(" m \u00D7 ");
             sb.append(img.getPixelSizeY());
             sb.append(" m");
-
-            return sb.toString();
+        } else {
+            sb.append("No new map image loaded.<br>");
+            String missingImageFileInfo = couldNotFindImageInfo(img);
+            if (missingImageFileInfo.isEmpty()) {
+                sb.append("Use Maps > Add OpenStreetMap or File > Import New Map Image.");
+            } else {
+                sb.append(missingImageFileInfo);
+            }
         }
-        return null;
+        return sb.toString();
     }
 
     /**
-     * Display info dialog with size of map image
+     * Display dialog with information about the size of map images
      *
      * @param oldMap for old or new map
      */
@@ -6471,22 +6548,19 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         String oldMapInfo = getOldMapImageInfo();
         String newMapInfo = getNewMapImageInfo();
         sb.append("<html>");
+
+        // old map
+        sb.append("<b>Old Map</b><br>");
         if (oldMapInfo != null) {
-            sb.append("<b>Old Map</b><br>");
             sb.append(oldMapInfo);
-        } else {
-            sb.append("There is currently no old map image loaded."
-                    + "<br>Please use File > Import Old Map Image to load an image.");
         }
+
+        // new map
+        sb.append("<br><br><b>New Map</b><br>");
         if (newMapInfo != null) {
-            sb.append("<br><br><b>New Map</b><br>");
             sb.append(newMapInfo);
         }
-        if (oldMapInfo != null || newMapInfo != null) {
-            sb.append("<br><br>");
-            sb.append("Correctly sized maps are required for accurate visualizations"
-                    + "<br>and the calculation of the scale of the old map.");
-        }
+
         sb.append("</html>");
         String dlgTitle = "About the Maps";
         JOptionPane.showMessageDialog(this, sb.toString(),

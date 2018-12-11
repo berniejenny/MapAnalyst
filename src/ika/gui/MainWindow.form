@@ -2726,7 +2726,7 @@
                             </Component>
                             <Component class="javax.swing.JLabel" name="jLabel9">
                               <Properties>
-                                <Property name="text" type="java.lang.String" value="Uncertain areas:"/>
+                                <Property name="text" type="java.lang.String" value="Uncertain Areas:"/>
                               </Properties>
                               <AuxValues>
                                 <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
