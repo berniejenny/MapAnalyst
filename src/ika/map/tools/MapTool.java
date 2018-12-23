@@ -6,12 +6,13 @@
 
 package ika.map.tools;
 
-import java.awt.geom.*;
-import java.awt.event.*;
-import java.awt.*;
-import ika.utils.*;
+import ika.geo.GeoSet;
 import ika.gui.MapComponent;
-import ika.geo.*;
+import ika.utils.CursorUtils;
+import java.awt.Cursor;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 /**
  * MapTool - an abstract base class for map tools. A MapTool offers some kind of
@@ -25,7 +26,7 @@ public abstract class MapTool {
      */
     protected MapComponent mapComponent;
     
-    private final java.util.Vector mapToolActionListeners = new java.util.Vector();
+    private final ArrayList<MapToolActionListener> mapToolActionListeners = new ArrayList<>();
     
     protected GeoSet destinationGeoSet;
     

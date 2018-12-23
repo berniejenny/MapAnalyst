@@ -3087,11 +3087,13 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     });
 
-    mapSizeMenuItem.setText("About the Maps…");
-    mapSizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent evt) {
-            mapSizeMenuItemActionPerformed(evt);
-        }
+    mapSizeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M,
+        java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+mapSizeMenuItem.setText("About the Maps…");
+mapSizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        mapSizeMenuItemActionPerformed(evt);
+    }
     });
     mapsMenu.add(mapSizeMenuItem);
     mapsMenu.add(jSeparator14);
@@ -6426,7 +6428,7 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         StringBuilder sb = new StringBuilder();
         String imageFilePath = filePath(img);
         if (imageFilePath.isEmpty() == false) {
-            sb.append("Could not find an image file here:");
+            sb.append("No image could be found here:");
             sb.append("<br>");
             sb.append(imageFilePath);
             sb.append("<br>");

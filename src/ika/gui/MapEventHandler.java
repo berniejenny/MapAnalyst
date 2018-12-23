@@ -74,7 +74,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      */
     private boolean mouseOverComponent = false;
 
-    private final HashSet mouseMotionListeners = new HashSet();
+    private final HashSet<MapToolMouseMotionListener> mouseMotionListeners = new HashSet<>();
 
     /**
      * Creates a new instance of MapEventHandler

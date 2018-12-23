@@ -1491,6 +1491,9 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mapSizeMenuItem">
               <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M,&#xa;    java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="About the Maps&#x2026;"/>
               </Properties>
               <Events>

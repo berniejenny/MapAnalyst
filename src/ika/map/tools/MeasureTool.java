@@ -1,14 +1,14 @@
 package ika.map.tools;
 
-import com.jhlabs.map.MapMath;
-import com.jhlabs.map.proj.MercatorProjection;
-import ika.geo.osm.OpenStreetMap;
-import ika.geo.osm.Projector;
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.event.*;
-import java.util.*;
 import ika.gui.MapComponent;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 /**
  * MeasureTool - a tool to measure distances between two points.
@@ -30,7 +30,7 @@ public class MeasureTool extends DoubleBufferedTool {
      * A set of MeasureToolListener that will be informed when a new distance
      * has been computed.
      */
-    private final Set<MeasureToolListener> listeners = new HashSet();
+    private final ArrayList<MeasureToolListener> listeners = new ArrayList<>();
 
     /**
      * Create a new instance.
