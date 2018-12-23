@@ -61,13 +61,27 @@ public class Projector {
             out[i][1] = pt.y;
         }
 
-        // inverse project from OSM to lon/lat in radians
+        // inverse project from lon/lat to OSM
         for (int i = 0; i < in.length; i++) {
             mercator.transform(Math.toDegrees(out[i][0]), Math.toDegrees(out[i][1]), pt);
             out[i][0] = pt.x;
             out[i][1] = pt.y;
         }
+    }
 
+    /**
+     * Converts from an intermediate coordinate system to the OpenStreetMap
+     * coordinate system. The intermediate coordinate system is used for
+     * generating distortion visualizations.
+     * 
+     * @param xy a single intermediate point
+     * @return OSM XY point
+     */
+    public double[] intermediate2OSM(double[] xy) {
+        double[][] ptIn = new double[][]{xy};
+        double[][] ptOut = new double[1][2];
+        intermediate2OSM(ptIn, ptOut);
+        return ptOut[0];
     }
 
     /**

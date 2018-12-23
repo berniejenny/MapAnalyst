@@ -1,15 +1,17 @@
 package ika.mapanalyst;
 
-import java.io.*;
-import java.awt.geom.*;
-import ika.geo.*;
+import ika.geo.GeoPath;
+import ika.geo.GeoSet;
+import ika.geo.GeoText;
+import ika.geo.VectorSymbol;
 import ika.geo.osm.OpenStreetMap;
-import ika.utils.*;
-import java.awt.BasicStroke;
+import ika.utils.CoordinateFormatter;
+import ika.utils.Median;
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.security.InvalidParameterException;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 
 /**
@@ -137,36 +139,9 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         }
     }
 
+    @Override
     public String getName() {
         return "Distortion Grid";
-    }
-
-    /**
-     * @return the exaggeration
-     */
-    public double getExaggeration() {
-        return exaggeration;
-    }
-
-    /**
-     * @param exaggeration the exaggeration to set
-     */
-    public void setExaggeration(double exaggeration) {
-        this.exaggeration = exaggeration;
-    }
-
-    /**
-     * @return the showUndistorted
-     */
-    public boolean isShowUndistorted() {
-        return showUndistorted;
-    }
-
-    /**
-     * @param showUndistorted the showUndistorted to set
-     */
-    public void setShowUndistorted(boolean showUndistorted) {
-        this.showUndistorted = showUndistorted;
     }
 
     private final class Grid {
@@ -573,7 +548,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
      * Returns the distance to the closest point of two point sets.
      *
      * @param ptSet1 point set 1
-     * @param ptSet2 poitn set 2
+     * @param ptSet2 point set 2
      * @param xy position in destination map
      * @return shortest distance
      */
@@ -637,7 +612,15 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         return msg;
     }
 
-    private void addLabel(String label, double x, double y,
+    /**
+     * Create a label for a grid line.
+     *
+     * @param label text for the label
+     * @param xy position
+     * @param labelVerticalLine true if the label is for a vertical grid line
+     * @param geoSet the destination for the new GeoText
+     */
+    private void addLabel(String label, double[] xy,
             boolean labelVerticalLine, GeoSet geoSet) {
 
         double dx = 0;
@@ -648,7 +631,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             dx = this.labelSize / 2;
         }
 
-        GeoText geoText = new GeoText(label, x, y, dx, dy);
+        GeoText geoText = new GeoText(label, xy[0], xy[1], dx, dy);
         geoText.setSize(this.labelSize);
         geoText.setCenterHor(labelVerticalLine);
         geoText.setCenterVer(!labelVerticalLine);
@@ -657,56 +640,90 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         geoSet.addGeoObject(geoText);
     }
 
+    /**
+     * Add a label to the start or the end of a line
+     *
+     * @param pt1 start point of line
+     * @param pt2 end point of line
+     * @param labelStr the label
+     * @param geoSet destination for new GeoText
+     * @param gridInOldMap true if the grid is in the old map
+     */
     private void addVerticalLabel(double[] pt1,
             double[] pt2,
             String labelStr,
             GeoSet geoSet,
             boolean gridInOldMap) {
 
+        double[] xy = new double[2]; // label position
+
         // position label at lower end of line
-        double x, y;
         if (pt1[1] < pt2[1]) {
-            x = pt1[0];
-            y = pt1[1];
+            xy[0] = pt1[0];
+            xy[1] = pt1[1];
         } else {
-            x = pt2[0];
-            y = pt2[1];
+            xy[0] = pt2[0];
+            xy[1] = pt2[1];
         }
+
+        // transform to OSM if needed
         if (params.isOSM() && !gridInOldMap) {
-            double[][] ptIn = new double[][]{{x, y}};
-            double[][] ptOut = new double[1][2];
-            params.getProjector().intermediate2OSM(ptIn, ptOut);
-            x = ptOut[0][0];
-            y = ptOut[0][1];
+            xy = params.getProjector().intermediate2OSM(xy);
         }
-        this.addLabel(labelStr, x, y, true, geoSet);
+
+        addLabel(labelStr, xy, true, geoSet);
     }
 
+    /**
+     * Add a label to the start or the end of a line
+     *
+     * @param pt1 start point of line
+     * @param pt2 end point of line
+     * @param labelStr the label
+     * @param geoSet destination for new GeoText
+     * @param gridInOldMap true if the grid is in the old map
+     */
     private void addHorizontalLabel(double[] pt1,
             double[] pt2,
             String labelStr,
             GeoSet geoSet,
             boolean gridInOldMap) {
 
+        double[] xy = new double[2]; // label position
+
         // position label at right end of line
-        double x, y;
         if (pt1[0] > pt2[0]) {
-            x = pt1[0];
-            y = pt1[1];
+            xy[0] = pt1[0];
+            xy[1] = pt1[1];
         } else {
-            x = pt2[0];
-            y = pt2[1];
+            xy[0] = pt2[0];
+            xy[1] = pt2[1];
         }
+
+        // transform to OSM if needed
         if (params.isOSM() && !gridInOldMap) {
-            double[][] ptIn = new double[][]{{x, y}};
-            double[][] ptOut = new double[1][2];
-            params.getProjector().intermediate2OSM(ptIn, ptOut);
-            x = ptOut[0][0];
-            y = ptOut[0][1];
+            xy = params.getProjector().intermediate2OSM(xy);
         }
-        this.addLabel(labelStr, x, y, false, geoSet);
+
+        addLabel(labelStr, xy, false, geoSet);
     }
 
+    /**
+     *
+     * @param polyline
+     * @param polygon
+     * @param geoSet
+     * @param useBezier
+     * @param gridInOldMap
+     * @param gridInDestinationMap true if the grid is for the destination map,
+     * which shows the distorted grid.
+     * @param pathName
+     * @param uncertaintyRefDistance if a grid vertex is further away from any
+     * control point than this distance, the vertex is considered uncertain and
+     * rendered semi-transparent. The distance is in the coordinate system of
+     * the map with the distorted grid. If zero, uncertainty is not visualized.
+     * @return
+     */
     private double[][] clipLine(double[][] polyline,
             double[][] polygon,
             GeoSet geoSet,
@@ -743,7 +760,18 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         return extremaPoints;
     }
 
-    private GeoPath gridLineToGeoPath(double[][] line, int firstPoint, int nbrPoints, boolean useBezier, String name) {
+    /**
+     * Create a GeoPath from a set of points.
+     *
+     * @param line points of the line
+     * @param firstPoint id of first point
+     * @param nbrPoints number of total points in line
+     * @param useBezier if true, Bezier curve segments are created
+     * @param name name of the GeoPath
+     * @return a new GeoPath
+     */
+    private GeoPath gridLineToGeoPath(double[][] line, int firstPoint,
+            int nbrPoints, boolean useBezier, String name) {
         GeoPath geoPath = new GeoPath();
         geoPath.setSelectable(false);
         geoPath.setVectorSymbol(vectorSymbol);
@@ -764,11 +792,12 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
      * uncertainty.
      *
      * @param line coordinates of the line
-     * @param geoSet destination
+     * @param geoSet destination line
      * @param useBezier smoothed lines
      * @param gridInOldMap true if grid is for the old map
-     * @param gridInDestinationMap true if grid is for the destination map
-     * @param name name of line grid
+     * @param gridInDestinationMap true if the grid is for the destination map,
+     * which shows the distorted grid.
+     * @param lineName name for the new GeoLine
      * @param uncertaintyRefDistance if a grid vertex is further away from any
      * control point than this distance, the vertex is considered uncertain and
      * rendered semi-transparent. The distance is in the coordinate system of
@@ -779,7 +808,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             boolean useBezier,
             boolean gridInOldMap,
             boolean gridInDestinationMap,
-            String name,
+            String lineName,
             double uncertaintyRefDistance) {
 
         if (line.length < 2) {
@@ -788,12 +817,10 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
         // convert from intermediate coordinate system to OSM coordinate system
         // if the distorted grid is in the new map and OSM is used.
-        double[][] lineToRender;
         if (params.isOSM() && !gridInOldMap) {
-            lineToRender = new double[line.length][2];
-            params.getProjector().intermediate2OSM(line, lineToRender);
-        } else {
-            lineToRender = line;
+            double[][] osmLine = new double[line.length][2];
+            params.getProjector().intermediate2OSM(line, osmLine);
+            line = osmLine;
         }
 
         if (gridInDestinationMap && uncertaintyRefDistance > 0) {
@@ -820,7 +847,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                         ++nbrPts;
                     }
                     if (nbrPts >= 2) {
-                        GeoPath p = gridLineToGeoPath(lineToRender, firstPoint, nbrPts, useBezier, name);
+                        GeoPath p = gridLineToGeoPath(line, firstPoint, nbrPts, useBezier, lineName);
                         geoSet.addGeoObject(p);
                         if (uncertain) {
                             p.setVectorSymbol(uncertainVectorSymbol);
@@ -837,7 +864,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             GeoPath geoPath = new GeoPath();
             geoPath.setSelectable(false);
             geoPath.setVectorSymbol(this.vectorSymbol);
-            geoPath.setName(name);
+            geoPath.setName(lineName);
 
             // only use Bezier splines if smoothness is larger then 0
             if (useBezier && smoothness > 0) {
@@ -850,24 +877,30 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     }
 
     /**
+     * Optionally clip a grid line, then create a GeoPath for the line.
      *
-     * @param line
-     * @param mask
-     * @param geoSet
-     * @param useBezier
-     * @param labelString
-     * @param pathName
-     * @param horizontalLabel
-     * @param gridInOldMap
-     * @param gridInDestinationMap true if grid is for the destination map
-     * @param uncertaintyRefDistance
+     * @param line coordinates of line
+     * @param mask clip line with this mask polygon. If null, no clipping is
+     * applied.
+     * @param geoSet destination for new line
+     * @param useBezier if true, the new line is smooth
+     * @param labelString label for the line
+     * @param lineName name for the new GeoLine
+     * @param horizontalLabel true if the label to add is for a horizontal line
+     * @param gridInOldMap true if grid is for the old map
+     * @param gridInDestinationMap true if the grid is for the destination map,
+     * which shows the distorted grid.
+     * @param uncertaintyRefDistance if a grid vertex is further away from any
+     * control point than this distance, the vertex is considered uncertain and
+     * rendered semi-transparent. The distance is in the coordinate system of
+     * the map with the distorted grid. If zero, uncertainty is not visualized.
      */
     private void clipAndAddPath(double[][] line,
             double[][] mask,
             GeoSet geoSet,
             boolean useBezier,
             String labelString,
-            String pathName,
+            String lineName,
             boolean horizontalLabel,
             boolean gridInOldMap,
             boolean gridInDestinationMap,
@@ -876,7 +909,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         // clip the line with the mask.
         if (mask != null) {
             double[][] extremaPoints = clipLine(line, mask, geoSet, useBezier,
-                    gridInOldMap, gridInDestinationMap, pathName, uncertaintyRefDistance);
+                    gridInOldMap, gridInDestinationMap, lineName, uncertaintyRefDistance);
             if (labelString != null && extremaPoints != null) {
                 if (horizontalLabel) {
                     addHorizontalLabel(extremaPoints[0], extremaPoints[1],
@@ -888,7 +921,7 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
             }
         } else { // no mask: add the whole line
             addGridLine(line, geoSet, useBezier, gridInOldMap,
-                    gridInDestinationMap, pathName, uncertaintyRefDistance);
+                    gridInDestinationMap, lineName, uncertaintyRefDistance);
             if (labelString != null) {
                 if (horizontalLabel) {
                     addHorizontalLabel(line[0], line[line.length - 1],
@@ -943,8 +976,23 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
     }
 
+    /**
+     * Create all vertical lines of a grid
+     *
+     * @param grid grid geometry
+     * @param geoSet destination for new grid lines
+     * @param mask mask to clip grid lines with
+     * @param gridInOldMap true if the gird is for the old map
+     * @param gridInDestinationMap true if the grid is for the destination map,
+     * which shows the distorted grid.
+     * @param uncertaintyRefDistance if a grid vertex is further away from any
+     * control point than this distance, the vertex is considered uncertain and
+     * rendered semi-transparent. The distance is in the coordinate system of
+     * the map with the distorted grid. If zero, uncertainty is not visualized.
+     */
     private void createVerticalLinesFromGrid(
-            Grid grid, GeoSet geoSet,
+            Grid grid,
+            GeoSet geoSet,
             double[][] mask,
             boolean gridInOldMap,
             boolean gridInDestinationMap,
@@ -960,11 +1008,11 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
 
         double[][] line = new double[grid.numberNodesY][2];
         for (int i = 0, lineID = 0; i < grid.grid.length; i += grid.numberNodesY, lineID++) {
-            int nbrPointsInLine = 0;
+            int ptID = 0;
             for (int y = i; y < i + grid.numberNodesY; y++) {
-                line[nbrPointsInLine][0] = grid.grid[y][0];
-                line[nbrPointsInLine][1] = grid.grid[y][1];
-                ++nbrPointsInLine;
+                line[ptID][0] = grid.grid[y][0];
+                line[ptID][1] = grid.grid[y][1];
+                ++ptID;
             }
 
             // prepare label
@@ -986,6 +1034,20 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
         }
     }
 
+    /**
+     * Create all horizontal lines of a grid
+     *
+     * @param grid grid geometry
+     * @param geoSet destination for new grid lines
+     * @param mask mask to clip grid lines with
+     * @param gridInOldMap true if the gird is for the old map
+     * @param gridInDestinationMap true if the grid is for the destination map,
+     * which shows the distorted grid.
+     * @param uncertaintyRefDistance if a grid vertex is further away from any
+     * control point than this distance, the vertex is considered uncertain and
+     * rendered semi-transparent. The distance is in the coordinate system of
+     * the map with the distorted grid. If zero, uncertainty is not visualized.
+     */
     private void createHorizontalLinesFromGrid(
             Grid grid, GeoSet geoSet,
             double[][] mask,
@@ -1021,8 +1083,8 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
                 }
             }
 
-            clipAndAddPath(line, mask, geoSet, useBezier, labelStr, coordStr,
-                    true, gridInOldMap, gridInDestinationMap, uncertaintyRefDistance);
+            clipAndAddPath(line, mask, geoSet, useBezier, labelStr, coordStr, true,
+                    gridInOldMap, gridInDestinationMap, uncertaintyRefDistance);
         }
     }
 
@@ -1202,4 +1264,33 @@ public class DistortionGrid extends MapAnalyzer implements Serializable {
     public void setOffsetY(double offsetY) {
         this.offsetY = offsetY;
     }
+
+    /**
+     * @return the exaggeration
+     */
+    public double getExaggeration() {
+        return exaggeration;
+    }
+
+    /**
+     * @param exaggeration the exaggeration to set
+     */
+    public void setExaggeration(double exaggeration) {
+        this.exaggeration = exaggeration;
+    }
+
+    /**
+     * @return the showUndistorted
+     */
+    public boolean isShowUndistorted() {
+        return showUndistorted;
+    }
+
+    /**
+     * @param showUndistorted the showUndistorted to set
+     */
+    public void setShowUndistorted(boolean showUndistorted) {
+        this.showUndistorted = showUndistorted;
+    }
+
 }
