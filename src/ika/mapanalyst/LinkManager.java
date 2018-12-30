@@ -22,6 +22,16 @@ public class LinkManager implements GeoSetSelectionChangeListener,
     private static final long serialVersionUID = -6411317472598414220L;
 
     /**
+     * name of GeoSet that contains the points of the old map
+     */
+    public static final String OLD_POINTS_GEOSET_NAME = "old points";
+    
+    /**
+     * name of GeoSet that contains the points of the new map
+     */
+    public static final String NEW_POINTS_GEOSET_NAME = "new points";
+    
+    /**
      * A list with all links.
      */
     private final Vector linksList;
@@ -55,9 +65,9 @@ public class LinkManager implements GeoSetSelectionChangeListener,
 
         // GeoSets
         oldPointsGeoSet = new GeoSet();
-        oldPointsGeoSet.setName("old points");
+        oldPointsGeoSet.setName(OLD_POINTS_GEOSET_NAME);
         newPointsGeoSet = new GeoSet();
-        newPointsGeoSet.setName("new points");
+        newPointsGeoSet.setName(NEW_POINTS_GEOSET_NAME);
 
         registerAsListener();
     }
@@ -135,27 +145,19 @@ public class LinkManager implements GeoSetSelectionChangeListener,
     }
 
     public byte[] serializePoints(boolean onlySelected) {
-        DataOutputStream dos = null;
         try {
             ByteArrayOutputStream bas = new ByteArrayOutputStream();
             GZIPOutputStream zip = new GZIPOutputStream(bas);
             BufferedOutputStream bos = new BufferedOutputStream(zip);
-            dos = new DataOutputStream(bos);
+            DataOutputStream dos = new DataOutputStream(bos);
             serializeLinkedPoints(dos, onlySelected);
             serializeUnlinkedPoints(dos, oldPointsGeoSet, onlySelected);
             serializeUnlinkedPoints(dos, newPointsGeoSet, onlySelected);
+            dos.close();
             return bas.toByteArray();
         } catch (IOException ex) {
             Logger.getLogger(LinkManager.class.getName()).log(Level.SEVERE, null, ex);
             return null;
-        } finally {
-            if (dos != null) {
-                try {
-                    dos.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(LinkManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         }
     }
 
@@ -210,25 +212,21 @@ public class LinkManager implements GeoSetSelectionChangeListener,
     }
 
     public void deserializePoints(byte[] b) throws java.io.IOException {
-        DataInputStream dis = null;
         try {
             ByteArrayInputStream bas = new ByteArrayInputStream(b);
             GZIPInputStream zip = new GZIPInputStream(bas);
             BufferedInputStream bis = new BufferedInputStream(zip);
-            dis = new DataInputStream(bis);
+            DataInputStream dis = new DataInputStream(bis);
 
             oldPointsGeoSet.suspendGeoSetChangeListeners();
             newPointsGeoSet.suspendGeoSetChangeListeners();
             deserializeLinkedPoints(dis);
             deserializeUnlinkedPoints(dis, oldPointsGeoSet);
             deserializeUnlinkedPoints(dis, newPointsGeoSet);
-
+            dis.close();
         } finally {
             oldPointsGeoSet.activateGeoSetChangeListeners(null);
             newPointsGeoSet.activateGeoSetChangeListeners(null);
-            if (dis != null) {
-                dis.close();
-            }
         }
     }
 
