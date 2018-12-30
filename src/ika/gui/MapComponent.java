@@ -71,6 +71,12 @@ public class MapComponent extends javax.swing.JComponent
     private CoordinateFormatter coordinateFormatter
             = new CoordinateFormatter("###,##0.00", "###,##0", 1);
 
+    /**
+     * A formatter for displaying distances measured on this map. Can be null,
+     * in which case the coordinateFormatter is used to format distances.
+     */
+    private CoordinateFormatter distanceFormatter = null;
+
     private CoordinatesTooltip coordinatesTooltip;
 
     /**
@@ -704,15 +710,24 @@ public class MapComponent extends javax.swing.JComponent
         this.coordinateFormatter = coordinateFormatter;
     }
 
+    public CoordinateFormatter getDistanceFormatter() {
+        return distanceFormatter == null ? coordinateFormatter : distanceFormatter;
+    }
+
+    public void setDistanceFormatter(CoordinateFormatter distanceFormatter) {
+        this.distanceFormatter = distanceFormatter;
+    }
+
     /**
      * @param coordinatesTooltip the coordinatesTooltip to set
      */
     public void setCoordinatesTooltip(CoordinatesTooltip coordinatesTooltip) {
         this.coordinatesTooltip = coordinatesTooltip;
     }
-    
+
     /**
      * Add a listener for scale change events. A listener is only added once.
+     *
      * @param listener listener to add
      */
     public void addScaleChangePropertyChangeListener(PropertyChangeListener listener) {
@@ -723,6 +738,7 @@ public class MapComponent extends javax.swing.JComponent
 
     /**
      * Remove a listener for scale change events.
+     *
      * @param listener listener to remove
      */
     public void removeScaleChangePropertyChangeListener(PropertyChangeListener listener) {

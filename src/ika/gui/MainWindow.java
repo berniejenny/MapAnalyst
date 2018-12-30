@@ -139,10 +139,11 @@ public class MainWindow extends javax.swing.JFrame
             newFormat = new CoordinateFormatter("###,##0.00 m", "###,##0.###", 1);
             this.oldMapComponent.setCoordinateFormatter(oldFormat);
             this.newMapComponent.setCoordinateFormatter(newFormat);
+            newMapComponent.setDistanceFormatter(new ReferenceDistanceFormatter());
 
             // register the info panels with the two maps
-            this.coordinateInfoPanel.registerWithMapComponent(this.oldMapComponent);
-            this.coordinateInfoPanel.registerWithMapComponent(this.newMapComponent);
+            this.coordinateInfoPanel.registerWithMapComponent(oldMapComponent);
+            this.coordinateInfoPanel.registerWithMapComponent(newMapComponent);
             this.geoObjectInfoPanel.registerWithMapComponent(this.oldMapComponent);
             this.geoObjectInfoPanel.registerWithMapComponent(this.newMapComponent);
             this.geoObjectInfoPanel.setGeoSetName("points");
@@ -4913,12 +4914,12 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_exportNewSVGMenuItemActionPerformed
 
     private void distanceToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_distanceToggleButtonActionPerformed
-        MeasureTool oldMeasureTool = new MeasureTool(this.oldMapComponent);
-        MeasureTool newMeasureTool = new MeasureTool(this.newMapComponent);
-        oldMeasureTool.addMeasureToolListener(this.coordinateInfoPanel);
-        newMeasureTool.addMeasureToolListener(this.coordinateInfoPanel);
-        this.oldMapComponent.setMapTool(oldMeasureTool);
-        this.newMapComponent.setMapTool(newMeasureTool);
+        MeasureTool oldMeasureTool = new MeasureTool(oldMapComponent, manager);
+        MeasureTool newMeasureTool = new MeasureTool(newMapComponent, manager);
+        oldMeasureTool.addMeasureToolListener(coordinateInfoPanel);
+        newMeasureTool.addMeasureToolListener(coordinateInfoPanel);
+        oldMapComponent.setMapTool(oldMeasureTool);
+        newMapComponent.setMapTool(newMeasureTool);
     }//GEN-LAST:event_distanceToggleButtonActionPerformed
 
     public String askLinkName(String oldName) {

@@ -171,8 +171,8 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         }
 
         // distance
-        CoordinateFormatter coordFormatter = mapComponent.getCoordinateFormatter();
-        this.distLabel.setText(coordFormatter.format(d));
+        CoordinateFormatter distFormatter = mapComponent.getDistanceFormatter();
+        distLabel.setText(distFormatter.format(d));
 
         // angle
         double azimuth = -Math.toDegrees(angleRad) + 90.;

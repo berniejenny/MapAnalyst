@@ -37,13 +37,4 @@ public class CoordinateFormatter {
     public String formatShort(double number) {
         return shortDecimalFormat.format(number * scaleFactor);
     }
-
-    public double getScaleFactor() {
-        return scaleFactor;
-    }
-
-    public void setScaleFactor(double scaleFactor) {
-        assert (scaleFactor > 0);
-        this.scaleFactor = scaleFactor;
-    }
 }
