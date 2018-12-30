@@ -146,7 +146,6 @@ public class MainWindow extends javax.swing.JFrame
             this.coordinateInfoPanel.registerWithMapComponent(newMapComponent);
             this.geoObjectInfoPanel.registerWithMapComponent(this.oldMapComponent);
             this.geoObjectInfoPanel.registerWithMapComponent(this.newMapComponent);
-            this.geoObjectInfoPanel.setGeoSetName("points");
 
             // Don't register the NEW map panel for displaying the local scale and
             // rotation. This would confuse users.
