@@ -29,7 +29,7 @@ abstract public class PolygonToolBase extends DoubleBufferedTool {
     private Point2D.Double currentMouseLoc;
     
     /**
-     * The GeoPath that is currerntly drawn.
+     * The GeoPath that is currently drawn.
      */
     protected GeoPath geoPath;
        
@@ -51,11 +51,13 @@ abstract public class PolygonToolBase extends DoubleBufferedTool {
         super(mapComponent);
     }
     
+    @Override
     public void deactivate() {
         finishPath();
         releaseBackground();
     }
     
+    @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
         if (geoPath == null) {
             geoPath = new GeoPath();
@@ -102,6 +104,7 @@ abstract public class PolygonToolBase extends DoubleBufferedTool {
         eventTimeMilliSec = evt.getWhen();
     }
     
+    @Override
     public void mouseExited(Point2D.Double point, MouseEvent evt) {
         // don't draw a straight line from the last point to the current
         // mouse position if the mouse is not inside the map.
@@ -109,6 +112,7 @@ abstract public class PolygonToolBase extends DoubleBufferedTool {
         mapComponent.repaint();
     }
    
+    @Override
     public void mouseMoved(Point2D.Double point, MouseEvent evt) {        
         // remember the current mouse position and repaint if their already is at
         // least one point.
@@ -118,6 +122,7 @@ abstract public class PolygonToolBase extends DoubleBufferedTool {
         }
     }
     
+    @Override
     public void draw(java.awt.Graphics2D g2d) {
         if (geoPath == null)
             return;

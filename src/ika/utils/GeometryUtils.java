@@ -440,4 +440,37 @@ public class GeometryUtils {
         }
     }
     */
+    
+    
+    /**
+     * Returns the distance of p3 to the segment defined by p1,p2.
+     * http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
+     * @param p1 First point of the segment
+     * @param p2 Second point of the segment
+     * @param p3  Point to which we want to know the distance of the segment
+     * defined by p1,p2
+     * @return The distance of p3 to the segment defined by p1,p2
+     */
+    public static double distanceToSegment(Point2D p1, Point2D p2, Point2D p3) {
+
+        final double xDelta = p2.getX() - p1.getX();
+        final double yDelta = p2.getY() - p1.getY();
+
+        if ((xDelta == 0) && (yDelta == 0)) {
+            return Double.NaN;
+        }
+
+        final double u = ((p3.getX() - p1.getX()) * xDelta + (p3.getY() - p1.getY()) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+
+        final Point2D closestPoint;
+        if (u < 0) {
+            closestPoint = p1;
+        } else if (u > 1) {
+            closestPoint = p2;
+        } else {
+            closestPoint = new Point2D.Double(p1.getX() + u * xDelta, p1.getY() + u * yDelta);
+        }
+
+        return closestPoint.distance(p3);
+    }
 }

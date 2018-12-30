@@ -323,7 +323,7 @@ public class ImageReferencerPanel extends javax.swing.JPanel
     }//GEN-LAST:event_showAllButtonActionPerformed
     
     private void distanceToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_distanceToggleButtonActionPerformed
-        MeasureTool measureTool = new MeasureTool(this.mapComponent);
+        MeasureTool measureTool = new MeasureTool(mapComponent, null); // FIXME null parameter
         measureTool.addMeasureToolListener(this.coordinateInfoPanel);
         this.mapComponent.setMapTool(measureTool);
     }//GEN-LAST:event_distanceToggleButtonActionPerformed

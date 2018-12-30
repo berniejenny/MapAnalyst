@@ -127,7 +127,18 @@ public class Projector {
             out[i][0] = pt.x;
             out[i][1] = pt.y;
         }
-
+    }
+    
+    /**
+     * converts lon/lat in degrees to OSM
+     *
+     * @param lon longitude in degrees on sphere
+     * @param lat latitude in degrees on sphere
+     * @return Cartesian web Mercator coordinates
+     */
+    public static Point2D geo2OSM(double lon, double lat) {
+        Point2D.Double xyOSM = new Point2D.Double();
+        return mercator.transform(lon, lat, xyOSM);
     }
 
     /**
