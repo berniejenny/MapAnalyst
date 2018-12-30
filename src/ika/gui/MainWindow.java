@@ -3894,20 +3894,20 @@ showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
         sb.append(filePath == null ? "undefined" : filePath);
         sb.append(nl);
 
-        // old map image: path is stored in name field
+        // old map image
         String oldMapName = null;
         if (manager.getOldMap() != null) {
-            oldMapName = manager.getOldMap().getName();
+            oldMapName = manager.getOldMap().getFilePath();
         }
         if (oldMapName != null) {
             sb.append("Old map image: ").append(oldMapName).append(nl);
         }
 
-        // new map image: path is stored in name field
+        // new map image
         if (manager.isUsingOpenStreetMap()) {
             sb.append("New map: OpenStreetMap").append(nl);
         } else if (manager.getNewMap() != null) {
-            String newMapName = manager.getNewMap().getName();
+            String newMapName = manager.getNewMap().getFilePath();
             if (newMapName != null) {
                 sb.append("New map image: ").append(newMapName).append(nl);
             }
