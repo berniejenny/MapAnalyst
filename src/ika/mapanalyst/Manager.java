@@ -40,8 +40,6 @@ public final class Manager implements Serializable {
     private boolean showErrorInOldMap;
     private GeoSet mapOld;
     private GeoSet mapNew;
-    private GeoSet oldImageGeoSet;
-    private GeoSet newImageGeoSet;
     private PlaceList placeList;
     private final HuberEstimator huberEstimator;
     private final VEstimator vEstimator;
@@ -89,13 +87,13 @@ public final class Manager implements Serializable {
         this.mapNew = new GeoSet();
         this.mapNew.setName("new map");
 
-        // image
-        this.oldImageGeoSet = new GeoSet();
-        this.oldImageGeoSet.setName("old image");
-        this.newImageGeoSet = new GeoSet();
-        this.newImageGeoSet.setName("new image");
-        this.mapOld.addGeoObject(this.oldImageGeoSet);
-        this.mapNew.addGeoObject(this.newImageGeoSet);
+        // images
+        GeoSet oldImageGeoSet = new GeoSet();
+        oldImageGeoSet.setName("old image");
+        GeoSet newImageGeoSet = new GeoSet();
+        newImageGeoSet.setName("new image");
+        mapOld.addGeoObject(oldImageGeoSet);
+        mapNew.addGeoObject(newImageGeoSet);
 
         // points
         this.mapOld.addGeoObject(this.linkManager.getOldPointsGeoSet());
@@ -424,13 +422,21 @@ public final class Manager implements Serializable {
         }
     }
 
+    private GeoSet getOldImageGeoSet() {
+        return (GeoSet) mapOld.getGeoObject("old image");
+    }
+    
+    private GeoSet getNewImageGeoSet() {
+        return (GeoSet) mapNew.getGeoObject("new image");
+    }
+    
     public void clearMaps() {
         // clear graphics
         this.clearGraphics();
 
         // clear images
-        this.oldImageGeoSet.removeAllGeoObjects();
-        this.newImageGeoSet.removeAllGeoObjects();
+        getOldImageGeoSet().removeAllGeoObjects();
+        getNewImageGeoSet().removeAllGeoObjects();
 
         // clear points
         this.linkManager.getOldPointsGeoSet().removeAllGeoObjects();
@@ -450,11 +456,11 @@ public final class Manager implements Serializable {
     }
 
     public GeoImage getOldMap() {
-        return (GeoImage) this.oldImageGeoSet.getFirstGeoObject(GeoImage.class, false, false);
+        return (GeoImage) getOldImageGeoSet().getFirstGeoObject(GeoImage.class, false, false);
     }
 
     public GeoImage getNewMap() {
-        return (GeoImage) this.newImageGeoSet.getFirstGeoObject(GeoImage.class, false, false);
+        return (GeoImage) getNewImageGeoSet().getFirstGeoObject(GeoImage.class, false, false);
     }
 
     public GeoSet getOldGeoSet() {
@@ -494,15 +500,15 @@ public final class Manager implements Serializable {
 
     public void importNewRasterImage(String filePath, java.awt.Frame parentFrame,
             MapComponent mapComponent) {
-        newImageGeoSet.removeAllGeoObjects();
-        Manager.importRasterImage(this.newImageGeoSet, filePath, parentFrame,
+        getNewImageGeoSet().removeAllGeoObjects();
+        Manager.importRasterImage(getNewImageGeoSet(), filePath, parentFrame,
                 mapComponent, true);
     }
 
     public void importOldRasterImage(String filePath, java.awt.Frame parentFrame,
             MapComponent mapComponent) {
-        oldImageGeoSet.removeAllGeoObjects();
-        Manager.importRasterImage(oldImageGeoSet, filePath, parentFrame,
+        getOldImageGeoSet().removeAllGeoObjects();
+        Manager.importRasterImage(getOldImageGeoSet(), filePath, parentFrame,
                 mapComponent, false);
     }
 
@@ -958,8 +964,8 @@ public final class Manager implements Serializable {
     }
 
     public void setImagesVisible(boolean showOld, boolean showNew) {
-        this.oldImageGeoSet.setVisible(showOld);
-        this.newImageGeoSet.setVisible(showNew);
+        getOldImageGeoSet().setVisible(showOld);
+        getNewImageGeoSet().setVisible(showNew);
     }
 
     public void setPointsVisible(boolean visible) {
@@ -980,16 +986,16 @@ public final class Manager implements Serializable {
     }
 
     public void removeOldImage() {
-        oldImageGeoSet.removeAllGeoObjects();
+        getOldImageGeoSet().removeAllGeoObjects();
     }
 
     public void removeNewImage() {
-        newImageGeoSet.removeAllGeoObjects();
+        getNewImageGeoSet().removeAllGeoObjects();
     }
 
     public void setNewMap(GeoObject item) {
-        this.newImageGeoSet.removeAllGeoObjects();
-        this.newImageGeoSet.addGeoObject(item);
+        getNewImageGeoSet().removeAllGeoObjects();
+        getNewImageGeoSet().addGeoObject(item);
     }
 
     public void initOSM(MapComponent map) {
@@ -1017,7 +1023,7 @@ public final class Manager implements Serializable {
      * @return the OpenStreetMap or null
      */
     public OpenStreetMap getOpenStreetMap() {
-        return (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        return (OpenStreetMap) getNewImageGeoSet().getFirstGeoObject(OpenStreetMap.class, false, false);
     }
 
     /**
@@ -1029,7 +1035,7 @@ public final class Manager implements Serializable {
      * @return true if over OSM.
      */
     public boolean isPointOnOpenStreetMap(Point2D point) {
-        OpenStreetMap osm = (OpenStreetMap) newImageGeoSet.getFirstGeoObject(OpenStreetMap.class, false, false);
+        OpenStreetMap osm = (OpenStreetMap) getNewImageGeoSet().getFirstGeoObject(OpenStreetMap.class, false, false);
         return osm == null ? false : osm.isPointOnSymbol(point, 0, 0);
     }
 

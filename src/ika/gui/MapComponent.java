@@ -717,6 +717,10 @@ public class MapComponent extends javax.swing.JComponent
     public void setDistanceFormatter(CoordinateFormatter distanceFormatter) {
         this.distanceFormatter = distanceFormatter;
     }
+    
+    public CoordinatesTooltip getCoordinatesToolTip() {
+        return coordinatesTooltip;
+    }
 
     /**
      * @param coordinatesTooltip the coordinatesTooltip to set

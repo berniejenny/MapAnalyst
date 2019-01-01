@@ -27,7 +27,7 @@ public class CoordinatesTooltip implements MouseListener, MouseMotionListener {
     private static final Color BACKGROUND_COLOR = new Color(255, 255, 255, 150);
 
     private final MapComponent mapComponent;
-    private final Manager manager;
+    private Manager manager;
     private Point mousePositionPixel = null;
 
     public CoordinatesTooltip(MapComponent mapComponent, Manager manager) {
@@ -124,5 +124,9 @@ public class CoordinatesTooltip implements MouseListener, MouseMotionListener {
     private void updatePosition(MouseEvent e) {
         mousePositionPixel = (Point) e.getPoint().clone();
         mapComponent.repaint();
+    }
+
+    void setManager(Manager manager) {
+        this.manager = manager;
     }
 }

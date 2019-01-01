@@ -54,6 +54,7 @@ public class Main {
                     }
                     MainWindow.newProject();
                 } catch (Exception exc) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, exc);
                     String msg = "An error occured.";
                     String title = "MapAnalyst Error";
                     ErrorDialog.showErrorDialog(msg, title, exc, null);

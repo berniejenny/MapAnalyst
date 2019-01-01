@@ -349,6 +349,11 @@ public class MainWindow extends javax.swing.JFrame
 
         localScaleRotationInfoPanel.setManager(manager);
         coordinateInfoPanel.setManager(manager);
+        
+        CoordinatesTooltip ctt = newMapComponent.getCoordinatesToolTip();
+        if (ctt != null) {
+            ctt.setManager(manager);
+        }
 
         // create a new MapTool to make sure the tool knows about the new Manager.
         // only for MapTools that have reference to some data of the Manager.
