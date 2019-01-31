@@ -7,6 +7,7 @@
 package ika.mapanalyst;
 
 import java.text.DateFormat;
+import java.util.Locale;
 
 /**
  * Information about this application.
@@ -27,7 +28,7 @@ public class ApplicationInfo {
      * @return The version of this application.
      */
     public static String getApplicationVersion() {
-        return "1.3.33";
+        return "1.3.34";
     }
     
     /**
@@ -44,7 +45,7 @@ public class ApplicationInfo {
      */
     public static String getCopyright() {
         String info = "<html><center>";
-        info += "MapAnalyst is Copyright 2005-2018 by<br>" +
+        info += "MapAnalyst is Copyright 2005-2019 by<br>" +
                 "Bernhard Jenny, Monash University, Australia<br><br>";
         info += "This program is free software;<br>";
         info += "you can redistribute it and/or modify it <br>" +
@@ -77,6 +78,9 @@ public class ApplicationInfo {
      */
     public static String getCurrentTimeAndDate() {
         return java.text.DateFormat.getDateTimeInstance(
-                DateFormat.LONG, DateFormat.LONG).format(new java.util.Date());
+                DateFormat.LONG, DateFormat.LONG,
+                Locale.US) // require US locale since the GUI is in English and 
+                // to avoid issues with missing glyphs for certain scripts (e.g. cyrillic)
+                .format(new java.util.Date());
     }
 }
