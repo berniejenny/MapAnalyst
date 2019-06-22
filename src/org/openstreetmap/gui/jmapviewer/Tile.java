@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
@@ -80,7 +81,7 @@ public class Tile {
 
     private static BufferedImage loadImage(String path) {
         try {
-            return ImageIO.read(JMapViewer.class.getResourceAsStream(path));
+            return FeatureAdapter.readImage(JMapViewer.class.getResource(path));
         } catch (IOException | IllegalArgumentException ex) {
             ex.printStackTrace();
             return null;
@@ -126,7 +127,7 @@ public class Tile {
         final CachedCallable<BufferedImage> tmpImage = new CachedCallable<>(new Callable<BufferedImage>() {
             @Override
             public BufferedImage call() throws Exception {
-                return new BufferedImage(source.getTileSize(), source.getTileSize(), BufferedImage.TYPE_INT_RGB);
+                return new BufferedImage(source.getTileSize(), source.getTileSize(), BufferedImage.TYPE_INT_ARGB);
             }
         });
 
@@ -228,7 +229,7 @@ public class Tile {
     }
 
     /**
-     * @return tile indexes as TileXY object
+     * @return tile indexes of the top left corner as TileXY object
      */
     public TileXY getTileXY() {
         return new TileXY(xtile, ytile);
@@ -243,7 +244,7 @@ public class Tile {
     }
 
     public void loadImage(InputStream input) throws IOException {
-        image = ImageIO.read(input);
+        setImage(ImageIO.read(input));
     }
 
     /**
@@ -301,7 +302,17 @@ public class Tile {
 
     @Override
     public String toString() {
-        return "Tile " + key;
+        StringBuilder sb = new StringBuilder(35).append("Tile ").append(key);
+        if (loading) {
+            sb.append(" [LOADING...]");
+        }
+        if (loaded) {
+            sb.append(" [loaded]");
+        }
+        if (error) {
+            sb.append(" [ERROR]");
+        }
+        return sb.toString();
     }
 
     /**
@@ -329,21 +340,13 @@ public class Tile {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (obj == null || !(obj instanceof Tile))
             return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Tile other = (Tile) obj;
-        if (xtile != other.xtile)
-            return false;
-        if (ytile != other.ytile)
-            return false;
-        if (zoom != other.zoom)
-            return false;
-        if (!getTileSource().equals(other.getTileSource())) {
-            return false;
-        }
-        return true;
+        final Tile other = (Tile) obj;
+        return xtile == other.xtile
+            && ytile == other.ytile
+            && zoom == other.zoom
+            && Objects.equals(source, other.source);
     }
 
     public static String getTileKey(TileSource source, int xtile, int ytile, int zoom) {
@@ -452,5 +455,4 @@ public class Tile {
         loading = false;
         loaded = false;
     }
-
 }

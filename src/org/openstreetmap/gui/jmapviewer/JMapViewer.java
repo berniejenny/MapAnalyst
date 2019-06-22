@@ -6,20 +6,17 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
@@ -43,6 +40,8 @@ import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
  * @author Jason Huntley
  */
 public class JMapViewer extends JPanel implements TileLoaderListener {
+
+    private static final long serialVersionUID = 1L;
 
     /** whether debug mode is enabled or not */
     public static boolean debug;
@@ -137,9 +136,9 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
     public JMapViewer(TileCache tileCache) {
         tileSource = new OsmTileSource.Mapnik();
         tileController = new TileController(tileSource, tileCache, this);
-        mapMarkerList = Collections.synchronizedList(new LinkedList<MapMarker>());
-        mapPolygonList = Collections.synchronizedList(new LinkedList<MapPolygon>());
-        mapRectangleList = Collections.synchronizedList(new LinkedList<MapRectangle>());
+        mapMarkerList = Collections.synchronizedList(new ArrayList<MapMarker>());
+        mapPolygonList = Collections.synchronizedList(new ArrayList<MapPolygon>());
+        mapRectangleList = Collections.synchronizedList(new ArrayList<MapRectangle>());
         mapMarkersVisible = true;
         mapRectanglesVisible = true;
         mapPolygonsVisible = true;
@@ -161,18 +160,12 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
         zoomSlider.setOrientation(JSlider.VERTICAL);
         zoomSlider.setBounds(10, 10, 30, 150);
         zoomSlider.setOpaque(false);
-        zoomSlider.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                setZoom(zoomSlider.getValue());
-            }
-        });
+        zoomSlider.addChangeListener(e -> setZoom(zoomSlider.getValue()));
         zoomSlider.setFocusable(false);
         add(zoomSlider);
         int size = 18;
-        URL url = JMapViewer.class.getResource("images/plus.png");
-        if (url != null) {
-            ImageIcon icon = new ImageIcon(url);
+        ImageIcon icon = getImageIcon("images/plus.png");
+        if (icon != null) {
             zoomInButton = new JButton(icon);
         } else {
             zoomInButton = new JButton("+");
@@ -180,18 +173,11 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
             zoomInButton.setMargin(new Insets(0, 0, 0, 0));
         }
         zoomInButton.setBounds(4, 155, size, size);
-        zoomInButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                zoomIn();
-            }
-        });
+        zoomInButton.addActionListener(e -> zoomIn());
         zoomInButton.setFocusable(false);
         add(zoomInButton);
-        url = JMapViewer.class.getResource("images/minus.png");
-        if (url != null) {
-            ImageIcon icon = new ImageIcon(url);
+        icon = getImageIcon("images/minus.png");
+        if (icon != null) {
             zoomOutButton = new JButton(icon);
         } else {
             zoomOutButton = new JButton("-");
@@ -199,15 +185,21 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
             zoomOutButton.setMargin(new Insets(0, 0, 0, 0));
         }
         zoomOutButton.setBounds(8 + size, 155, size, size);
-        zoomOutButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                zoomOut();
-            }
-        });
+        zoomOutButton.addActionListener(e -> zoomOut());
         zoomOutButton.setFocusable(false);
         add(zoomOutButton);
+    }
+
+    private static ImageIcon getImageIcon(String name) {
+        URL url = JMapViewer.class.getResource(name);
+        if (url != null) {
+            try {
+                return new ImageIcon(FeatureAdapter.readImage(url));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     /**
@@ -502,7 +494,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
             return (int) marker.getRadius();
         else if (p != null) {
             Integer radius = getLatOffset(marker.getLat(), marker.getLon(), marker.getRadius(), false);
-            radius = radius == null ? null : p.y - radius.intValue();
+            radius = radius == null ? null : p.y - radius;
             return radius;
         } else
             return null;
@@ -767,7 +759,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
     protected void paintPolygon(Graphics g, MapPolygon polygon) {
         List<? extends ICoordinate> coords = polygon.getPoints();
         if (coords != null && coords.size() >= 3) {
-            List<Point> points = new LinkedList<>();
+            List<Point> points = new ArrayList<>();
             for (ICoordinate c : coords) {
                 Point p = getMapPosition(c, false);
                 if (p == null) {
@@ -779,7 +771,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
             if (scrollWrapEnabled) {
                 int tilesize = tileSource.getTileSize();
                 int mapSize = tilesize << zoom;
-                List<Point> pointsWrapped = new LinkedList<>(points);
+                List<Point> pointsWrapped = new ArrayList<>(points);
                 boolean keepWrapping = true;
                 while (keepWrapping) {
                     for (Point p : pointsWrapped) {
@@ -790,7 +782,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
                     }
                     polygon.paint(g, pointsWrapped);
                 }
-                pointsWrapped = new LinkedList<>(points);
+                pointsWrapped = new ArrayList<>(points);
                 keepWrapping = true;
                 while (keepWrapping) {
                     for (Point p : pointsWrapped) {
@@ -1070,8 +1062,18 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
     /**
      * Sets whether zoom controls are displayed or not.
      * @param visible {@code true} if zoom controls are displayed, {@code false} otherwise
+     * @deprecated use {@link #setZoomControlsVisible(boolean)}
      */
+    @Deprecated
     public void setZoomContolsVisible(boolean visible) {
+        setZoomControlsVisible(visible);
+    }
+
+    /**
+     * Sets whether zoom controls are displayed or not.
+     * @param visible {@code true} if zoom controls are displayed, {@code false} otherwise
+     */
+    public void setZoomControlsVisible(boolean visible) {
         zoomSlider.setVisible(visible);
         zoomInButton.setVisible(visible);
         zoomOutButton.setVisible(visible);

@@ -9,8 +9,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
@@ -108,13 +106,6 @@ public class CheckBoxTree extends JTree {
         final CheckBoxTree tree = new CheckBoxTree(root);
         ((DefaultMutableTreeNode) tree.getModel().getRoot()).add(new DefaultMutableTreeNode(new CheckBoxNodeData("gggg", null)));
         ((DefaultTreeModel) tree.getModel()).reload();
-        // listen for changes in the selection
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(final TreeSelectionEvent e) {
-                //System.out.println("selection changed");
-            }
-        });
         // show the tree on screen
         final JFrame frame = new JFrame("CheckBox Tree");
         final JScrollPane scrollPane = new JScrollPane(tree);

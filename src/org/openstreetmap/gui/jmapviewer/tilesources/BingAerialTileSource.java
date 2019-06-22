@@ -3,7 +3,6 @@ package org.openstreetmap.gui.jmapviewer.tilesources;
 
 import java.awt.Image;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
-import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,6 +26,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
+import org.openstreetmap.gui.jmapviewer.FeatureAdapter;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.w3c.dom.Document;
@@ -38,7 +37,8 @@ import org.xml.sax.SAXException;
 
 /**
  * Tile source for the Bing Maps REST Imagery API.
- * @see <a href="https://msdn.microsoft.com/en-us/library/ff701724.aspx">MSDN</a>
+ * @see <a href="https://msdn.microsoft.com/en-us/library/bb259689.aspx">MSDN (1)</a>
+ *  and <a href="https://msdn.microsoft.com/en-us/library/ff701724.aspx">MSDN (2)</a>
  */
 public class BingAerialTileSource extends TMSTileSource {
 
@@ -58,6 +58,7 @@ public class BingAerialTileSource extends TMSTileSource {
      */
     public BingAerialTileSource() {
         super(new TileSourceInfo("Bing", null, null));
+        minZoom = 1;
     }
 
     /**
@@ -161,9 +162,7 @@ public class BingAerialTileSource extends TMSTileSource {
         } catch (SAXException e) {
             System.err.println("Could not parse Bing aerials attribution metadata.");
             e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (XPathExpressionException e) {
+        } catch (ParserConfigurationException | XPathExpressionException | NumberFormatException e) {
             e.printStackTrace();
         }
         return null;
@@ -192,9 +191,9 @@ public class BingAerialTileSource extends TMSTileSource {
     @Override
     public Image getAttributionImage() {
         try {
-            final InputStream imageResource = JMapViewer.class.getResourceAsStream("images/bing_maps.png");
+            final URL imageResource = JMapViewer.class.getResource("images/bing_maps.png");
             if (imageResource != null) {
-                return ImageIO.read(imageResource);
+                return FeatureAdapter.readImage(imageResource);
             } else {
                 // Some Linux distributions (like Debian) will remove Bing logo from sources, so get it at runtime
                 for (int i = 0; i < 5 && getAttribution() == null; i++) {
@@ -205,7 +204,7 @@ public class BingAerialTileSource extends TMSTileSource {
                 }
                 if (brandLogoUri != null && !brandLogoUri.isEmpty()) {
                     System.out.println("Reading Bing logo from "+brandLogoUri);
-                    return ImageIO.read(new URL(brandLogoUri));
+                    return FeatureAdapter.readImage(new URL(brandLogoUri));
                 }
             }
         } catch (IOException e) {
@@ -216,7 +215,7 @@ public class BingAerialTileSource extends TMSTileSource {
 
     @Override
     public String getAttributionImageURL() {
-        return "http://opengeodata.org/microsoft-imagery-details";
+        return "https://opengeodata.org/microsoft-imagery-details";
     }
 
     @Override
@@ -226,7 +225,7 @@ public class BingAerialTileSource extends TMSTileSource {
 
     @Override
     public String getTermsOfUseURL() {
-        return "http://opengeodata.org/microsoft-imagery-details";
+        return "https://opengeodata.org/microsoft-imagery-details";
     }
 
     protected Callable<List<Attribution>> getAttributionLoaderCallable() {
@@ -243,7 +242,7 @@ public class BingAerialTileSource extends TMSTileSource {
                         return r;
                     } catch (IOException ex) {
                         System.err.println("Could not connect to Bing API. Will retry in " + waitTimeSec + " seconds.");
-                        Thread.sleep(waitTimeSec * 1000L);
+                        Thread.sleep(TimeUnit.SECONDS.toMillis(waitTimeSec));
                         waitTimeSec *= 2;
                     }
                 }
@@ -303,10 +302,10 @@ public class BingAerialTileSource extends TMSTileSource {
             char digit = 48;
             int mask = 1 << (i - 1);
             if ((tilex & mask) != 0) {
-                digit += 1;
+                digit += (char) 1;
             }
             if ((tiley & mask) != 0) {
-                digit += 2;
+                digit += (char) 2;
             }
             k.append(digit);
         }

@@ -2281,7 +2281,7 @@
                       <Image iconType="3" name="/ika/icons/ZoomIn16x16.gif"/>
                     </Property>
                     <Property name="selected" type="boolean" value="true"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Zoom In"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Zoom In (Press Cmd or Ctrl for quick access.)"/>
                     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[24, 24]"/>
                     </Property>
@@ -2298,7 +2298,7 @@
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                       <Image iconType="3" name="/ika/icons/ZoomOut16x16.gif"/>
                     </Property>
-                    <Property name="toolTipText" type="java.lang.String" value="Zoom Out"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Zoom Out (Press Alt+Cmd  or Alt+Ctrl for quick access.)"/>
                     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[24, 24]"/>
                     </Property>
@@ -2315,7 +2315,7 @@
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                       <Image iconType="3" name="/ika/icons/Hand16x16.gif"/>
                     </Property>
-                    <Property name="toolTipText" type="java.lang.String" value="Pan"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Pan (Press space key for quick access.)"/>
                     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[24, 24]"/>
                     </Property>

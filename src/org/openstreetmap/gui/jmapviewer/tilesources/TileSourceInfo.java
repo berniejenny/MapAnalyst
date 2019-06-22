@@ -35,10 +35,13 @@ public class TileSourceInfo {
     protected String cookies = "";
 
     /** tile size of the displayed tiles */
-    private int tileSize = -1;
+    protected int tileSize = -1;
 
     /** mapping &lt;header key, metadata key&gt; */
     protected Map<String, String> metadataHeaders;
+
+    /** supports "/status" and "/dirty" mode (tile re-rendering) */
+    protected boolean modTileFeatures;
 
     /**
      * Create a TileSourceInfo class
@@ -104,7 +107,7 @@ public class TileSourceInfo {
     }
 
     /**
-     * Checkusm for empty tiles for servers delivering such tile types
+     * Checksum for empty tiles for servers delivering such tile types
      * @return map of checksums, that when detected, means that this is "no tile at this zoom level" situation
      * @since 32022
      */
@@ -186,5 +189,29 @@ public class TileSourceInfo {
      */
     public final void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * Sets the cookies to be sent together with request
+     * @param cookies cookies to be sent along with request to tile source
+     */
+    public final void setCookies(String cookies) {
+        this.cookies = cookies;
+    }
+
+    /**
+     * Determines if this imagery supports "/status" and "/dirty" mode (tile re-rendering).
+     * @return <code>true</code> if it supports "/status" and "/dirty" mode (tile re-rendering)
+     */
+    public final boolean isModTileFeatures() {
+        return modTileFeatures;
+    }
+
+    /**
+     * Sets whether this imagery supports "/status" and "/dirty" mode (tile re-rendering).
+     * @param modTileFeatures <code>true</code> if it supports "/status" and "/dirty" mode (tile re-rendering)
+     */
+    public final void setModTileFeatures(boolean modTileFeatures) {
+        this.modTileFeatures = modTileFeatures;
     }
 }

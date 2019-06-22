@@ -4,6 +4,7 @@ import com.jhlabs.map.proj.MercatorProjection;
 import ika.geo.GeoObject;
 import ika.geo.GeoText;
 import ika.gui.MapComponent;
+import ika.mapanalyst.ApplicationInfo;
 import ika.proj.ProjectionsManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -20,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import org.openstreetmap.gui.jmapviewer.MemoryTileCache;
+import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
 import org.openstreetmap.gui.jmapviewer.Tile;
 import org.openstreetmap.gui.jmapviewer.TileController;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileCache;
@@ -206,7 +208,15 @@ public class OpenStreetMap extends GeoObject implements java.io.Serializable, Ti
         TileSource tileSource = new OsmTileSource.Mapnik();
         TileCache cache = new MemoryTileCache(NBR_CACHED_IMAGES);
         tileController = new TileController(tileSource, cache, this);
-
+        
+        // Set user agent string.
+        // Without a user agent string the openstreetmap server returns error 403.
+        String userAgent = ApplicationInfo.getApplicationName();
+        userAgent += "/";
+        userAgent += ApplicationInfo.getApplicationVersion();
+        OsmTileLoader osmTileLoader  = (OsmTileLoader)tileController.getTileLoader();
+        osmTileLoader.headers.put("User-Agent", userAgent);
+        
         scaleChangeListener = new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

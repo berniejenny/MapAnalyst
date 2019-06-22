@@ -1,4 +1,6 @@
-// License: GPL. For details, see Readme.txt file.
+// License: BSD or GPL. For details, see Readme.txt file.
+// Authors of this file, namely Gleb Smirnoff and Andrey Boltenkov, allow
+// to reuse the code under BSD license.
 package org.openstreetmap.gui.jmapviewer.tilesources;
 
 import java.awt.Point;
@@ -26,11 +28,10 @@ public class ScanexTileSource extends TMSTileSource {
     private static final String API_KEY = "4018C5A9AECAD8868ED5DEB2E41D09F7";
 
     private enum ScanexLayer {
-        IRS("irs", "/TileSender.ashx?ModeKey=tile&MapName=F7B8CF651682420FA1749D894C8AD0F6&LayerName=BAC78D764F0443BD9AF93E7A998C9F5B"),
-        SPOT("spot", "/TileSender.ashx?ModeKey=tile&MapName=F7B8CF651682420FA1749D894C8AD0F6&LayerName=F51CE95441284AF6B2FC319B609C7DEC");
+        IRS("irs", "/TileSender.ashx?ModeKey=tile&MapName=F7B8CF651682420FA1749D894C8AD0F6&LayerName=BAC78D764F0443BD9AF93E7A998C9F5B");
 
-        private String name;
-        private String uri;
+        private final String name;
+        private final String uri;
 
         ScanexLayer(String name, String uri) {
             this.name = name;
@@ -109,22 +110,22 @@ public class ScanexTileSource extends TMSTileSource {
     }
 
     // Latitude to Y and back calculations.
-    private static double RADIUS_E = 6378137;   /* radius of Earth at equator, m */
-    private static double EQUATOR = 40075016.68557849; /* equator length, m */
-    private static double E = 0.0818191908426;  /* eccentricity of Earth's ellipsoid */
+    private static final double RADIUS_E = 6378137;   /* radius of Earth at equator, m */
+    private static final double EQUATOR = 40075016.68557849; /* equator length, m */
+    private static final double E = 0.0818191908426;  /* eccentricity of Earth's ellipsoid */
 
     @Override
     public Point latLonToXY(double lat, double lon, int zoom) {
         return new Point(
-                (int) osmMercator.lonToX(lon, zoom),
-                (int) latToTileY(lat, zoom)
+                (int) Math.round(osmMercator.lonToX(lon, zoom)),
+                (int) Math.round(latToTileY(lat, zoom))
                 );
     }
 
     @Override
     public ICoordinate xyToLatLon(int x, int y, int zoom) {
         return new Coordinate(
-                tileYToLat((double) y, zoom),
+                tileYToLat(y, zoom),
                 osmMercator.xToLon(x, zoom)
                 );
     }
@@ -140,7 +141,7 @@ public class ScanexTileSource extends TMSTileSource {
     @Override
     public ICoordinate tileXYToLatLon(int x, int y, int zoom) {
         return new Coordinate(
-                tileYToLat((double) y, zoom),
+                tileYToLat(y, zoom),
                 osmMercator.xToLon(x * getTileSize(), zoom)
                 );
     }
@@ -187,7 +188,7 @@ public class ScanexTileSource extends TMSTileSource {
         double f = Math.tan(Math.PI/4+lat/2) -
             ec * Math.pow(Math.tan(Math.PI/4 + Math.asin(E * sinl)/2), E);
         double df = 1/(1 - sinl) - ec * E * cosl/((1 - E * sinl) *
-            (Math.sqrt(1 - E * E * sinl * sinl)));
+            Math.sqrt(1 - E * E * sinl * sinl));
 
         return f/df;
     }

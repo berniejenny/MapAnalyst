@@ -1590,7 +1590,7 @@ public class MainWindow extends javax.swing.JFrame
         toolBarButtonGroup.add(zoomInToggleButton);
         zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/ZoomIn16x16.gif"))); // NOI18N
         zoomInToggleButton.setSelected(true);
-        zoomInToggleButton.setToolTipText("Zoom In");
+        zoomInToggleButton.setToolTipText("Zoom In (Press Cmd or Ctrl for quick access.)");
         zoomInToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         zoomInToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1601,7 +1601,7 @@ public class MainWindow extends javax.swing.JFrame
 
         toolBarButtonGroup.add(zoomOutToggleButton);
         zoomOutToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/ZoomOut16x16.gif"))); // NOI18N
-        zoomOutToggleButton.setToolTipText("Zoom Out");
+        zoomOutToggleButton.setToolTipText("Zoom Out (Press Alt+Cmd  or Alt+Ctrl for quick access.)");
         zoomOutToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         zoomOutToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1612,7 +1612,7 @@ public class MainWindow extends javax.swing.JFrame
 
         toolBarButtonGroup.add(handToggleButton);
         handToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ika/icons/Hand16x16.gif"))); // NOI18N
-        handToggleButton.setToolTipText("Pan");
+        handToggleButton.setToolTipText("Pan (Press space key for quick access.)");
         handToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         handToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3083,12 +3083,12 @@ placePointMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     mapsMenu.setText("Maps");
     mapsMenu.addMenuListener(new javax.swing.event.MenuListener() {
-        public void menuSelected(javax.swing.event.MenuEvent evt) {
-            mapsMenuMenuSelected(evt);
+        public void menuCanceled(javax.swing.event.MenuEvent evt) {
         }
         public void menuDeselected(javax.swing.event.MenuEvent evt) {
         }
-        public void menuCanceled(javax.swing.event.MenuEvent evt) {
+        public void menuSelected(javax.swing.event.MenuEvent evt) {
+            mapsMenuMenuSelected(evt);
         }
     });
 

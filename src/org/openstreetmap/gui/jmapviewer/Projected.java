@@ -7,45 +7,31 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Objects;
 
-import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
+import org.openstreetmap.gui.jmapviewer.interfaces.IProjected;
 
 /**
- * This class encapsulates a Point2D.Double and provide access
- * via <code>lat</code> and <code>lon</code>.
- *
- * @author Jan Peter Stotz
- *
+ * Projected coordinates represented by an encapsulates a Point2D.Double value.
  */
-public class Coordinate implements ICoordinate {
+public class Projected implements IProjected {
     private transient Point2D.Double data;
 
     /**
-     * Constructs a new {@code Coordinate}.
-     * @param lat latitude in degrees
-     * @param lon longitude in degrees
+     * Constructs a new {@code Projected}.
+     * @param east easting
+     * @param north northing
      */
-    public Coordinate(double lat, double lon) {
-        data = new Point2D.Double(lon, lat);
+    public Projected(double east, double north) {
+        data = new Point2D.Double(east, north);
     }
 
     @Override
-    public double getLat() {
-        return data.y;
-    }
-
-    @Override
-    public void setLat(double lat) {
-        data.y = lat;
-    }
-
-    @Override
-    public double getLon() {
+    public double getEast() {
         return data.x;
     }
 
     @Override
-    public void setLon(double lon) {
-        data.x = lon;
+    public double getNorth() {
+        return data.y;
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -61,7 +47,7 @@ public class Coordinate implements ICoordinate {
 
     @Override
     public String toString() {
-        return "Coordinate[" + data.y + ", " + data.x + ']';
+        return "Projected[" + data.y + ", " + data.x + ']';
     }
 
     @Override
@@ -73,9 +59,9 @@ public class Coordinate implements ICoordinate {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null || !(obj instanceof Coordinate))
+        if (obj == null || !(obj instanceof Projected))
             return false;
-        final Coordinate other = (Coordinate) obj;
+        final Projected other = (Projected) obj;
         return Objects.equals(data, other.data);
     }
 }

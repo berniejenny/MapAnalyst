@@ -1,6 +1,8 @@
 // License: GPL. For details, see Readme.txt file.
 package org.openstreetmap.gui.jmapviewer;
 
+import static org.openstreetmap.gui.jmapviewer.FeatureAdapter.tr;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,7 +24,7 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TileLoaderListener;
  * @author Jan Peter Stotz
  */
 public class OsmTileLoader implements TileLoader {
-    private static final ThreadPoolExecutor jobDispatcher = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
+    private static final ThreadPoolExecutor jobDispatcher = (ThreadPoolExecutor) Executors.newFixedThreadPool(8);
 
     private final class OsmTileJob implements TileJob {
         private final Tile tile;
@@ -49,7 +51,7 @@ public class OsmTileLoader implements TileLoader {
                 }
                 loadTileMetadata(tile, conn);
                 if ("no-tile".equals(tile.getValue("tile-info"))) {
-                    tile.setError("No tile at this zoom level");
+                    tile.setError(tr("No tiles at this zoom level"));
                 } else {
                     input = conn.getInputStream();
                     try {
@@ -76,11 +78,6 @@ public class OsmTileLoader implements TileLoader {
                 tile.loading = false;
                 tile.setLoaded(true);
             }
-        }
-
-        @Override
-        public Tile getTile() {
-            return tile;
         }
 
         @Override
@@ -182,13 +179,18 @@ public class OsmTileLoader implements TileLoader {
     }
 
     @Override
+    public boolean hasOutstandingTasks() {
+        return jobDispatcher.getTaskCount() > jobDispatcher.getCompletedTaskCount();
+    }
+
+    @Override
     public void cancelOutstandingTasks() {
         jobDispatcher.getQueue().clear();
     }
 
     /**
      * Sets the maximum number of concurrent connections the tile loader will do
-     * @param num number of conncurent connections
+     * @param num number of concurrent connections
      */
     public static void setConcurrentConnections(int num) {
         jobDispatcher.setMaximumPoolSize(num);
